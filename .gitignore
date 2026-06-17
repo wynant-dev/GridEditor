@@ -1,0 +1,64 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+
+# IntelliJ / Android Studio
+*.iml
+.idea/
+android/.gradle/
+android/captures/
+
+# VS Code
+.vscode/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub/
+build/
+
+# Generated Dart files
+*.g.dart
+*.freezed.dart
+
+# Coverage
+coverage/
+
+# Obfuscation
+app.*.symbols
+
+# Android
+android/key.properties
+
+# iOS
+ios/Flutter/.last_build_id
+
+# macOS
+macos/Flutter/ephemeral/
+
+# Linux
+linux/flutter/ephemeral/
+
+# Windows
+windows/flutter/ephemeral/
+
+# Web
+.flutter_build/
+
+# Firebase
+firebase-debug.log
+firebase-debug.*.log
+
+# Environment files
+.env
+.env.*
+!.env.example
