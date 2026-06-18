@@ -23,6 +23,16 @@ class GridCamera {
     return copyWith(zoom: (zoom * factor).clamp(0.2, 4.0));
   }
 
+  /// Zooms while keeping [focalPoint] anchored in screen space.
+  GridCamera zoomByAt(double factor, Offset focalPoint) {
+    final newZoom = (zoom * factor).clamp(0.2, 4.0);
+    if (newZoom == zoom) return this;
+
+    final newOffset =
+        focalPoint - (focalPoint - offset) * (newZoom / zoom);
+    return copyWith(offset: newOffset, zoom: newZoom);
+  }
+
   GridCamera panBy(Offset delta) {
     return copyWith(offset: offset + delta);
   }

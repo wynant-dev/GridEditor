@@ -14,8 +14,10 @@ class ViewportController extends ChangeNotifier {
 
   GridCamera get camera => _camera;
 
-  void zoomBy(double factor) {
-    _camera = _camera.zoomBy(factor);
+  void zoomBy(double factor, {Offset? focalPoint}) {
+    _camera = focalPoint == null
+        ? _camera.zoomBy(factor)
+        : _camera.zoomByAt(factor, focalPoint);
     notifyListeners();
   }
 
@@ -27,7 +29,7 @@ class ViewportController extends ChangeNotifier {
   void handlePointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent) {
       final factor = event.scrollDelta.dy > 0 ? 0.9 : 1.1;
-      zoomBy(factor);
+      zoomBy(factor, focalPoint: event.localPosition);
     }
   }
 
