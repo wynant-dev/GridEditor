@@ -24,5 +24,17 @@ void main() {
     test('cellSize returns single-cell dimensions', () {
       expect(metrics.cellSize(), const Size(100, 100));
     });
+
+    test('screenToWorld inverts viewport transform', () {
+      const metrics = GridMetrics(
+        rows: 4,
+        cols: 4,
+        size: Size(400, 400),
+        transform: ViewportTransform(offset: Offset(100, 50), zoom: 2.0),
+      );
+
+      expect(metrics.screenToWorld(const Offset(100, 50)), const Offset(0, 0));
+      expect(metrics.screenToWorld(const Offset(300, 250)), const Offset(100, 100));
+    });
   });
 }

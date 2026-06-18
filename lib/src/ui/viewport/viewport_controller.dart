@@ -1,0 +1,62 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+
+import 'grid_camera.dart';
+
+/// Owns viewport camera state and pointer-driven pan/zoom interaction.
+class ViewportController extends ChangeNotifier {
+  ViewportController({GridCamera camera = const GridCamera()})
+      : _camera = camera;
+
+  GridCamera _camera;
+  int? _panPointerId;
+  Offset? _lastPanPosition;
+
+  GridCamera get camera => _camera;
+
+  void zoomBy(double factor) {
+    _camera = _camera.zoomBy(factor);
+    notifyListeners();
+  }
+
+  void panBy(Offset delta) {
+    _camera = _camera.panBy(delta);
+    notifyListeners();
+  }
+
+  void handlePointerSignal(PointerSignalEvent event) {
+    if (event is PointerScrollEvent) {
+      final factor = event.scrollDelta.dy > 0 ? 0.9 : 1.1;
+      zoomBy(factor);
+    }
+  }
+
+  void handlePointerDown(PointerDownEvent event) {
+    if (event.buttons == kMiddleMouseButton) {
+      _panPointerId = event.pointer;
+      _lastPanPosition = event.localPosition;
+    }
+  }
+
+  void handlePointerMove(PointerMoveEvent event) {
+    if (_panPointerId == event.pointer && _lastPanPosition != null) {
+      final delta = event.localPosition - _lastPanPosition!;
+      _lastPanPosition = event.localPosition;
+      panBy(delta);
+    }
+  }
+
+  void handlePointerUp(PointerUpEvent event) {
+    if (_panPointerId == event.pointer) {
+      _panPointerId = null;
+      _lastPanPosition = null;
+    }
+  }
+
+  void handlePointerCancel(PointerCancelEvent event) {
+    if (_panPointerId == event.pointer) {
+      _panPointerId = null;
+      _lastPanPosition = null;
+    }
+  }
+}

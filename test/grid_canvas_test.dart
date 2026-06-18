@@ -45,19 +45,18 @@ void main() {
   testWidgets('ghost preview renders when item selected and cell hovered',
       (tester) async {
     final controller = EditorController()..loadCatalog(catalog);
+    final interactionState = GridInteractionState();
 
     await tester.pumpWidget(
       MaterialApp(
         home: SizedBox(
           width: 200,
           height: 200,
-          child: ListenableBuilder(
-            listenable: controller,
-            builder: (context, _) => GridCanvas(
-              document: const GridDocument(rows: 2, cols: 2),
-              catalog: catalog,
-              controller: controller,
-            ),
+          child: GridCanvas(
+            document: const GridDocument(rows: 2, cols: 2),
+            catalog: catalog,
+            controller: controller,
+            interactionState: interactionState,
           ),
         ),
       ),
@@ -65,7 +64,7 @@ void main() {
 
     expect(find.text('House'), findsNothing);
 
-    controller.setHoverCell(0, 0);
+    interactionState.setHoverCell(0, 0);
     await tester.pump();
 
     expect(find.text('House'), findsOneWidget);
@@ -74,29 +73,28 @@ void main() {
 
   testWidgets('ghost preview hidden when hover cleared', (tester) async {
     final controller = EditorController()..loadCatalog(catalog);
+    final interactionState = GridInteractionState();
 
     await tester.pumpWidget(
       MaterialApp(
         home: SizedBox(
           width: 200,
           height: 200,
-          child: ListenableBuilder(
-            listenable: controller,
-            builder: (context, _) => GridCanvas(
-              document: const GridDocument(rows: 2, cols: 2),
-              catalog: catalog,
-              controller: controller,
-            ),
+          child: GridCanvas(
+            document: const GridDocument(rows: 2, cols: 2),
+            catalog: catalog,
+            controller: controller,
+            interactionState: interactionState,
           ),
         ),
       ),
     );
 
-    controller.setHoverCell(0, 0);
+    interactionState.setHoverCell(0, 0);
     await tester.pump();
     expect(find.text('House'), findsOneWidget);
 
-    controller.setHoverCell(null, null);
+    interactionState.setHoverCell(null, null);
     await tester.pump();
     expect(find.text('House'), findsNothing);
   });

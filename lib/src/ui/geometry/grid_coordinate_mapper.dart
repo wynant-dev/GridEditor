@@ -12,10 +12,12 @@ class GridCoordinateMapper {
   final GridMetrics metrics;
 
   (int row, int col) fromLocalPosition(Offset position) {
-    final row = (position.dy / metrics.cellHeight)
+    final world = metrics.screenToWorld(position);
+
+    final row = (world.dy / metrics.cellHeight)
         .floor()
         .clamp(0, metrics.rows - 1);
-    final col = (position.dx / metrics.cellWidth)
+    final col = (world.dx / metrics.cellWidth)
         .floor()
         .clamp(0, metrics.cols - 1);
 
