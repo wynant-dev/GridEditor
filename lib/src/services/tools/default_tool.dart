@@ -2,8 +2,8 @@ import '../../domain/layout/placed_item.dart';
 import 'editor_tool.dart';
 import 'grid_tool_context.dart';
 
-class PlaceTool extends EditorTool {
-  PlaceTool({this.onPlaceError});
+class DefaultTool extends EditorTool {
+  DefaultTool({this.onPlaceError});
 
   final void Function(String error)? onPlaceError;
 
@@ -22,5 +22,8 @@ class PlaceTool extends EditorTool {
   }
 
   @override
-  bool onPlacementTap(GridToolContext context, PlacedItem placement) => false;
+  bool onPlacementTap(GridToolContext context, PlacedItem placement) {
+    context.controller.selectPlacement(placement.id);
+    return true;
+  }
 }

@@ -52,6 +52,13 @@ class _GridEditorAppState extends State<GridEditorApp> {
 
   @override
   Widget build(BuildContext context) {
+    _controller.configurePlaceError((error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error)),
+      );
+    });
+
     return MaterialApp(
       title: _title,
       home: ListenableBuilder(
@@ -62,12 +69,6 @@ class _GridEditorAppState extends State<GridEditorApp> {
             document: _controller.layout,
             catalog: _controller.catalog,
             controller: _controller,
-            onPlaceError: (error) {
-              if (!mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(error)),
-              );
-            },
             body: CatalogPanel(
               catalog: _controller.catalog,
               selectedItemId: _controller.selectedItemId,

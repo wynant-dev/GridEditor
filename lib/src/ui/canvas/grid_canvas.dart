@@ -5,8 +5,6 @@ import '../../domain/catalog/item_catalog.dart';
 import '../../domain/layout/grid_document.dart';
 import '../../domain/layout/placed_item.dart';
 import '../../services/editor_controller.dart';
-import '../../services/tools/place_tool.dart';
-import '../../services/tools/tool_manager.dart';
 import '../geometry/grid_coordinate_mapper.dart';
 import '../geometry/grid_metrics.dart';
 import '../geometry/viewport_transform.dart';
@@ -14,6 +12,7 @@ import '../input/grid_interaction_controller.dart';
 import '../input/grid_interaction_layer.dart';
 import '../renderer/grid_renderer.dart';
 import '../renderer/overlay_layer.dart';
+import '../renderer/selection_overlay_layer.dart';
 import '../viewport/grid_interaction_state.dart';
 import '../viewport/viewport_controller.dart';
 import '../viewport/viewport_shell.dart';
@@ -58,15 +57,14 @@ class _GridCanvasState extends State<GridCanvas> {
   final ViewportController _viewportController = ViewportController();
   late final GridInteractionState _interactionState;
   late final bool _ownsInteractionState;
-  late final ToolManager _toolManager;
 
   @override
   void initState() {
     super.initState();
     _ownsInteractionState = widget.interactionState == null;
     _interactionState = widget.interactionState ?? GridInteractionState();
-    _toolManager = ToolManager(PlaceTool(onPlaceError: widget.onPlaceError));
     widget.controller?.attachInteractionState(_interactionState);
+    widget.controller?.configurePlaceError(widget.onPlaceError);
     widget.controller?.addListener(_syncSelectionFromController);
     _interactionState.syncSelectedItemId(widget.controller?.selectedItemId);
   }
@@ -77,11 +75,11 @@ class _GridCanvasState extends State<GridCanvas> {
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller?.removeListener(_syncSelectionFromController);
       widget.controller?.attachInteractionState(_interactionState);
+      widget.controller?.configurePlaceError(widget.onPlaceError);
       widget.controller?.addListener(_syncSelectionFromController);
       _syncSelectionFromController();
-    }
-    if (oldWidget.onPlaceError != widget.onPlaceError) {
-      _toolManager.setTool(PlaceTool(onPlaceError: widget.onPlaceError));
+    } else if (oldWidget.onPlaceError != widget.onPlaceError) {
+      widget.controller?.configurePlaceError(widget.onPlaceError);
     }
   }
 
@@ -91,7 +89,6 @@ class _GridCanvasState extends State<GridCanvas> {
     if (_ownsInteractionState) {
       _interactionState.dispose();
     }
-    _toolManager.dispose();
     _viewportController.dispose();
     super.dispose();
   }
@@ -137,7 +134,7 @@ class _GridCanvasState extends State<GridCanvas> {
               catalog: widget.catalog,
               interactionState: _interactionState,
               editorController: controller,
-              toolManager: useTools ? _toolManager : null,
+              toolManager: useTools ? controller.toolManager : null,
               onCellTap: useTools ? null : widget.onCellTap,
               onPlacementTap: useTools ? null : widget.onPlacementTap,
               supportsHover: supportsHover,
@@ -154,7 +151,7 @@ class _GridCanvasState extends State<GridCanvas> {
                     metrics: metrics,
                   ),
                   GridInteractionLayer(controller: interactionController),
-                  if (widget.controller != null)
+                  if (controller != null) ...[
                     ListenableBuilder(
                       listenable: _interactionState,
                       builder: (context, _) {
@@ -165,6 +162,13 @@ class _GridCanvasState extends State<GridCanvas> {
                         );
                       },
                     ),
+                    SelectionOverlayLayer(
+                      selectedPlacementId: controller.selectedPlacementId,
+                      document: widget.document,
+                      catalog: widget.catalog,
+                      metrics: metrics,
+                    ),
+                  ],
                 ],
               ),
             );

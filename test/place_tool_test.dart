@@ -10,6 +10,36 @@ void main() {
     ],
   );
 
+  test('onCellTap places item and returns true', () {
+    final controller = EditorController()..loadCatalog(catalog);
+    final tool = PlaceTool();
+    final ctx = GridToolContext(
+      row: 0,
+      col: 0,
+      controller: controller,
+      engine: controller.engine,
+    );
+
+    expect(tool.onCellTap(ctx), isTrue);
+    expect(controller.layout.placements, hasLength(1));
+  });
+
+  test('onPlacementTap returns false', () {
+    final controller = EditorController()..loadCatalog(catalog);
+    controller.placeAt(0, 0);
+    final placement = controller.layout.placements.single;
+    final tool = PlaceTool();
+    final ctx = GridToolContext(
+      row: 0,
+      col: 0,
+      controller: controller,
+      engine: controller.engine,
+    );
+
+    expect(tool.onPlacementTap(ctx, placement), isFalse);
+    expect(controller.selectedPlacementId, isNull);
+  });
+
   test('onCellHover delegates to controller setHoverCell', () {
     final controller = EditorController()..loadCatalog(catalog);
     final interactionState = GridInteractionState();
@@ -26,21 +56,6 @@ void main() {
 
     expect(interactionState.hoverRow, 2);
     expect(interactionState.hoverCol, 3);
-  });
-
-  test('onCellTap places item at cell', () {
-    final controller = EditorController()..loadCatalog(catalog);
-    final tool = PlaceTool();
-    final ctx = GridToolContext(
-      row: 0,
-      col: 0,
-      controller: controller,
-      engine: controller.engine,
-    );
-
-    tool.onCellTap(ctx);
-
-    expect(controller.layout.placements, hasLength(1));
   });
 
   test('onCellTap reports placement error via callback', () {

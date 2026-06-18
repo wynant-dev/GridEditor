@@ -13,6 +13,13 @@ class GridDocument {
   final int cols;
   final List<PlacedItem> placements;
 
+  PlacedItem? placementById(String id) {
+    for (final placement in placements) {
+      if (placement.id == id) return placement;
+    }
+    return null;
+  }
+
   GridDocument copyWith({
     int? rows,
     int? cols,

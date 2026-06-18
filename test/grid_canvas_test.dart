@@ -121,7 +121,7 @@ void main() {
     expect(controller.layout.placements, hasLength(1));
   });
 
-  testWidgets('tapping a placement removes it when controller is attached',
+  testWidgets('tapping a placement selects it when controller is attached',
       (tester) async {
     const placement = PlacedItem(
       id: 'p1',
@@ -130,6 +130,48 @@ void main() {
       originCol: 0,
     );
     final controller = EditorController()..loadCatalog(catalog);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox(
+          width: 200,
+          height: 200,
+          child: GridCanvas(
+            document: const GridDocument(
+              rows: 2,
+              cols: 2,
+              placements: [placement],
+            ),
+            catalog: catalog,
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tapAt(const Offset(50, 50));
+    expect(controller.selectedPlacementId, 'p1');
+    expect(find.byType(SelectionOverlayLayer), findsOneWidget);
+  });
+
+  testWidgets('EraseTool active removes placement on tap', (tester) async {
+    const placement = PlacedItem(
+      id: 'p1',
+      catalogItemId: 'house',
+      originRow: 0,
+      originCol: 0,
+    );
+    final controller = EditorController(
+      engine: EditorEngine(
+        catalog: catalog,
+        layout: const GridDocument(
+          rows: 2,
+          cols: 2,
+          placements: [placement],
+        ),
+      ),
+    )..loadCatalog(catalog);
+    controller.toolManager.setTool(EraseTool());
 
     await tester.pumpWidget(
       MaterialApp(

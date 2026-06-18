@@ -10,7 +10,7 @@ void main() {
     ],
   );
 
-  test('onPlacementTap removes placement from layout', () {
+  test('onPlacementTap removes placement and returns true', () {
     final controller = EditorController()..loadCatalog(catalog);
     controller.placeAt(0, 0);
     final placement = controller.layout.placements.single;
@@ -22,8 +22,21 @@ void main() {
       engine: controller.engine,
     );
 
-    tool.onPlacementTap(ctx, placement);
+    expect(tool.onPlacementTap(ctx, placement), isTrue);
+    expect(controller.layout.placements, isEmpty);
+  });
 
+  test('onCellTap returns false', () {
+    final controller = EditorController()..loadCatalog(catalog);
+    final tool = EraseTool();
+    final ctx = GridToolContext(
+      row: 0,
+      col: 0,
+      controller: controller,
+      engine: controller.engine,
+    );
+
+    expect(tool.onCellTap(ctx), isFalse);
     expect(controller.layout.placements, isEmpty);
   });
 }

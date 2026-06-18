@@ -1,24 +1,24 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
-class _RecordingTool implements EditorTool {
+class _RecordingTool extends EditorTool {
   int hoverCount = 0;
   int tapCount = 0;
+  bool placementHandled = false;
 
   @override
   void onCellHover(GridToolContext ctx) => hoverCount++;
 
   @override
-  void onCellTap(GridToolContext ctx) => tapCount++;
-}
-
-class _RecordingEraseTool extends EraseTool {
-  PlacedItem? removed;
+  bool onCellTap(GridToolContext ctx) {
+    tapCount++;
+    return true;
+  }
 
   @override
-  void onPlacementTap(GridToolContext ctx, PlacedItem placement) {
-    removed = placement;
-    super.onPlacementTap(ctx, placement);
+  bool onPlacementTap(GridToolContext ctx, PlacedItem placement) {
+    placementHandled = true;
+    return false;
   }
 }
 
@@ -38,36 +38,49 @@ void main() {
     engine: controller.engine,
   );
 
-  test('handleCellHover delegates to active tool', () {
+  test('handleCellHover calls active tool and default tool', () {
     final controller = EditorController()..loadCatalog(catalog);
     final tool = _RecordingTool();
-    final manager = ToolManager(tool);
+    final manager = ToolManager(activeTool: tool);
 
     manager.handleCellHover(ctx(controller));
 
     expect(tool.hoverCount, 1);
   });
 
-  test('handleCellTap delegates to active tool', () {
+  test('handleCellTap uses active tool when handled', () {
     final controller = EditorController()..loadCatalog(catalog);
     final tool = _RecordingTool();
-    final manager = ToolManager(tool);
+    final manager = ToolManager(activeTool: tool);
 
     manager.handleCellTap(ctx(controller));
 
     expect(tool.tapCount, 1);
   });
 
-  test('handlePlacementTap delegates to erase tool', () {
+  test('handlePlacementTap falls back to DefaultTool when active does not handle',
+      () {
     final controller = EditorController()..loadCatalog(catalog);
     controller.placeAt(0, 0);
     final placement = controller.layout.placements.single;
-    final eraseTool = _RecordingEraseTool();
-    final manager = ToolManager(_RecordingTool(), eraseTool: eraseTool);
+    final tool = _RecordingTool();
+    final manager = ToolManager(activeTool: tool);
 
     manager.handlePlacementTap(ctx(controller), placement);
 
-    expect(eraseTool.removed, placement);
+    expect(tool.placementHandled, isTrue);
+    expect(controller.selectedPlacementId, placement.id);
+    expect(controller.layout.placements, hasLength(1));
+  });
+
+  test('handlePlacementTap erases when EraseTool is active', () {
+    final controller = EditorController()..loadCatalog(catalog);
+    controller.placeAt(0, 0);
+    final placement = controller.layout.placements.single;
+    final manager = ToolManager(activeTool: EraseTool());
+
+    manager.handlePlacementTap(ctx(controller), placement);
+
     expect(controller.layout.placements, isEmpty);
   });
 
@@ -75,7 +88,7 @@ void main() {
     final controller = EditorController()..loadCatalog(catalog);
     final first = _RecordingTool();
     final second = _RecordingTool();
-    final manager = ToolManager(first);
+    final manager = ToolManager(activeTool: first);
     var notified = 0;
     manager.addListener(() => notified++);
 

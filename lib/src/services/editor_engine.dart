@@ -97,6 +97,8 @@ class EditorEngine {
     );
   }
 
+  PlacedItem? placementById(String id) => layout.placementById(id);
+
   String layoutToJson() => jsonEncode(layout.toJsonMap());
 
   factory EditorEngine.fromLayoutJson({
