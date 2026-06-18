@@ -1,11 +1,11 @@
 {
-    "name": "grid_editor",
-    "short_name": "grid_editor",
+    "name": "Grid Editor",
+    "short_name": "Grid Editor",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Grid editor — place catalog items on a resizable grid.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

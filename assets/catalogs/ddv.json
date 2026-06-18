@@ -1,0 +1,21 @@
+{
+  "id": "ddv",
+  "name": "DDV catalog",
+  "items": [
+    {
+      "id": "house",
+      "name": "House",
+      "width": 4,
+      "height": 4,
+      "color": "#E53935"
+    },
+    {
+      "id": "bank",
+      "name": "Bank",
+      "width": 2,
+      "height": 2,
+      "color": "#1E88E5",
+      "imagePath": "assets/images/bank.png"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "sandbox",
+  "name": "Sandbox catalog",
+  "items": [
+    {
+      "id": "house",
+      "name": "House",
+      "width": 2,
+      "height": 2,
+      "color": "#EF5350"
+    },
+    {
+      "id": "tree",
+      "name": "Tree",
+      "width": 1,
+      "height": 1,
+      "color": "#66BB6A"
+    }
+  ]
+}

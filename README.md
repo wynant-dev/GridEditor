@@ -1,16 +1,78 @@
-# grid_editor
+# Grid Editor
 
-A new Flutter project.
+Flutter web grid editor: place items from a catalog onto a resizable grid.
 
-## Getting Started
+## Structure
 
-This project is a starting point for a Flutter application.
+```
+lib/
+  main.dart
+  grid_editor.dart
+  src/
+    domain/
+      catalog/              # Item definitions (CatalogItem, ItemCatalog)
+      layout/               # Grid state (GridDocument, PlacedItem)
+    services/
+      editor_engine.dart    # Bridge: catalog + layout
+      placement_rules.dart  # Pure rules (can I place it?)
+    ui/
+      canvas/               # Grid rendering + input
+      toolbar/
+      panels/               # Catalog panel, …
+    screens/
+      grid_editor_screen.dart
+assets/catalogs/
+  ddv.json
+  sandbox.json
+```
 
-A few resources to get you started if this is your first Flutter project:
+## Run
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```bash
+flutter pub get
+flutter run -d chrome
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Default catalog: `assets/catalogs/ddv.json`.
+
+```bash
+flutter run -d chrome --dart-define=CATALOG_ASSET=assets/catalogs/sandbox.json
+```
+
+**Run and Debug** launch configs:
+
+| Config | Catalog |
+|--------|---------|
+| Grid Editor (Chrome) | `ddv.json` |
+| Grid Editor: sandbox catalog (Chrome) | `sandbox.json` |
+
+## Test
+
+```bash
+flutter analyze
+flutter test
+```
+
+## Architecture
+
+```
+catalog JSON → domain/catalog
+grid state   → domain/layout
+                    ↓
+              services/
+                EditorEngine   ← holds catalog + layout
+                PlacementRules ← overlap, bounds
+                    ↓
+         ui/ + screens/ + main.dart
+```
+
+| Layer | Role |
+|-------|------|
+| `domain/catalog` | What can be placed (items, catalogs, JSON) |
+| `domain/layout` | What is placed (grid size, placements) |
+| `services` | `EditorEngine` bridges catalog + layout; `PlacementRules` validates placements |
+| `ui` | Reusable widgets (canvas, toolbar, panels) |
+| `screens` | Compose widgets into a full screen |
+| `main.dart` | App state, load catalog, wire callbacks |
+
+Catalog and layout stay in separate domains. `EditorEngine` connects them; `PlacementRules` holds the pure "can I place it?" logic.
