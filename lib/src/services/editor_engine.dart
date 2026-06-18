@@ -7,18 +7,12 @@ import 'placement_rules.dart';
 
 /// Bridge between catalog (what exists) and layout (what is placed).
 class EditorEngine {
-  const EditorEngine({
-    required this.catalog,
-    required this.layout,
-  });
+  const EditorEngine({required this.catalog, required this.layout});
 
   final ItemCatalog catalog;
   final GridDocument layout;
 
-  EditorEngine copyWith({
-    ItemCatalog? catalog,
-    GridDocument? layout,
-  }) {
+  EditorEngine copyWith({ItemCatalog? catalog, GridDocument? layout}) {
     return EditorEngine(
       catalog: catalog ?? this.catalog,
       layout: layout ?? this.layout,
@@ -26,7 +20,9 @@ class EditorEngine {
   }
 
   EditorEngine resize({required int rows, required int cols}) {
-    return copyWith(layout: layout.copyWith(rows: rows, cols: cols));
+    return copyWith(
+      layout: layout.copyWith(rows: rows, cols: cols),
+    );
   }
 
   String? placementError({
@@ -68,9 +64,7 @@ class EditorEngine {
     );
 
     return copyWith(
-      layout: layout.copyWith(
-        placements: [...layout.placements, placement],
-      ),
+      layout: layout.copyWith(placements: [...layout.placements, placement]),
     );
   }
 

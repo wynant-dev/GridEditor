@@ -10,11 +10,13 @@ class GridCanvas extends StatelessWidget {
     required this.document,
     required this.catalog,
     this.onCellTap,
+    this.onPlacementTap,
   });
 
   final GridDocument document;
   final ItemCatalog catalog;
   final void Function(int row, int col)? onCellTap;
+  final void Function(PlacedItem placement)? onPlacementTap;
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +58,7 @@ class GridCanvas extends StatelessWidget {
                 catalog: catalog,
                 cellWidth: cellWidth,
                 cellHeight: cellHeight,
+                onTap: () => onPlacementTap?.call(placement),
               ),
           ],
         );
@@ -109,12 +112,14 @@ class _PlacementLayer extends StatelessWidget {
     required this.catalog,
     required this.cellWidth,
     required this.cellHeight,
+    this.onTap,
   });
 
   final PlacedItem placement;
   final ItemCatalog catalog;
   final double cellWidth;
   final double cellHeight;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +133,9 @@ class _PlacementLayer extends StatelessWidget {
       top: placement.originRow * cellHeight,
       width: item.width * cellWidth,
       height: item.height * cellHeight,
-      child: IgnorePointer(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: color,
