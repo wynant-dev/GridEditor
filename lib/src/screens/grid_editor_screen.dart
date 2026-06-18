@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../domain/catalog/item_catalog.dart';
 import '../domain/layout/grid_document.dart';
 import '../domain/layout/placed_item.dart';
+import '../services/editor_controller.dart';
 import '../ui/canvas/grid_canvas.dart';
 import '../ui/toolbar/grid_toolbar.dart';
 
@@ -13,6 +14,7 @@ class GridEditorScreen extends StatelessWidget {
     required this.title,
     required this.document,
     required this.catalog,
+    this.controller,
     this.onCellTap,
     this.onPlacementTap,
     this.toolbarActions = const [],
@@ -23,6 +25,7 @@ class GridEditorScreen extends StatelessWidget {
   final String title;
   final GridDocument document;
   final ItemCatalog catalog;
+  final EditorController? controller;
   final void Function(int row, int col)? onCellTap;
   final void Function(PlacedItem placement)? onPlacementTap;
   final List<Widget> toolbarActions;
@@ -59,6 +62,7 @@ class GridEditorScreen extends StatelessWidget {
                 child: GridCanvas(
                   document: document,
                   catalog: catalog,
+                  controller: controller,
                   onCellTap: onCellTap,
                   onPlacementTap: onPlacementTap,
                 ),

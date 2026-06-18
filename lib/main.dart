@@ -70,6 +70,7 @@ class _GridEditorAppState extends State<GridEditorApp> {
             title: _title,
             document: _controller.layout,
             catalog: _controller.catalog,
+            controller: _controller,
             onCellTap: _onCellTap,
             onPlacementTap: _controller.removePlacement,
             body: CatalogPanel(

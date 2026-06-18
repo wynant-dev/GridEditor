@@ -67,4 +67,34 @@ void main() {
 
     expect(controller.selectedItemId, 'b');
   });
+
+  test('setHoverCell updates hover state and notifies listeners', () {
+    final controller = EditorController()..loadCatalog(catalog);
+    var notified = 0;
+    controller.addListener(() => notified++);
+
+    controller.setHoverCell(2, 3);
+
+    expect(controller.hoverRow, 2);
+    expect(controller.hoverCol, 3);
+    expect(notified, 1);
+
+    controller.setHoverCell(2, 3);
+    expect(notified, 1);
+
+    controller.setHoverCell(null, null);
+    expect(controller.hoverRow, isNull);
+    expect(controller.hoverCol, isNull);
+    expect(notified, 2);
+  });
+
+  test('setHoverCell does not modify engine layout', () {
+    final controller = EditorController()..loadCatalog(catalog);
+    final layoutBefore = controller.layout;
+
+    controller.setHoverCell(1, 1);
+
+    expect(controller.layout, layoutBefore);
+    expect(controller.layout.placements, isEmpty);
+  });
 }

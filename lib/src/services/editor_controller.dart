@@ -20,11 +20,15 @@ class EditorController extends ChangeNotifier {
 
   EditorEngine _engine;
   String? _selectedItemId;
+  int? _hoverRow;
+  int? _hoverCol;
 
   EditorEngine get engine => _engine;
   ItemCatalog get catalog => _engine.catalog;
   GridDocument get layout => _engine.layout;
   String? get selectedItemId => _selectedItemId;
+  int? get hoverRow => _hoverRow;
+  int? get hoverCol => _hoverCol;
 
   void loadCatalog(ItemCatalog catalog) {
     _engine = _engine.copyWith(catalog: catalog);
@@ -34,6 +38,13 @@ class EditorController extends ChangeNotifier {
 
   void selectItem(String itemId) {
     _selectedItemId = itemId;
+    notifyListeners();
+  }
+
+  void setHoverCell(int? row, int? col) {
+    if (_hoverRow == row && _hoverCol == col) return;
+    _hoverRow = row;
+    _hoverCol = col;
     notifyListeners();
   }
 
