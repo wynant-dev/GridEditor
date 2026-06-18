@@ -15,7 +15,7 @@ export 'src/ui/geometry/grid_coordinate_mapper.dart';
 export 'src/ui/viewport/grid_interaction_state.dart';
 export 'src/ui/geometry/grid_metrics.dart';
 export 'src/ui/geometry/viewport_transform.dart';
-export 'src/ui/input/grid_hit_layer.dart';
+export 'src/ui/input/grid_interaction_layer.dart';
 export 'src/ui/renderer/overlay_layer.dart';
 export 'src/ui/viewport/viewport_controller.dart';
 export 'src/ui/viewport/viewport_shell.dart';

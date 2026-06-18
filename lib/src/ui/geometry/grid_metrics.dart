@@ -4,20 +4,20 @@ import 'viewport_transform.dart';
 
 /// Single source of truth for grid geometry in the UI layer.
 class GridMetrics {
-  const GridMetrics({
+  GridMetrics({
     required this.rows,
     required this.cols,
     required this.size,
     this.transform = const ViewportTransform(),
-  });
+  })  : cellWidth = size.width / cols,
+        cellHeight = size.height / rows;
 
   final int rows;
   final int cols;
   final Size size;
   final ViewportTransform transform;
-
-  double get cellWidth => size.width / cols;
-  double get cellHeight => size.height / rows;
+  final double cellWidth;
+  final double cellHeight;
 
   Offset cellTopLeft(int row, int col) {
     return Offset(col * cellWidth, row * cellHeight);

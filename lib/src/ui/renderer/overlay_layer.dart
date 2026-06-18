@@ -66,16 +66,20 @@ class _PlacementGhostPreview extends StatelessWidget {
       child: IgnorePointer(
         child: Opacity(
           opacity: 0.5,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: color,
-              border: Border.all(color: Colors.black26, width: 1.5),
-            ),
-            child: Center(
-              child: Text(
-                item.name,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.labelMedium,
+          child: Padding(
+            padding: const EdgeInsets.all(3),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: color,
+                border: Border.all(color: Colors.black26, width: 3),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Center(
+                child: Text(
+                  item.name,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
               ),
             ),
           ),

@@ -38,7 +38,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('House'));
+    await tester.tapAt(const Offset(50, 50));
     expect(tapped, placement);
   });
 
@@ -119,6 +119,31 @@ void main() {
     );
 
     await tester.tapAt(const Offset(50, 50));
+    expect(controller.layout.placements, hasLength(1));
+  });
+
+  testWidgets('64x64 grid uses no per-cell GestureDetectors', (tester) async {
+    final controller = EditorController()..loadCatalog(catalog);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox(
+          width: 640,
+          height: 640,
+          child: GridCanvas(
+            document: const GridDocument(rows: 64, cols: 64),
+            catalog: catalog,
+            controller: controller,
+            onCellTap: controller.placeAt,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(GestureDetector), findsNothing);
+    expect(find.byType(GridInteractionLayer), findsOneWidget);
+
+    await tester.tapAt(const Offset(10, 10));
     expect(controller.layout.placements, hasLength(1));
   });
 }

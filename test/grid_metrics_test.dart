@@ -5,10 +5,10 @@ import 'package:grid_editor/grid_editor.dart';
 
 void main() {
   group('GridMetrics', () {
-    const metrics = GridMetrics(
+    final metrics = GridMetrics(
       rows: 4,
       cols: 8,
-      size: Size(800, 400),
+      size: const Size(800, 400),
     );
 
     test('computes cell dimensions', () {
@@ -26,11 +26,11 @@ void main() {
     });
 
     test('screenToWorld inverts viewport transform', () {
-      const metrics = GridMetrics(
+      final metrics = GridMetrics(
         rows: 4,
         cols: 4,
-        size: Size(400, 400),
-        transform: ViewportTransform(offset: Offset(100, 50), zoom: 2.0),
+        size: const Size(400, 400),
+        transform: const ViewportTransform(offset: Offset(100, 50), zoom: 2.0),
       );
 
       expect(metrics.screenToWorld(const Offset(100, 50)), const Offset(0, 0));

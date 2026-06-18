@@ -1,5 +1,8 @@
 import 'dart:ui';
 
+import '../../domain/catalog/item_catalog.dart';
+import '../../domain/layout/grid_document.dart';
+import '../../domain/layout/placed_item.dart';
 import 'grid_metrics.dart';
 
 /// Converts pointer positions on the canvas into grid cell coordinates.
@@ -12,15 +15,45 @@ class GridCoordinateMapper {
   final GridMetrics metrics;
 
   (int row, int col) fromLocalPosition(Offset position) {
-    final world = metrics.screenToWorld(position);
+    return fromWorldPosition(metrics.screenToWorld(position));
+  }
 
-    final row = (world.dy / metrics.cellHeight)
+  (int row, int col) fromWorldPosition(Offset position) {
+    final row = (position.dy / metrics.cellHeight)
         .floor()
         .clamp(0, metrics.rows - 1);
-    final col = (world.dx / metrics.cellWidth)
+    final col = (position.dx / metrics.cellWidth)
         .floor()
         .clamp(0, metrics.cols - 1);
 
     return (row, col);
+  }
+
+  PlacedItem? hitTestPlacement(
+    Offset worldPosition,
+    GridDocument document,
+    ItemCatalog catalog,
+  ) {
+    for (final placement in document.placements.reversed) {
+      final item = catalog.itemById(placement.catalogItemId);
+      if (item == null) continue;
+
+      final topLeft = metrics.cellTopLeft(
+        placement.originRow,
+        placement.originCol,
+      );
+      final rect = Rect.fromLTWH(
+        topLeft.dx,
+        topLeft.dy,
+        item.width * metrics.cellWidth,
+        item.height * metrics.cellHeight,
+      );
+
+      if (rect.contains(worldPosition)) {
+        return placement;
+      }
+    }
+
+    return null;
   }
 }

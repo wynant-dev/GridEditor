@@ -27,10 +27,7 @@ class GridRenderer extends StatelessWidget {
       children: [
         CustomPaint(
           size: metrics.size,
-          painter: _GridLinePainter(
-            metrics: metrics,
-            color: lineColor,
-          ),
+          painter: _GridLinePainter(metrics: metrics, color: lineColor),
         ),
         for (final placement in document.placements)
           _PlacementLayer(
@@ -44,10 +41,7 @@ class GridRenderer extends StatelessWidget {
 }
 
 class _GridLinePainter extends CustomPainter {
-  const _GridLinePainter({
-    required this.metrics,
-    required this.color,
-  });
+  const _GridLinePainter({required this.metrics, required this.color});
 
   final GridMetrics metrics;
   final Color color;
@@ -97,23 +91,30 @@ class _PlacementLayer extends StatelessWidget {
     if (item == null) return const SizedBox.shrink();
 
     final color = CatalogColorResolver.fromItem(item);
-    final topLeft = metrics.cellTopLeft(placement.originRow, placement.originCol);
+    final topLeft = metrics.cellTopLeft(
+      placement.originRow,
+      placement.originCol,
+    );
 
     return Positioned(
       left: topLeft.dx,
       top: topLeft.dy,
       width: item.width * metrics.cellWidth,
       height: item.height * metrics.cellHeight,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: color,
-          border: Border.all(color: Colors.black54),
-        ),
-        child: Center(
-          child: Text(
-            item.name,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.labelMedium,
+      child: Padding(
+        padding: const EdgeInsets.all(3),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: color,
+            border: Border.all(color: Colors.black26, width: 3),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Center(
+            child: Text(
+              item.name,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
           ),
         ),
       ),

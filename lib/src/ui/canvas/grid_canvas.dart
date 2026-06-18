@@ -8,7 +8,8 @@ import '../../services/editor_controller.dart';
 import '../geometry/grid_coordinate_mapper.dart';
 import '../geometry/grid_metrics.dart';
 import '../geometry/viewport_transform.dart';
-import '../input/grid_hit_layer.dart';
+import '../input/grid_interaction_controller.dart';
+import '../input/grid_interaction_layer.dart';
 import '../renderer/grid_renderer.dart';
 import '../renderer/overlay_layer.dart';
 import '../viewport/grid_interaction_state.dart';
@@ -87,8 +88,8 @@ class _GridCanvasState extends State<GridCanvas> {
     _interactionState.updateSelectedItemId(widget.controller?.selectedItemId);
   }
 
-  Listenable get _rebuildListenable {
-    final sources = <Listenable>[_viewportController, _interactionState];
+  Listenable get _contentListenable {
+    final sources = <Listenable>[_viewportController];
     final controller = widget.controller;
     if (controller != null) {
       sources.add(controller);
@@ -101,7 +102,7 @@ class _GridCanvasState extends State<GridCanvas> {
     return LayoutBuilder(
       builder: (context, constraints) {
         return ListenableBuilder(
-          listenable: _rebuildListenable,
+          listenable: _contentListenable,
           builder: (context, _) {
             final camera = _viewportController.camera;
             final transform = ViewportTransform(
@@ -116,19 +117,19 @@ class _GridCanvasState extends State<GridCanvas> {
             );
             final mapper = GridCoordinateMapper(metrics);
             final supportsHover = _supportsHoverPreview();
+            final interactionController = GridInteractionController(
+              mapper: mapper,
+              document: widget.document,
+              catalog: widget.catalog,
+              interactionState: _interactionState,
+              onCellTap: widget.onCellTap,
+              onPlacementTap: widget.onPlacementTap,
+              supportsHover: supportsHover,
+            );
 
             return ViewportShell(
               viewportController: _viewportController,
               transform: transform,
-              onHover: supportsHover
-                  ? (position) {
-                      final (row, col) = mapper.fromLocalPosition(position);
-                      _interactionState.setHoverCell(row, col);
-                    }
-                  : null,
-              onHoverExit: supportsHover
-                  ? () => _interactionState.setHoverCell(null, null)
-                  : null,
               child: Stack(
                 children: [
                   GridRenderer(
@@ -136,18 +137,17 @@ class _GridCanvasState extends State<GridCanvas> {
                     catalog: widget.catalog,
                     metrics: metrics,
                   ),
-                  GridHitLayer(
-                    document: widget.document,
-                    catalog: widget.catalog,
-                    metrics: metrics,
-                    onCellTap: widget.onCellTap,
-                    onPlacementTap: widget.onPlacementTap,
-                  ),
+                  GridInteractionLayer(controller: interactionController),
                   if (widget.controller != null)
-                    OverlayLayer(
-                      interactionState: _interactionState,
-                      catalog: widget.catalog,
-                      metrics: metrics,
+                    ListenableBuilder(
+                      listenable: _interactionState,
+                      builder: (context, _) {
+                        return OverlayLayer(
+                          interactionState: _interactionState,
+                          catalog: widget.catalog,
+                          metrics: metrics,
+                        );
+                      },
                     ),
                 ],
               ),

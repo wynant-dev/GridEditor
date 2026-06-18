@@ -7,16 +7,14 @@ import 'editor_engine.dart';
 
 /// Single source of truth for editor state: engine + UI selection.
 class EditorController extends ChangeNotifier {
-  EditorController({
-    EditorEngine? engine,
-    String? selectedItemId,
-  }) : _engine =
-           engine ??
-           EditorEngine(
-             catalog: const ItemCatalog(id: 'default', name: 'My catalog'),
-             layout: const GridDocument(rows: 12, cols: 12),
-           ),
-       _selectedItemId = selectedItemId;
+  EditorController({EditorEngine? engine, String? selectedItemId})
+    : _engine =
+          engine ??
+          EditorEngine(
+            catalog: const ItemCatalog(id: 'default', name: 'My catalog'),
+            layout: const GridDocument(rows: 64, cols: 64),
+          ),
+      _selectedItemId = selectedItemId;
 
   EditorEngine _engine;
   String? _selectedItemId;
