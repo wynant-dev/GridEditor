@@ -50,15 +50,6 @@ class _GridEditorAppState extends State<GridEditorApp> {
     }
   }
 
-  void _onCellTap(int row, int col) {
-    final error = _controller.placeAt(row, col);
-    if (error != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error)),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -71,8 +62,12 @@ class _GridEditorAppState extends State<GridEditorApp> {
             document: _controller.layout,
             catalog: _controller.catalog,
             controller: _controller,
-            onCellTap: _onCellTap,
-            onPlacementTap: _controller.removePlacement,
+            onPlaceError: (error) {
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(error)),
+              );
+            },
             body: CatalogPanel(
               catalog: _controller.catalog,
               selectedItemId: _controller.selectedItemId,

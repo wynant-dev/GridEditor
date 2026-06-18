@@ -17,6 +17,7 @@ class GridEditorScreen extends StatelessWidget {
     this.controller,
     this.onCellTap,
     this.onPlacementTap,
+    this.onPlaceError,
     this.toolbarActions = const [],
     this.body,
     this.seedColor,
@@ -28,6 +29,7 @@ class GridEditorScreen extends StatelessWidget {
   final EditorController? controller;
   final void Function(int row, int col)? onCellTap;
   final void Function(PlacedItem placement)? onPlacementTap;
+  final void Function(String error)? onPlaceError;
   final List<Widget> toolbarActions;
   final Widget? body;
   final Color? seedColor;
@@ -65,6 +67,7 @@ class GridEditorScreen extends StatelessWidget {
                   controller: controller,
                   onCellTap: onCellTap,
                   onPlacementTap: onPlacementTap,
+                  onPlaceError: onPlaceError,
                 ),
               ),
             ),

@@ -112,7 +112,6 @@ void main() {
             document: const GridDocument(rows: 2, cols: 2),
             catalog: catalog,
             controller: controller,
-            onCellTap: controller.placeAt,
           ),
         ),
       ),
@@ -120,6 +119,38 @@ void main() {
 
     await tester.tapAt(const Offset(50, 50));
     expect(controller.layout.placements, hasLength(1));
+  });
+
+  testWidgets('tapping a placement removes it when controller is attached',
+      (tester) async {
+    const placement = PlacedItem(
+      id: 'p1',
+      catalogItemId: 'house',
+      originRow: 0,
+      originCol: 0,
+    );
+    final controller = EditorController()..loadCatalog(catalog);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox(
+          width: 200,
+          height: 200,
+          child: GridCanvas(
+            document: const GridDocument(
+              rows: 2,
+              cols: 2,
+              placements: [placement],
+            ),
+            catalog: catalog,
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tapAt(const Offset(50, 50));
+    expect(controller.layout.placements, isEmpty);
   });
 
   testWidgets('64x64 grid uses no per-cell GestureDetectors', (tester) async {
@@ -134,7 +165,6 @@ void main() {
             document: const GridDocument(rows: 64, cols: 64),
             catalog: catalog,
             controller: controller,
-            onCellTap: controller.placeAt,
           ),
         ),
       ),

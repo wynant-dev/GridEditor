@@ -5,6 +5,8 @@ import '../../domain/catalog/item_catalog.dart';
 import '../../domain/layout/grid_document.dart';
 import '../../domain/layout/placed_item.dart';
 import '../../services/editor_controller.dart';
+import '../../services/tools/place_tool.dart';
+import '../../services/tools/tool_manager.dart';
 import '../geometry/grid_coordinate_mapper.dart';
 import '../geometry/grid_metrics.dart';
 import '../geometry/viewport_transform.dart';
@@ -37,6 +39,7 @@ class GridCanvas extends StatefulWidget {
     this.interactionState,
     this.onCellTap,
     this.onPlacementTap,
+    this.onPlaceError,
   });
 
   final GridDocument document;
@@ -45,6 +48,7 @@ class GridCanvas extends StatefulWidget {
   final GridInteractionState? interactionState;
   final void Function(int row, int col)? onCellTap;
   final void Function(PlacedItem placement)? onPlacementTap;
+  final void Function(String error)? onPlaceError;
 
   @override
   State<GridCanvas> createState() => _GridCanvasState();
@@ -54,12 +58,15 @@ class _GridCanvasState extends State<GridCanvas> {
   final ViewportController _viewportController = ViewportController();
   late final GridInteractionState _interactionState;
   late final bool _ownsInteractionState;
+  late final ToolManager _toolManager;
 
   @override
   void initState() {
     super.initState();
     _ownsInteractionState = widget.interactionState == null;
     _interactionState = widget.interactionState ?? GridInteractionState();
+    _toolManager = ToolManager(PlaceTool(onPlaceError: widget.onPlaceError));
+    widget.controller?.attachInteractionState(_interactionState);
     widget.controller?.addListener(_syncSelectionFromController);
     _interactionState.syncSelectedItemId(widget.controller?.selectedItemId);
   }
@@ -69,8 +76,12 @@ class _GridCanvasState extends State<GridCanvas> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller?.removeListener(_syncSelectionFromController);
+      widget.controller?.attachInteractionState(_interactionState);
       widget.controller?.addListener(_syncSelectionFromController);
       _syncSelectionFromController();
+    }
+    if (oldWidget.onPlaceError != widget.onPlaceError) {
+      _toolManager.setTool(PlaceTool(onPlaceError: widget.onPlaceError));
     }
   }
 
@@ -80,6 +91,7 @@ class _GridCanvasState extends State<GridCanvas> {
     if (_ownsInteractionState) {
       _interactionState.dispose();
     }
+    _toolManager.dispose();
     _viewportController.dispose();
     super.dispose();
   }
@@ -117,13 +129,17 @@ class _GridCanvasState extends State<GridCanvas> {
             );
             final mapper = GridCoordinateMapper(metrics);
             final supportsHover = _supportsHoverPreview();
+            final controller = widget.controller;
+            final useTools = controller != null;
             final interactionController = GridInteractionController(
               mapper: mapper,
               document: widget.document,
               catalog: widget.catalog,
               interactionState: _interactionState,
-              onCellTap: widget.onCellTap,
-              onPlacementTap: widget.onPlacementTap,
+              editorController: controller,
+              toolManager: useTools ? _toolManager : null,
+              onCellTap: useTools ? null : widget.onCellTap,
+              onPlacementTap: useTools ? null : widget.onPlacementTap,
               supportsHover: supportsHover,
             );
 

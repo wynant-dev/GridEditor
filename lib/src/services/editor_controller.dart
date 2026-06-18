@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../domain/catalog/item_catalog.dart';
 import '../domain/layout/grid_document.dart';
 import '../domain/layout/placed_item.dart';
+import '../ui/viewport/grid_interaction_state.dart';
 import 'editor_engine.dart';
 
 /// Single source of truth for editor state: engine + UI selection.
@@ -18,6 +19,7 @@ class EditorController extends ChangeNotifier {
 
   EditorEngine _engine;
   String? _selectedItemId;
+  GridInteractionState? _interactionState;
 
   EditorEngine get engine => _engine;
   ItemCatalog get catalog => _engine.catalog;
@@ -33,6 +35,18 @@ class EditorController extends ChangeNotifier {
   void selectItem(String itemId) {
     _selectedItemId = itemId;
     notifyListeners();
+  }
+
+  void attachInteractionState(GridInteractionState state) {
+    _interactionState = state;
+  }
+
+  void setHoverCell(int row, int col) {
+    _interactionState?.setHoverCell(row, col);
+  }
+
+  void clearHover() {
+    _interactionState?.setHoverCell(null, null);
   }
 
   /// Places the selected catalog item. Returns an error message on failure.
