@@ -12,12 +12,14 @@ class SelectionOverlayLayer extends StatelessWidget {
     required this.document,
     required this.catalog,
     required this.metrics,
+    required this.onDelete,
   });
 
   final String? selectedPlacementId;
   final GridDocument document;
   final ItemCatalog catalog;
   final GridMetrics metrics;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -46,14 +48,57 @@ class SelectionOverlayLayer extends StatelessWidget {
       top: topLeft.dy,
       width: item.width * metrics.cellWidth,
       height: item.height * metrics.cellHeight,
-      child: IgnorePointer(
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Theme.of(context).colorScheme.primary,
-              width: 2,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2,
+                  ),
+                ),
+              ),
             ),
           ),
+          Positioned(
+            top: 2,
+            right: 2,
+            child: _DeletePlacementButton(onPressed: onDelete),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DeletePlacementButton extends StatelessWidget {
+  const _DeletePlacementButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Listener(
+      key: const Key('delete_placement_button'),
+      behavior: HitTestBehavior.opaque,
+      onPointerDown: (_) => onPressed(),
+      child: Container(
+        width: 20,
+        height: 20,
+        decoration: BoxDecoration(
+          color: colorScheme.error,
+          shape: BoxShape.circle,
+          border: Border.all(color: colorScheme.onError, width: 1),
+        ),
+        child: Icon(
+          Icons.close,
+          size: 14,
+          color: colorScheme.onError,
         ),
       ),
     );

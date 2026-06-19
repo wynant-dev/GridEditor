@@ -151,7 +151,92 @@ void main() {
 
     await tester.tapAt(const Offset(50, 50));
     expect(controller.selectedPlacementId, 'p1');
+    expect(controller.selectedItemId, isNull);
     expect(find.byType(SelectionOverlayLayer), findsOneWidget);
+  });
+
+  testWidgets('ghost preview hidden when placement is selected', (tester) async {
+    const placement = PlacedItem(
+      id: 'p1',
+      catalogItemId: 'house',
+      originRow: 0,
+      originCol: 0,
+    );
+    final controller = EditorController()..loadCatalog(catalog);
+    final interactionState = GridInteractionState();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox(
+          width: 200,
+          height: 200,
+          child: GridCanvas(
+            document: const GridDocument(
+              rows: 2,
+              cols: 2,
+              placements: [placement],
+            ),
+            catalog: catalog,
+            controller: controller,
+            interactionState: interactionState,
+          ),
+        ),
+      ),
+    );
+
+    interactionState.setHoverCell(1, 1);
+    await tester.pump();
+    expect(find.byType(Opacity), findsOneWidget);
+
+    await tester.tapAt(const Offset(50, 50));
+    await tester.pump();
+
+    expect(controller.selectedPlacementId, 'p1');
+    expect(controller.selectedItemId, isNull);
+    expect(find.byType(Opacity), findsNothing);
+  });
+
+  testWidgets('delete button removes selected placement', (tester) async {
+    const placement = PlacedItem(
+      id: 'p1',
+      catalogItemId: 'house',
+      originRow: 0,
+      originCol: 0,
+    );
+    final controller = EditorController(
+      engine: EditorEngine(
+        catalog: catalog,
+        layout: const GridDocument(
+          rows: 2,
+          cols: 2,
+          placements: [placement],
+        ),
+      ),
+    )..loadCatalog(catalog);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox(
+          width: 200,
+          height: 200,
+          child: GridCanvas(
+            document: controller.layout,
+            catalog: catalog,
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tapAt(const Offset(50, 50));
+    await tester.pump();
+    expect(controller.selectedPlacementId, 'p1');
+
+    await tester.tap(find.byKey(const Key('delete_placement_button')));
+    await tester.pump();
+
+    expect(controller.layout.placements, isEmpty);
+    expect(controller.selectedPlacementId, isNull);
   });
 
   testWidgets('EraseTool active removes placement on tap', (tester) async {

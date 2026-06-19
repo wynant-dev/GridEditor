@@ -19,7 +19,29 @@ void main() {
 
     expect(controller.selectedPlacementId, 'p1');
     expect(controller.selection.selectedPlacementId, 'p1');
+    expect(controller.selectedItemId, isNull);
     expect(notified, 1);
+  });
+
+  test('selectPlacement clears catalog item selection', () {
+    final controller = EditorController()..loadCatalog(catalog);
+
+    expect(controller.selectedItemId, 'house');
+
+    controller.selectPlacement('p1');
+
+    expect(controller.selectedItemId, isNull);
+  });
+
+  test('selectItem clears placement selection', () {
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectPlacement('p1');
+
+    controller.selectItem('house');
+
+    expect(controller.selectedPlacementId, isNull);
+    expect(controller.selectedItemId, 'house');
   });
 
   test('clearSelection resets selection', () {

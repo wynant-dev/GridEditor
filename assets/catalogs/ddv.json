@@ -16,6 +16,13 @@
       "height": 2,
       "color": "#1E88E5",
       "imagePath": "assets/images/bank.png"
+    },
+    {
+      "id": "restaurant",
+      "name": "Restaurant",
+      "width": 8,
+      "height": 3,
+      "color": "#43A047"
     }
   ]
 }

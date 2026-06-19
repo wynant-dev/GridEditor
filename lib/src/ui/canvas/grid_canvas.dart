@@ -144,6 +144,7 @@ class _GridCanvasState extends State<GridCanvas> {
               viewportController: _viewportController,
               transform: transform,
               child: Stack(
+                clipBehavior: Clip.none,
                 children: [
                   GridRenderer(
                     document: widget.document,
@@ -167,6 +168,12 @@ class _GridCanvasState extends State<GridCanvas> {
                       document: widget.document,
                       catalog: widget.catalog,
                       metrics: metrics,
+                      onDelete: () {
+                        final placement = controller.selectedPlacement;
+                        if (placement != null) {
+                          controller.removePlacement(placement);
+                        }
+                      },
                     ),
                   ],
                 ],

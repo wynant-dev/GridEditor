@@ -66,11 +66,13 @@ class EditorController extends ChangeNotifier {
 
   void selectItem(String itemId) {
     _selectedItemId = itemId;
+    _selection = const SelectionState();
     notifyListeners();
   }
 
   void selectPlacement(String placementId) {
     _selection = _selection.copyWith(selectedPlacementId: placementId);
+    _selectedItemId = null;
     notifyListeners();
   }
 
