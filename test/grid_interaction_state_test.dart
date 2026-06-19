@@ -36,5 +36,36 @@ void main() {
       interactionState.updateSelectedItemId('house');
       expect(notified, 1);
     });
+
+    test('drag session start, update, and clear notify listeners', () {
+      final interactionState = GridInteractionState();
+      var notified = 0;
+      interactionState.addListener(() => notified++);
+
+      final session = DragSession(
+        placementId: 'p1',
+        startRow: 0,
+        startCol: 0,
+        grabOffsetRow: 0,
+        grabOffsetCol: 0,
+        currentRow: 0,
+        currentCol: 0,
+      );
+      interactionState.startDragSession(session);
+      expect(interactionState.isDragging, isTrue);
+      expect(notified, 1);
+
+      interactionState.updateDragPosition(1, 2);
+      expect(session.currentRow, 1);
+      expect(session.currentCol, 2);
+      expect(notified, 2);
+
+      interactionState.updateDragPosition(1, 2);
+      expect(notified, 2);
+
+      interactionState.clearDragSession();
+      expect(interactionState.isDragging, isFalse);
+      expect(notified, 3);
+    });
   });
 }

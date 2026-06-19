@@ -28,15 +28,26 @@ class ToolManager extends ChangeNotifier {
     defaultTool.onCellHover(ctx);
   }
 
-  void handleCellTap(GridToolContext ctx) {
+  void handleCellTap(GridToolContext ctx, {bool isDragging = false}) {
+    if (isDragging) return;
     if (!_activeTool.onCellTap(ctx)) {
       defaultTool.onCellTap(ctx);
     }
   }
 
-  void handlePlacementTap(GridToolContext ctx, PlacedItem placement) {
+  void handlePlacementTap(
+    GridToolContext ctx,
+    PlacedItem placement, {
+    bool isDragging = false,
+  }) {
+    if (isDragging) return;
     if (!_activeTool.onPlacementTap(ctx, placement)) {
       defaultTool.onPlacementTap(ctx, placement);
     }
+  }
+
+  bool canStartDrag(PlacedItem placement) {
+    return _activeTool.canStartDrag(placement) &&
+        defaultTool.canStartDrag(placement);
   }
 }

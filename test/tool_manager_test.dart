@@ -99,4 +99,19 @@ void main() {
     expect(second.tapCount, 1);
     expect(notified, 1);
   });
+
+  test('handlePlacementTap ignores taps while dragging', () {
+    final controller = EditorController()..loadCatalog(catalog);
+    controller.placeAt(0, 0);
+    final placement = controller.layout.placements.single;
+    final manager = ToolManager(activeTool: EraseTool());
+
+    manager.handlePlacementTap(
+      ctx(controller),
+      placement,
+      isDragging: true,
+    );
+
+    expect(controller.layout.placements, hasLength(1));
+  });
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../domain/catalog/item_catalog.dart';
 import '../../domain/layout/grid_document.dart';
 import '../geometry/grid_metrics.dart';
+import '../input/drag_session.dart';
 
 /// Renders a selection outline around the currently selected placement.
 class SelectionOverlayLayer extends StatelessWidget {
@@ -13,6 +14,7 @@ class SelectionOverlayLayer extends StatelessWidget {
     required this.catalog,
     required this.metrics,
     required this.onDelete,
+    this.dragSession,
   });
 
   final String? selectedPlacementId;
@@ -20,6 +22,7 @@ class SelectionOverlayLayer extends StatelessWidget {
   final ItemCatalog catalog;
   final GridMetrics metrics;
   final VoidCallback onDelete;
+  final DragSession? dragSession;
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +41,15 @@ class SelectionOverlayLayer extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final topLeft = metrics.cellTopLeft(
-      placement.originRow,
-      placement.originCol,
-    );
+    final session = dragSession;
+    final originRow = session != null && session.placementId == placementId
+        ? session.currentRow
+        : placement.originRow;
+    final originCol = session != null && session.placementId == placementId
+        ? session.currentCol
+        : placement.originCol;
+
+    final topLeft = metrics.cellTopLeft(originRow, originCol);
 
     return Positioned(
       left: topLeft.dx,

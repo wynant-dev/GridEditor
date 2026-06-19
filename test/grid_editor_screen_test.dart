@@ -9,14 +9,12 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: GridEditorScreen(
-          title: 'Test',
           document: GridDocument(rows: 2, cols: 2),
           catalog: catalog,
         ),
       ),
     );
 
-    expect(find.text('Test'), findsOneWidget);
     expect(find.byType(GridCanvas), findsOneWidget);
   });
 }

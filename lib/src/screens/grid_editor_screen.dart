@@ -5,32 +5,27 @@ import '../domain/layout/grid_document.dart';
 import '../domain/layout/placed_item.dart';
 import '../services/editor_controller.dart';
 import '../ui/canvas/grid_canvas.dart';
-import '../ui/toolbar/grid_toolbar.dart';
 
 /// Generic editor shell: renders grid state and forwards user input upward.
 class GridEditorScreen extends StatelessWidget {
   const GridEditorScreen({
     super.key,
-    required this.title,
     required this.document,
     required this.catalog,
     this.controller,
     this.onCellTap,
     this.onPlacementTap,
     this.onPlaceError,
-    this.toolbarActions = const [],
     this.body,
     this.seedColor,
   });
 
-  final String title;
   final GridDocument document;
   final ItemCatalog catalog;
   final EditorController? controller;
   final void Function(int row, int col)? onCellTap;
   final void Function(PlacedItem placement)? onPlacementTap;
   final void Function(String error)? onPlaceError;
-  final List<Widget> toolbarActions;
   final Widget? body;
   final Color? seedColor;
 
@@ -46,33 +41,45 @@ class GridEditorScreen extends StatelessWidget {
     return Theme(
       data: theme,
       child: Scaffold(
-        appBar: GridToolbar(title: title, actions: toolbarActions),
-        body: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (body != null)
-              SizedBox(
-                width: 280,
-                child: Material(
-                  elevation: 1,
-                  child: body!,
-                ),
+        body: body != null
+            ? Stack(
+                children: [
+                  Positioned.fill(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 280),
+                      child: ClipRect(
+                        child: GridCanvas(
+                          document: document,
+                          catalog: catalog,
+                          controller: controller,
+                          onCellTap: onCellTap,
+                          onPlacementTap: onPlacementTap,
+                          onPlaceError: onPlaceError,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: 280,
+                    child: Material(
+                      elevation: 2,
+                      color: theme.colorScheme.surfaceContainerLow,
+                      child: body!,
+                    ),
+                  ),
+                ],
+              )
+            : GridCanvas(
+                document: document,
+                catalog: catalog,
+                controller: controller,
+                onCellTap: onCellTap,
+                onPlacementTap: onPlacementTap,
+                onPlaceError: onPlaceError,
               ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: GridCanvas(
-                  document: document,
-                  catalog: catalog,
-                  controller: controller,
-                  onCellTap: onCellTap,
-                  onPlacementTap: onPlacementTap,
-                  onPlaceError: onPlaceError,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

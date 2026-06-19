@@ -303,4 +303,54 @@ void main() {
     await tester.tapAt(const Offset(10, 10));
     expect(controller.layout.placements, hasLength(1));
   });
+
+  testWidgets('dragging to invalid cell reverts placement', (tester) async {
+    const placement = PlacedItem(
+      id: 'p1',
+      catalogItemId: 'house',
+      originRow: 0,
+      originCol: 0,
+    );
+    const blocker = PlacedItem(
+      id: 'p2',
+      catalogItemId: 'house',
+      originRow: 0,
+      originCol: 1,
+    );
+    final controller = EditorController(
+      engine: EditorEngine(
+        catalog: catalog,
+        layout: const GridDocument(
+          rows: 4,
+          cols: 4,
+          placements: [placement, blocker],
+        ),
+      ),
+    )..loadCatalog(catalog);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SizedBox(
+          width: 400,
+          height: 400,
+          child: ListenableBuilder(
+            listenable: controller,
+            builder: (context, _) => GridCanvas(
+              document: controller.layout,
+              catalog: catalog,
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final layerTopLeft = tester.getTopLeft(find.byType(GridInteractionLayer));
+    await tester.dragFrom(layerTopLeft + const Offset(50, 50), const Offset(120, 0));
+    await tester.pump();
+
+    final moved = controller.layout.placementById('p1');
+    expect(moved?.originRow, 0);
+    expect(moved?.originCol, 0);
+  });
 }

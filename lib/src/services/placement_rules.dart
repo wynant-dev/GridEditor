@@ -76,6 +76,20 @@ class PlacementRules {
         originCol + item.width <= layout.cols;
   }
 
+  /// Placement origin so [anchorRow]/[anchorCol] sits at the item center.
+  static (int originRow, int originCol) originFromCenterAnchor({
+    required GridDocument layout,
+    required CatalogItem item,
+    required int anchorRow,
+    required int anchorCol,
+  }) {
+    var originRow = anchorRow - item.height ~/ 2;
+    var originCol = anchorCol - item.width ~/ 2;
+    originRow = originRow.clamp(0, layout.rows - item.height);
+    originCol = originCol.clamp(0, layout.cols - item.width);
+    return (originRow, originCol);
+  }
+
   static bool overlaps(
     CatalogItem item,
     int originRow,

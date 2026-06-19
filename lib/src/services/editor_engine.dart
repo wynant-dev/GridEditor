@@ -79,6 +79,35 @@ class EditorEngine {
     );
   }
 
+  EditorEngine movePlacement({
+    required String placementId,
+    required int newRow,
+    required int newCol,
+  }) {
+    final existing = placementById(placementId);
+    if (existing == null) {
+      throw StateError('Placement not found');
+    }
+
+    final error = placementError(
+      catalogItemId: existing.catalogItemId,
+      originRow: newRow,
+      originCol: newCol,
+      ignorePlacementId: placementId,
+    );
+    if (error != null) {
+      throw StateError(error);
+    }
+
+    final without = removePlacement(placementId);
+    return without.placeItem(
+      catalogItemId: existing.catalogItemId,
+      originRow: newRow,
+      originCol: newCol,
+      placementId: placementId,
+    );
+  }
+
   bool occupiesCell({required int row, required int col}) {
     return PlacementRules.occupiesCell(
       catalog: catalog,
@@ -113,5 +142,16 @@ class EditorEngine {
     );
   }
 
-  String _nextPlacementId() => 'p${layout.placements.length + 1}';
+  String _nextPlacementId() {
+    var max = 0;
+    for (final placement in layout.placements) {
+      final match = RegExp(r'^p(\d+)$').firstMatch(placement.id);
+      if (match == null) continue;
+      final value = int.tryParse(match.group(1)!);
+      if (value != null && value > max) {
+        max = value;
+      }
+    }
+    return 'p${max + 1}';
+  }
 }

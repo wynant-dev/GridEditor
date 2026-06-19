@@ -11,4 +11,6 @@ abstract class EditorTool {
       false;
 
   void onCellHover(GridToolContext context) {}
+
+  bool canStartDrag(PlacedItem placement) => true;
 }

@@ -13,11 +13,13 @@ class GridRenderer extends StatelessWidget {
     required this.document,
     required this.catalog,
     required this.metrics,
+    this.hiddenPlacementId,
   });
 
   final GridDocument document;
   final ItemCatalog catalog;
   final GridMetrics metrics;
+  final String? hiddenPlacementId;
 
   @override
   Widget build(BuildContext context) {
@@ -30,11 +32,12 @@ class GridRenderer extends StatelessWidget {
           painter: _GridLinePainter(metrics: metrics, color: lineColor),
         ),
         for (final placement in document.placements)
-          _PlacementLayer(
-            placement: placement,
-            catalog: catalog,
-            metrics: metrics,
-          ),
+          if (placement.id != hiddenPlacementId)
+            _PlacementLayer(
+              placement: placement,
+              catalog: catalog,
+              metrics: metrics,
+            ),
       ],
     );
   }

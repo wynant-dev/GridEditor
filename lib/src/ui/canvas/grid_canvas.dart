@@ -57,12 +57,28 @@ class _GridCanvasState extends State<GridCanvas> {
   final ViewportController _viewportController = ViewportController();
   late final GridInteractionState _interactionState;
   late final bool _ownsInteractionState;
+  late final GridInteractionController _interactionController;
+  String? _hiddenPlacementId;
 
   @override
   void initState() {
     super.initState();
     _ownsInteractionState = widget.interactionState == null;
     _interactionState = widget.interactionState ?? GridInteractionState();
+    _interactionController = GridInteractionController(
+      mapper: GridCoordinateMapper(
+        GridMetrics(
+          rows: widget.document.rows,
+          cols: widget.document.cols,
+          size: Size.zero,
+        ),
+      ),
+      document: widget.document,
+      catalog: widget.catalog,
+      interactionState: _interactionState,
+      supportsHover: _supportsHoverPreview(),
+    );
+    _interactionState.addListener(_syncHiddenPlacementFromDrag);
     widget.controller?.attachInteractionState(_interactionState);
     widget.controller?.configurePlaceError(widget.onPlaceError);
     widget.controller?.addListener(_syncSelectionFromController);
@@ -85,6 +101,7 @@ class _GridCanvasState extends State<GridCanvas> {
 
   @override
   void dispose() {
+    _interactionState.removeListener(_syncHiddenPlacementFromDrag);
     widget.controller?.removeListener(_syncSelectionFromController);
     if (_ownsInteractionState) {
       _interactionState.dispose();
@@ -95,6 +112,14 @@ class _GridCanvasState extends State<GridCanvas> {
 
   void _syncSelectionFromController() {
     _interactionState.updateSelectedItemId(widget.controller?.selectedItemId);
+  }
+
+  void _syncHiddenPlacementFromDrag() {
+    final hiddenId = _interactionState.isDragging
+        ? _interactionState.dragSession?.placementId
+        : null;
+    if (_hiddenPlacementId == hiddenId) return;
+    setState(() => _hiddenPlacementId = hiddenId);
   }
 
   Listenable get _contentListenable {
@@ -128,11 +153,12 @@ class _GridCanvasState extends State<GridCanvas> {
             final supportsHover = _supportsHoverPreview();
             final controller = widget.controller;
             final useTools = controller != null;
-            final interactionController = GridInteractionController(
+            final document = widget.document;
+
+            _interactionController.updateContext(
               mapper: mapper,
-              document: widget.document,
+              document: document,
               catalog: widget.catalog,
-              interactionState: _interactionState,
               editorController: controller,
               toolManager: useTools ? controller.toolManager : null,
               onCellTap: useTools ? null : widget.onCellTap,
@@ -147,32 +173,42 @@ class _GridCanvasState extends State<GridCanvas> {
                 clipBehavior: Clip.none,
                 children: [
                   GridRenderer(
-                    document: widget.document,
+                    document: document,
                     catalog: widget.catalog,
                     metrics: metrics,
+                    hiddenPlacementId: _hiddenPlacementId,
                   ),
-                  GridInteractionLayer(controller: interactionController),
+                  GridInteractionLayer(controller: _interactionController),
                   if (controller != null) ...[
                     ListenableBuilder(
                       listenable: _interactionState,
                       builder: (context, _) {
-                        return OverlayLayer(
-                          interactionState: _interactionState,
-                          catalog: widget.catalog,
-                          metrics: metrics,
+                        return Positioned.fill(
+                          child: OverlayLayer(
+                            interactionState: _interactionState,
+                            catalog: widget.catalog,
+                            metrics: metrics,
+                            document: document,
+                          ),
                         );
                       },
                     ),
-                    SelectionOverlayLayer(
-                      selectedPlacementId: controller.selectedPlacementId,
-                      document: widget.document,
-                      catalog: widget.catalog,
-                      metrics: metrics,
-                      onDelete: () {
-                        final placement = controller.selectedPlacement;
-                        if (placement != null) {
-                          controller.removePlacement(placement);
-                        }
+                    ListenableBuilder(
+                      listenable: _interactionState,
+                      builder: (context, _) {
+                        return SelectionOverlayLayer(
+                          selectedPlacementId: controller.selectedPlacementId,
+                          document: document,
+                          catalog: widget.catalog,
+                          metrics: metrics,
+                          dragSession: _interactionState.dragSession,
+                          onDelete: () {
+                            final placement = controller.selectedPlacement;
+                            if (placement != null) {
+                              controller.removePlacement(placement);
+                            }
+                          },
+                        );
                       },
                     ),
                   ],

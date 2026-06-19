@@ -5,6 +5,7 @@ import '../domain/layout/grid_document.dart';
 import '../domain/layout/placed_item.dart';
 import '../ui/viewport/grid_interaction_state.dart';
 import 'editor_engine.dart';
+import 'placement_rules.dart';
 import 'selection_state.dart';
 import 'tools/default_tool.dart';
 import 'tools/place_tool.dart';
@@ -93,16 +94,27 @@ class EditorController extends ChangeNotifier {
     _interactionState?.setHoverCell(null, null);
   }
 
-  /// Places the selected catalog item. Returns an error message on failure.
+  /// Places the selected catalog item centered on [row]/[col].
+  /// Returns an error message on failure.
   String? placeAt(int row, int col) {
     final selectedId = _selectedItemId;
     if (selectedId == null) return null;
 
+    final item = _engine.catalog.itemById(selectedId);
+    if (item == null) return 'Unknown item: $selectedId';
+
+    final (originRow, originCol) = PlacementRules.originFromCenterAnchor(
+      layout: _engine.layout,
+      item: item,
+      anchorRow: row,
+      anchorCol: col,
+    );
+
     try {
       _engine = _engine.placeItem(
         catalogItemId: selectedId,
-        originRow: row,
-        originCol: col,
+        originRow: originRow,
+        originCol: originCol,
       );
       notifyListeners();
       return null;
@@ -117,6 +129,25 @@ class EditorController extends ChangeNotifier {
       _selection = const SelectionState();
     }
     notifyListeners();
+  }
+
+  /// Moves a placement to a new origin. Returns false when the move is invalid.
+  bool movePlacement({
+    required String placementId,
+    required int newRow,
+    required int newCol,
+  }) {
+    try {
+      _engine = _engine.movePlacement(
+        placementId: placementId,
+        newRow: newRow,
+        newCol: newCol,
+      );
+      notifyListeners();
+      return true;
+    } on StateError {
+      return false;
+    }
   }
 
   @override

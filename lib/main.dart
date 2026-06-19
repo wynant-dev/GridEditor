@@ -65,7 +65,6 @@ class _GridEditorAppState extends State<GridEditorApp> {
         listenable: _controller,
         builder: (context, _) {
           return GridEditorScreen(
-            title: _title,
             document: _controller.layout,
             catalog: _controller.catalog,
             controller: _controller,

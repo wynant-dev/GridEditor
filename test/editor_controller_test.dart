@@ -31,6 +31,16 @@ void main() {
     expect(controller.layout.placements, hasLength(1));
   });
 
+  test('placeAt centers item on anchor cell', () {
+    final controller = EditorController()..loadCatalog(catalog);
+
+    controller.placeAt(5, 5);
+
+    final placement = controller.layout.placements.single;
+    expect(placement.originRow, 4);
+    expect(placement.originCol, 4);
+  });
+
   test('placeAt returns error message on invalid placement', () {
     final controller = EditorController()..loadCatalog(catalog);
     controller.placeAt(0, 0);
@@ -66,5 +76,39 @@ void main() {
     controller.selectItem('b');
 
     expect(controller.selectedItemId, 'b');
+  });
+
+  test('movePlacement updates layout and preserves selection', () {
+    final controller = EditorController()..loadCatalog(catalog);
+    controller.placeAt(0, 0);
+    final placement = controller.layout.placements.single;
+    controller.selectPlacement(placement.id);
+
+    final moved = controller.movePlacement(
+      placementId: placement.id,
+      newRow: 2,
+      newCol: 2,
+    );
+
+    expect(moved, isTrue);
+    expect(controller.layout.placements.single.originRow, 2);
+    expect(controller.layout.placements.single.originCol, 2);
+    expect(controller.selectedPlacementId, placement.id);
+  });
+
+  test('movePlacement returns false for invalid move', () {
+    final controller = EditorController()..loadCatalog(catalog);
+    controller.placeAt(0, 0);
+    final placement = controller.layout.placements.single;
+
+    final moved = controller.movePlacement(
+      placementId: placement.id,
+      newRow: 63,
+      newCol: 63,
+    );
+
+    expect(moved, isFalse);
+    expect(controller.layout.placements.single.originRow, 0);
+    expect(controller.layout.placements.single.originCol, 0);
   });
 }

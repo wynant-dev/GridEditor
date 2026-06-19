@@ -68,6 +68,37 @@ void main() {
       expect(engine.occupiesCell(row: 1, col: 1), isTrue);
     });
 
+    test('placeItem assigns unique ids after deletion', () {
+      var engine = const EditorEngine(
+        catalog: catalog,
+        layout: GridDocument(rows: 4, cols: 4),
+      ).placeItem(
+        catalogItemId: 'house',
+        originRow: 0,
+        originCol: 0,
+      );
+      expect(engine.layout.placements.single.id, 'p1');
+
+      engine = engine.placeItem(
+        catalogItemId: 'bank',
+        originRow: 2,
+        originCol: 0,
+      );
+      expect(engine.layout.placements.last.id, 'p2');
+
+      engine = engine.removePlacement('p1');
+      engine = engine.placeItem(
+        catalogItemId: 'bank',
+        originRow: 0,
+        originCol: 0,
+      );
+
+      final ids = engine.layout.placements.map((p) => p.id).toList();
+      expect(ids, contains('p2'));
+      expect(ids, contains('p3'));
+      expect(ids.toSet(), hasLength(2));
+    });
+
     test('placeItem rejects overlapping placements', () {
       final engine = const EditorEngine(
         catalog: catalog,
@@ -86,6 +117,104 @@ void main() {
         ),
         throwsStateError,
       );
+    });
+
+    test('movePlacement updates placement origin while preserving id', () {
+      final engine = const EditorEngine(
+        catalog: catalog,
+        layout: GridDocument(rows: 4, cols: 4),
+      ).placeItem(
+        catalogItemId: 'house',
+        originRow: 0,
+        originCol: 0,
+        placementId: 'p1',
+      );
+
+      final moved = engine.movePlacement(
+        placementId: 'p1',
+        newRow: 2,
+        newCol: 2,
+      );
+
+      final placement = moved.layout.placements.single;
+      expect(placement.id, 'p1');
+      expect(placement.originRow, 2);
+      expect(placement.originCol, 2);
+    });
+
+    test('movePlacement rejects overlapping placements', () {
+      final engine = const EditorEngine(
+        catalog: catalog,
+        layout: GridDocument(
+          rows: 4,
+          cols: 4,
+          placements: [
+            PlacedItem(
+              id: 'p1',
+              catalogItemId: 'house',
+              originRow: 0,
+              originCol: 0,
+            ),
+            PlacedItem(
+              id: 'p2',
+              catalogItemId: 'bank',
+              originRow: 2,
+              originCol: 0,
+            ),
+          ],
+        ),
+      );
+
+      expect(
+        () => engine.movePlacement(
+          placementId: 'p1',
+          newRow: 2,
+          newCol: 0,
+        ),
+        throwsStateError,
+      );
+    });
+
+    test('movePlacement rejects out-of-bounds target', () {
+      final engine = const EditorEngine(
+        catalog: catalog,
+        layout: GridDocument(rows: 4, cols: 4),
+      ).placeItem(
+        catalogItemId: 'house',
+        originRow: 0,
+        originCol: 0,
+        placementId: 'p1',
+      );
+
+      expect(
+        () => engine.movePlacement(
+          placementId: 'p1',
+          newRow: 3,
+          newCol: 3,
+        ),
+        throwsStateError,
+      );
+    });
+
+    test('movePlacement allows no-op move to same origin', () {
+      final engine = const EditorEngine(
+        catalog: catalog,
+        layout: GridDocument(rows: 4, cols: 4),
+      ).placeItem(
+        catalogItemId: 'house',
+        originRow: 1,
+        originCol: 1,
+        placementId: 'p1',
+      );
+
+      final moved = engine.movePlacement(
+        placementId: 'p1',
+        newRow: 1,
+        newCol: 1,
+      );
+
+      expect(moved.layout.placements.single.originRow, 1);
+      expect(moved.layout.placements.single.originCol, 1);
     });
 
     test('layout round-trips through JSON', () {
