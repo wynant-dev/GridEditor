@@ -53,6 +53,27 @@ flutter analyze
 flutter test
 ```
 
+## Web hosting (GitHub Pages)
+
+The app is deployed automatically on every push to `main`.
+
+**Live site:** [https://wynant-dev.github.io/GridEditor/](https://wynant-dev.github.io/GridEditor/)
+
+### One-time GitHub setup
+
+1. Open **Settings → Pages** on the repository.
+2. Under **Build and deployment → Source**, choose **GitHub Actions**.
+
+After that, the [Deploy to GitHub Pages](.github/workflows/deploy.yml) workflow builds the Flutter web app and publishes it. The first deploy may take a minute; later pushes update the site on each merge to `main`.
+
+### Local web build
+
+```bash
+flutter build web --base-href=/GridEditor/ --release
+```
+
+Output is in `build/web/`.
+
 ## Architecture
 
 ```
