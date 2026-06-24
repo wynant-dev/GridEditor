@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
 void main() {
-  const catalog = ItemCatalog(
+  const catalog = Catalog(
     id: 'test',
     name: 'Test',
     items: [
@@ -10,7 +10,7 @@ void main() {
     ],
   );
 
-  GridToolContext ctx(EditorController controller) => GridToolContext(
+  EditorToolContext ctx(EditorController controller) => EditorToolContext(
     row: 0,
     col: 0,
     controller: controller,
@@ -40,16 +40,16 @@ void main() {
     expect(controller.selectedPlacementId, placement.id);
   });
 
-  test('onCellHover updates hover state', () {
+  test('onCellHover updates hover state via onHover callback', () {
     final controller = EditorController()..loadCatalog(catalog);
     final interactionState = GridInteractionState();
-    controller.attachInteractionState(interactionState);
     final tool = DefaultTool();
-    final context = GridToolContext(
+    final context = EditorToolContext(
       row: 2,
       col: 3,
       controller: controller,
       engine: controller.engine,
+      onHover: (row, col) => interactionState.setHoverCell(row, col),
     );
 
     tool.onCellHover(context);

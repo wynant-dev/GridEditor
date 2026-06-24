@@ -4,7 +4,7 @@ import 'package:grid_editor/grid_editor.dart';
 
 void main() {
   testWidgets('GridEditorScreen renders grid canvas', (tester) async {
-    const catalog = ItemCatalog(id: 'test', name: 'Test');
+    const catalog = Catalog(id: 'test', name: 'Test');
 
     await tester.pumpWidget(
       const MaterialApp(

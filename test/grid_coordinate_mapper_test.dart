@@ -63,7 +63,7 @@ void main() {
         size: const Size(400, 400),
       );
       final mapper = GridCoordinateMapper(metrics);
-      const catalog = ItemCatalog(
+      const catalog = Catalog(
         id: 'test',
         name: 'Test',
         items: [
@@ -96,7 +96,7 @@ void main() {
         size: const Size(400, 400),
       );
       final mapper = GridCoordinateMapper(metrics);
-      const catalog = ItemCatalog(
+      const catalog = Catalog(
         id: 'test',
         name: 'Test',
         items: [

@@ -7,23 +7,23 @@ class _RecordingTool extends EditorTool {
   bool placementHandled = false;
 
   @override
-  void onCellHover(GridToolContext ctx) => hoverCount++;
+  void onCellHover(EditorToolContext ctx) => hoverCount++;
 
   @override
-  bool onCellTap(GridToolContext ctx) {
+  bool onCellTap(EditorToolContext ctx) {
     tapCount++;
     return true;
   }
 
   @override
-  bool onPlacementTap(GridToolContext ctx, PlacedItem placement) {
+  bool onPlacementTap(EditorToolContext ctx, PlacedItem placement) {
     placementHandled = true;
     return false;
   }
 }
 
 void main() {
-  const catalog = ItemCatalog(
+  const catalog = Catalog(
     id: 'test',
     name: 'Test',
     items: [
@@ -31,7 +31,7 @@ void main() {
     ],
   );
 
-  GridToolContext ctx(EditorController controller) => GridToolContext(
+  EditorToolContext ctx(EditorController controller) => EditorToolContext(
     row: 0,
     col: 0,
     controller: controller,

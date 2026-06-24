@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
 void main() {
-  const catalog = ItemCatalog(
+  const catalog = Catalog(
     id: 'test',
     name: 'Test',
     items: [
@@ -15,7 +15,7 @@ void main() {
     controller.placeAt(0, 0);
     final placement = controller.layout.placements.single;
     final tool = EraseTool();
-    final ctx = GridToolContext(
+    final ctx = EditorToolContext(
       row: 0,
       col: 0,
       controller: controller,
@@ -29,7 +29,7 @@ void main() {
   test('onCellTap returns false', () {
     final controller = EditorController()..loadCatalog(catalog);
     final tool = EraseTool();
-    final ctx = GridToolContext(
+    final ctx = EditorToolContext(
       row: 0,
       col: 0,
       controller: controller,

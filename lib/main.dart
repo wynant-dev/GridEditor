@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'grid_editor.dart';
-import 'src/ui/panels/catalog_panel.dart';
+import 'src/presentation/panels/catalog_panel.dart';
 
 /// Bundled catalog JSON path. Override at build/run time, e.g.:
 /// `flutter run -d chrome --dart-define=CATALOG_ASSET=assets/catalogs/sandbox.json`
@@ -44,7 +44,7 @@ class _GridEditorAppState extends State<GridEditorApp> {
     try {
       final json = await rootBundle.loadString(catalogAsset);
       if (!mounted) return;
-      _controller.loadCatalog(ItemCatalog.fromJson(json));
+      _controller.loadCatalog(Catalog.fromJson(json));
     } catch (_) {
       // Missing or invalid catalog asset — start with an empty catalog.
     }

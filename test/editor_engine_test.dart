@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
 void main() {
-  const catalog = ItemCatalog(
+  const catalog = Catalog(
     id: 'test',
     name: 'Test',
     items: [
@@ -236,8 +236,8 @@ void main() {
     });
   });
 
-  test('ItemCatalog round-trips through JSON', () {
-    const catalog = ItemCatalog(
+  test('Catalog round-trips through JSON', () {
+    const catalog = Catalog(
       id: 'ddv',
       name: 'DDV',
       items: [
@@ -251,7 +251,7 @@ void main() {
       ],
     );
 
-    final restored = ItemCatalog.fromJson(catalog.toJson());
+    final restored = Catalog.fromJson(catalog.toJson());
     expect(restored.name, 'DDV');
     expect(restored.items.single.width, 4);
   });

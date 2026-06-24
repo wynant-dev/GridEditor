@@ -1,99 +1,76 @@
 # Grid Editor
 
-Flutter web grid editor: place items from a catalog onto a resizable grid.
+Place buildings and objects from a catalog onto a large grid. Pan and zoom to explore your layout, drag pieces into position, and remove what you no longer need.
 
-## Structure
+**Try it in your browser:** [https://wynant-dev.github.io/GridEditor/](https://wynant-dev.github.io/GridEditor/)
 
-```
-lib/
-  main.dart
-  grid_editor.dart
-  src/
-    domain/
-      catalog/              # Item definitions (CatalogItem, ItemCatalog)
-      layout/               # Grid state (GridDocument, PlacedItem)
-    services/
-      editor_engine.dart    # Bridge: catalog + layout
-      placement_rules.dart  # Pure rules (can I place it?)
-    ui/
-      canvas/               # Grid rendering + input
-      toolbar/
-      panels/               # Catalog panel, …
-    screens/
-      grid_editor_screen.dart
-assets/catalogs/
-  ddv.json
-  sandbox.json
-```
+## How to use
 
-## Run
+### Place items
+
+1. Pick an item in the **Catalog** panel on the left.
+2. Move the pointer over the grid — a semi-transparent preview shows where the item will land, centered on the cell under your cursor.
+3. Click an empty cell to place it.
+
+If a placement is not allowed (out of bounds or overlapping another piece), a message appears at the bottom of the screen.
+
+### Select, move, and delete
+
+- **Select** — click a placed item. A highlight appears around it.
+- **Move** — drag a placed item. You can start the drag from anywhere on its footprint; it stays under your finger until you release.
+- **Delete** — with an item selected, click the red **×** button on its top-right corner.
+
+To place again after selecting something, choose an item from the catalog first (selection clears the catalog choice).
+
+### Navigate the grid
+
+| Action | Input |
+|--------|--------|
+| **Zoom** | Scroll wheel / trackpad scroll |
+| **Pan** | Middle mouse button + drag |
+
+The grid is large (64×64 cells), so zoom and pan help when working on bigger layouts.
+
+## Default catalog
+
+The live app loads the **DDV catalog**, which includes:
+
+| Item | Size (cells) |
+|------|----------------|
+| House | 4 × 4 |
+| Bank | 2 × 2 |
+| Restaurant | 8 × 3 |
+
+Catalogs are defined as JSON under `assets/catalogs/`. The repository also includes a smaller **Sandbox** catalog for testing.
+
+## Run locally
+
+Requires [Flutter](https://docs.flutter.dev/get-started/install) with web support.
 
 ```bash
 flutter pub get
 flutter run -d chrome
 ```
 
-Default catalog: `assets/catalogs/ddv.json`.
+To use the sandbox catalog instead:
 
 ```bash
 flutter run -d chrome --dart-define=CATALOG_ASSET=assets/catalogs/sandbox.json
 ```
 
-**Run and Debug** launch configs:
+## Development
 
-| Config | Catalog |
-|--------|---------|
-| Grid Editor (Chrome) | `ddv.json` |
-| Grid Editor: sandbox catalog (Chrome) | `sandbox.json` |
-
-## Test
+This project is built with Flutter for web. Pushes to `main` deploy automatically to GitHub Pages via [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
 
 ```bash
 flutter analyze
 flutter test
 ```
 
-## Web hosting (GitHub Pages)
-
-The app is deployed automatically on every push to `main`.
-
-**Live site:** [https://wynant-dev.github.io/GridEditor/](https://wynant-dev.github.io/GridEditor/)
-
-### One-time GitHub setup
-
-1. Open **Settings → Pages** on the repository.
-2. Under **Build and deployment → Source**, choose **GitHub Actions**.
-
-After that, the [Deploy to GitHub Pages](.github/workflows/deploy.yml) workflow builds the Flutter web app and publishes it. The first deploy may take a minute; later pushes update the site on each merge to `main`.
-
-### Local web build
+To build the same bundle used for GitHub Pages:
 
 ```bash
 flutter build web --base-href=/GridEditor/ --release
 ```
 
-Output is in `build/web/`.
-
-## Architecture
-
-```
-catalog JSON → domain/catalog
-grid state   → domain/layout
-                    ↓
-              services/
-                EditorEngine   ← holds catalog + layout
-                PlacementRules ← overlap, bounds
-                    ↓
-         ui/ + screens/ + main.dart
-```
-
-| Layer | Role |
-|-------|------|
-| `domain/catalog` | What can be placed (items, catalogs, JSON) |
-| `domain/layout` | What is placed (grid size, placements) |
-| `services` | `EditorEngine` bridges catalog + layout; `PlacementRules` validates placements |
-| `ui` | Reusable widgets (canvas, toolbar, panels) |
-| `screens` | Compose widgets into a full screen |
-| `main.dart` | App state, load catalog, wire callbacks |
-
-Catalog and layout stay in separate domains. `EditorEngine` connects them; `PlacementRules` holds the pure "can I place it?" logic.
+Output is written to `build/web/`.

@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
 void main() {
-  const catalog = ItemCatalog(
+  const catalog = Catalog(
     id: 'test',
     name: 'Test',
     items: [
@@ -13,7 +13,7 @@ void main() {
   test('onCellTap places item and returns true', () {
     final controller = EditorController()..loadCatalog(catalog);
     final tool = PlaceTool();
-    final ctx = GridToolContext(
+    final ctx = EditorToolContext(
       row: 0,
       col: 0,
       controller: controller,
@@ -29,7 +29,7 @@ void main() {
     controller.placeAt(0, 0);
     final placement = controller.layout.placements.single;
     final tool = PlaceTool();
-    final ctx = GridToolContext(
+    final ctx = EditorToolContext(
       row: 0,
       col: 0,
       controller: controller,
@@ -40,16 +40,16 @@ void main() {
     expect(controller.selectedPlacementId, isNull);
   });
 
-  test('onCellHover delegates to controller setHoverCell', () {
+  test('onCellHover delegates to onHover callback', () {
     final controller = EditorController()..loadCatalog(catalog);
     final interactionState = GridInteractionState();
-    controller.attachInteractionState(interactionState);
     final tool = PlaceTool();
-    final ctx = GridToolContext(
+    final ctx = EditorToolContext(
       row: 2,
       col: 3,
       controller: controller,
       engine: controller.engine,
+      onHover: (row, col) => interactionState.setHoverCell(row, col),
     );
 
     tool.onCellHover(ctx);
@@ -63,7 +63,7 @@ void main() {
     controller.placeAt(0, 0);
     String? reportedError;
     final tool = PlaceTool(onPlaceError: (error) => reportedError = error);
-    final ctx = GridToolContext(
+    final ctx = EditorToolContext(
       row: 0,
       col: 0,
       controller: controller,

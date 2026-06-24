@@ -23,20 +23,6 @@ void main() {
       expect(notified, 2);
     });
 
-    test('updateSelectedItemId updates selection and notifies listeners', () {
-      final interactionState = GridInteractionState();
-      var notified = 0;
-      interactionState.addListener(() => notified++);
-
-      interactionState.updateSelectedItemId('house');
-
-      expect(interactionState.selectedItemId, 'house');
-      expect(notified, 1);
-
-      interactionState.updateSelectedItemId('house');
-      expect(notified, 1);
-    });
-
     test('drag session start, update, and clear notify listeners', () {
       final interactionState = GridInteractionState();
       var notified = 0;
