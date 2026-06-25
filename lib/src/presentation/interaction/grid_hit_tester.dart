@@ -17,17 +17,18 @@ class GridHitTester {
   final GridDocument document;
   final Catalog catalog;
 
-  (int row, int col) cellAt(Offset worldPosition) {
-    return mapper.fromWorldPosition(worldPosition);
+  (int row, int col) cellAt(Offset viewportPosition) {
+    return mapper.fromLocalPosition(viewportPosition);
   }
 
-  GridHit classifyTap(Offset worldPosition) {
+  GridHit classifyTap(Offset viewportPosition) {
+    final world = mapper.metrics.screenToWorld(viewportPosition);
     final placement = mapper.hitTestPlacement(
-      worldPosition,
+      world,
       document,
       catalog,
     );
-    final (row, col) = mapper.fromWorldPosition(worldPosition);
+    final (row, col) = mapper.fromLocalPosition(viewportPosition);
 
     if (placement != null) {
       return PlacementHit(placement: placement, row: row, col: col);

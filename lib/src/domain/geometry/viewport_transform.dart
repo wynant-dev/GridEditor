@@ -13,4 +13,8 @@ class ViewportTransform {
   Offset screenToWorld(Offset position) {
     return (position - offset) / zoom;
   }
+
+  Offset worldToScreen(Offset world) {
+    return offset + world * zoom;
+  }
 }

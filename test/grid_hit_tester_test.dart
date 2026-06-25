@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
+import 'grid_test_helpers.dart';
+
 void main() {
   const catalog = Catalog(
     id: 'test',
@@ -37,7 +39,7 @@ void main() {
       catalog: catalog,
     );
 
-    final hit = hitTester.classifyTap(const Offset(50, 50));
+    final hit = hitTester.classifyTap(cellCenter(metrics, 0, 0));
 
     expect(hit, isA<PlacementHit>());
     final placementHit = hit as PlacementHit;
@@ -54,7 +56,7 @@ void main() {
       catalog: catalog,
     );
 
-    final hit = hitTester.classifyTap(const Offset(150, 150));
+    final hit = hitTester.classifyTap(cellCenter(metrics, 1, 1));
 
     expect(hit, isA<CellHit>());
     final cellHit = hit as CellHit;
@@ -70,7 +72,7 @@ void main() {
       catalog: catalog,
     );
 
-    expect(hitTester.cellAt(const Offset(50, 50)), (0, 0));
-    expect(hitTester.cellAt(const Offset(150, 150)), (1, 1));
+    expect(hitTester.cellAt(cellCenter(metrics, 0, 0)), (0, 0));
+    expect(hitTester.cellAt(cellCenter(metrics, 1, 1)), (1, 1));
   });
 }

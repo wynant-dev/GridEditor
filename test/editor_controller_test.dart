@@ -180,8 +180,8 @@ void main() {
 
     final moved = controller.movePlacement(
       placementId: placement.id,
-      newRow: 63,
-      newCol: 63,
+      newRow: 129,
+      newCol: 129,
     );
 
     expect(moved, isFalse);

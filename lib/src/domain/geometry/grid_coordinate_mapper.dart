@@ -19,11 +19,12 @@ class GridCoordinateMapper {
   }
 
   (int row, int col) fromWorldPosition(Offset position) {
-    final row = (position.dy / metrics.cellHeight).floor().clamp(
+    final local = position - metrics.origin;
+    final row = (local.dy / metrics.cellHeight).floor().clamp(
       0,
       metrics.rows - 1,
     );
-    final col = (position.dx / metrics.cellWidth).floor().clamp(
+    final col = (local.dx / metrics.cellWidth).floor().clamp(
       0,
       metrics.cols - 1,
     );

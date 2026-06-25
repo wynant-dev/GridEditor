@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
+import 'grid_test_helpers.dart';
+
 void main() {
   const catalog = Catalog(
     id: 'test',
@@ -12,6 +14,7 @@ void main() {
   );
 
   testWidgets('tapping a placement invokes onPlacementTap', (tester) async {
+    setGridTestViewSize(tester);
     const placement = PlacedItem(
       id: 'p1',
       catalogItemId: 'house',
@@ -38,12 +41,18 @@ void main() {
       ),
     );
 
-    await tester.tapAt(const Offset(50, 50));
+    await tapGridCell(
+      tester,
+      metrics: testMetrics(rows: 2, cols: 2),
+      row: 0,
+      col: 0,
+    );
     expect(tapped, placement);
   });
 
   testWidgets('ghost preview renders when item selected and cell hovered',
       (tester) async {
+    setGridTestViewSize(tester);
     final controller = EditorController()
       ..loadCatalog(catalog)
       ..selectItem('house');
@@ -74,6 +83,7 @@ void main() {
   });
 
   testWidgets('ghost preview hidden when hover cleared', (tester) async {
+    setGridTestViewSize(tester);
     final controller = EditorController()
       ..loadCatalog(catalog)
       ..selectItem('house');
@@ -105,6 +115,7 @@ void main() {
 
   testWidgets('cell tap still places item when controller is attached',
       (tester) async {
+    setGridTestViewSize(tester);
     final controller = EditorController()
       ..loadCatalog(catalog)
       ..selectItem('house');
@@ -123,12 +134,18 @@ void main() {
       ),
     );
 
-    await tester.tapAt(const Offset(50, 50));
+    await tapGridCell(
+      tester,
+      metrics: testMetrics(rows: 2, cols: 2),
+      row: 0,
+      col: 0,
+    );
     expect(controller.layout.placements, hasLength(1));
   });
 
   testWidgets('tapping a placement selects it when controller is attached',
       (tester) async {
+    setGridTestViewSize(tester);
     const placement = PlacedItem(
       id: 'p1',
       catalogItemId: 'house',
@@ -155,13 +172,19 @@ void main() {
       ),
     );
 
-    await tester.tapAt(const Offset(50, 50));
+    await tapGridCell(
+      tester,
+      metrics: testMetrics(rows: 2, cols: 2),
+      row: 0,
+      col: 0,
+    );
     expect(controller.selectedPlacementId, 'p1');
     expect(controller.selectedItemId, isNull);
     expect(find.byType(SelectionOverlayLayer), findsOneWidget);
   });
 
   testWidgets('ghost preview hidden when placement is selected', (tester) async {
+    setGridTestViewSize(tester);
     const placement = PlacedItem(
       id: 'p1',
       catalogItemId: 'house',
@@ -196,7 +219,12 @@ void main() {
     await tester.pump();
     expect(find.byType(Opacity), findsOneWidget);
 
-    await tester.tapAt(const Offset(50, 50));
+    await tapGridCell(
+      tester,
+      metrics: testMetrics(rows: 2, cols: 2),
+      row: 0,
+      col: 0,
+    );
     await tester.pump();
 
     expect(controller.selectedPlacementId, 'p1');
@@ -205,6 +233,7 @@ void main() {
   });
 
   testWidgets('delete button removes selected placement', (tester) async {
+    setGridTestViewSize(tester);
     const placement = PlacedItem(
       id: 'p1',
       catalogItemId: 'house',
@@ -236,7 +265,12 @@ void main() {
       ),
     );
 
-    await tester.tapAt(const Offset(50, 50));
+    await tapGridCell(
+      tester,
+      metrics: testMetrics(rows: 2, cols: 2),
+      row: 0,
+      col: 0,
+    );
     await tester.pump();
     expect(controller.selectedPlacementId, 'p1');
 
@@ -248,6 +282,7 @@ void main() {
   });
 
   testWidgets('EraseTool active removes placement on tap', (tester) async {
+    setGridTestViewSize(tester);
     const placement = PlacedItem(
       id: 'p1',
       catalogItemId: 'house',
@@ -284,11 +319,17 @@ void main() {
       ),
     );
 
-    await tester.tapAt(const Offset(50, 50));
+    await tapGridCell(
+      tester,
+      metrics: testMetrics(rows: 2, cols: 2),
+      row: 0,
+      col: 0,
+    );
     expect(controller.layout.placements, isEmpty);
   });
 
   testWidgets('64x64 grid uses no per-cell GestureDetectors', (tester) async {
+    setGridTestViewSize(tester, size: const Size(640, 640));
     final controller = EditorController()
       ..loadCatalog(catalog)
       ..selectItem('house');
@@ -310,11 +351,17 @@ void main() {
     expect(find.byType(GestureDetector), findsNothing);
     expect(find.byType(GridInteractionLayer), findsOneWidget);
 
-    await tester.tapAt(const Offset(10, 10));
+    await tapGridCell(
+      tester,
+      metrics: testMetrics(rows: 64, cols: 64, size: const Size(640, 640)),
+      row: 32,
+      col: 32,
+    );
     expect(controller.layout.placements, hasLength(1));
   });
 
   testWidgets('dragging to invalid cell reverts placement', (tester) async {
+    setGridTestViewSize(tester, size: const Size(400, 400));
     const placement = PlacedItem(
       id: 'p1',
       catalogItemId: 'house',
@@ -355,8 +402,15 @@ void main() {
       ),
     );
 
-    final layerTopLeft = tester.getTopLeft(find.byType(GridInteractionLayer));
-    await tester.dragFrom(layerTopLeft + const Offset(50, 50), const Offset(120, 0));
+    final metrics = testMetrics(rows: 4, cols: 4, size: const Size(400, 400));
+    await dragBetweenCells(
+      tester,
+      metrics: metrics,
+      fromRow: 0,
+      fromCol: 0,
+      toRow: 0,
+      toCol: 1,
+    );
     await tester.pump();
 
     final moved = controller.layout.placementById('p1');

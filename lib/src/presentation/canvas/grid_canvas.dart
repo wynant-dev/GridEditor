@@ -146,73 +146,70 @@ class _GridCanvasState extends State<GridCanvas> {
             return ViewportShell(
               viewportController: _viewportController,
               transform: transform,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  GridRenderer(
-                    document: document,
-                    catalog: widget.catalog,
-                    metrics: metrics,
-                    hiddenPlacementId: _hiddenPlacementId,
-                    hidePlacements: controller?.selectedFloorId != null,
-                  ),
-                  GridInteractionLayer(handler: _interactionHandler),
-                  if (controller != null) ...[
-                    ListenableBuilder(
-                      listenable: Listenable.merge([
-                        _interactionState,
-                        controller,
-                      ]),
-                      builder: (context, _) {
-                        return Positioned.fill(
-                          child: PlacementOverlayLayer(
-                            interactionState: _interactionState,
-                            selectedItemId: controller.selectedItemId,
-                            catalog: widget.catalog,
-                            metrics: metrics,
-                            document: document,
-                          ),
-                        );
-                      },
-                    ),
-                    ListenableBuilder(
-                      listenable: Listenable.merge([
-                        _interactionState,
-                        controller,
-                      ]),
-                      builder: (context, _) {
-                        return Positioned.fill(
-                          child: FloorOverlayLayer(
-                            interactionState: _interactionState,
-                            selectedFloorId: controller.selectedFloorId,
-                            catalog: widget.catalog,
-                            metrics: metrics,
-                            document: document,
-                          ),
-                        );
-                      },
-                    ),
-                    ListenableBuilder(
-                      listenable: _interactionState,
-                      builder: (context, _) {
-                        return SelectionOverlayLayer(
-                          selectedPlacementId: controller.selectedPlacementId,
-                          document: document,
-                          catalog: widget.catalog,
-                          metrics: metrics,
-                          dragSession: _interactionState.dragSession,
-                          onDelete: () {
-                            final placement = controller.selectedPlacement;
-                            if (placement != null) {
-                              controller.removePlacement(placement);
-                            }
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ],
+              scene: GridRenderer(
+                document: document,
+                catalog: widget.catalog,
+                metrics: metrics,
+                hiddenPlacementId: _hiddenPlacementId,
+                hidePlacements: controller?.selectedFloorId != null,
               ),
+              input: GridInteractionLayer(handler: _interactionHandler),
+              overlay: controller != null
+                  ? Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        ListenableBuilder(
+                          listenable: Listenable.merge([
+                            _interactionState,
+                            controller,
+                          ]),
+                          builder: (context, _) {
+                            return PlacementOverlayLayer(
+                              interactionState: _interactionState,
+                              selectedItemId: controller.selectedItemId,
+                              catalog: widget.catalog,
+                              metrics: metrics,
+                              document: document,
+                            );
+                          },
+                        ),
+                        ListenableBuilder(
+                          listenable: Listenable.merge([
+                            _interactionState,
+                            controller,
+                          ]),
+                          builder: (context, _) {
+                            return FloorOverlayLayer(
+                              interactionState: _interactionState,
+                              selectedFloorId: controller.selectedFloorId,
+                              catalog: widget.catalog,
+                              metrics: metrics,
+                              document: document,
+                            );
+                          },
+                        ),
+                        ListenableBuilder(
+                          listenable: _interactionState,
+                          builder: (context, _) {
+                            return SelectionOverlayLayer(
+                              selectedPlacementId:
+                                  controller.selectedPlacementId,
+                              document: document,
+                              catalog: widget.catalog,
+                              metrics: metrics,
+                              dragSession: _interactionState.dragSession,
+                              onDelete: () {
+                                final placement = controller.selectedPlacement;
+                                if (placement != null) {
+                                  controller.removePlacement(placement);
+                                }
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    )
+                  : null,
             );
           },
         );

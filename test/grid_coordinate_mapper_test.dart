@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
+import 'grid_test_helpers.dart';
+
 void main() {
   group('GridCoordinateMapper', () {
     test('maps position to grid cell', () {
@@ -13,9 +15,9 @@ void main() {
       );
       final mapper = GridCoordinateMapper(metrics);
 
-      expect(mapper.fromLocalPosition(const Offset(50, 50)), (0, 0));
-      expect(mapper.fromLocalPosition(const Offset(150, 250)), (2, 1));
-      expect(mapper.fromLocalPosition(const Offset(399, 399)), (3, 3));
+      expect(mapper.fromLocalPosition(cellCenter(metrics, 0, 0)), (0, 0));
+      expect(mapper.fromLocalPosition(cellCenter(metrics, 2, 1)), (2, 1));
+      expect(mapper.fromLocalPosition(cellCenter(metrics, 3, 3)), (3, 3));
     });
 
     test('clamps position outside grid bounds', () {
@@ -40,7 +42,7 @@ void main() {
       final mapper = GridCoordinateMapper(metrics);
 
       expect(mapper.fromLocalPosition(const Offset(100, 50)), (0, 0));
-      expect(mapper.fromLocalPosition(const Offset(300, 450)), (2, 1));
+      expect(mapper.fromLocalPosition(const Offset(452, 498)), (2, 1));
     });
 
     test('fromWorldPosition maps world coordinates directly', () {
@@ -52,7 +54,7 @@ void main() {
       final mapper = GridCoordinateMapper(metrics);
 
       expect(mapper.fromWorldPosition(const Offset(50, 50)), (0, 0));
-      expect(mapper.fromWorldPosition(const Offset(150, 250)), (2, 1));
+      expect(mapper.fromWorldPosition(cellCenter(metrics, 2, 1)), (2, 1));
       expect(mapper.fromWorldPosition(const Offset(-10, -10)), (0, 0));
     });
 
@@ -81,7 +83,7 @@ void main() {
       );
 
       final hit = mapper.hitTestPlacement(
-        const Offset(50, 50),
+        cellCenter(metrics, 0, 0),
         document,
         catalog,
       );
@@ -112,7 +114,7 @@ void main() {
       );
 
       expect(
-        mapper.hitTestPlacement(const Offset(350, 350), document, catalog),
+        mapper.hitTestPlacement(cellCenter(metrics, 3, 3), document, catalog),
         isNull,
       );
     });

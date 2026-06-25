@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 import 'package:grid_editor/src/presentation/interaction/grid_interaction_handler.dart';
 
+import 'grid_test_helpers.dart';
+
 void main() {
   const catalog = Catalog(
     id: 'test',
@@ -17,6 +19,7 @@ void main() {
     late EditorController editorController;
     late GridInteractionState interactionState;
     late GridInteractionHandler handler;
+    late GridMetrics metrics;
 
     setUp(() {
       final document = const GridDocument(
@@ -35,7 +38,7 @@ void main() {
         engine: EditorEngine(catalog: catalog, layout: document),
       )..loadCatalog(catalog);
       interactionState = GridInteractionState();
-      final metrics = GridMetrics(
+      metrics = GridMetrics(
         rows: 4,
         cols: 4,
         size: const Size(400, 400),
@@ -52,8 +55,8 @@ void main() {
 
     test('drag beyond slop commits move to hovered cell', () {
       final pointer = TestPointer(1);
-      handler.handlePointerDown(pointer.down(const Offset(50, 50)));
-      handler.handlePointerMove(pointer.move(const Offset(170, 50)));
+      handler.handlePointerDown(pointer.down(cellCenter(metrics, 0, 0)));
+      handler.handlePointerMove(pointer.move(cellCenter(metrics, 0, 1)));
       handler.handlePointerUp(pointer.up());
 
       expect(editorController.layout.placements.single.originCol, 1);
@@ -83,11 +86,6 @@ void main() {
       final blocked = EditorController(
         engine: EditorEngine(catalog: catalog, layout: blockedDocument),
       )..loadCatalog(catalog);
-      final metrics = GridMetrics(
-        rows: 4,
-        cols: 4,
-        size: const Size(400, 400),
-      );
       handler.updateContext(
         mapper: GridCoordinateMapper(metrics),
         document: blockedDocument,
@@ -97,8 +95,8 @@ void main() {
       );
 
       final pointer = TestPointer(3);
-      handler.handlePointerDown(pointer.down(const Offset(50, 50)));
-      handler.handlePointerMove(pointer.move(const Offset(170, 50)));
+      handler.handlePointerDown(pointer.down(cellCenter(metrics, 0, 0)));
+      handler.handlePointerMove(pointer.move(cellCenter(metrics, 0, 1)));
       handler.handlePointerUp(pointer.up());
 
       expect(blocked.layout.placementById('p1')?.originCol, 0);
@@ -106,8 +104,9 @@ void main() {
 
     test('tap without slop selects placement instead of moving', () {
       final pointer = TestPointer(2);
-      handler.handlePointerDown(pointer.down(const Offset(50, 50)));
-      handler.handlePointerMove(pointer.move(const Offset(52, 52)));
+      final down = cellCenter(metrics, 0, 0);
+      handler.handlePointerDown(pointer.down(down));
+      handler.handlePointerMove(pointer.move(down + const Offset(2, 2)));
       handler.handlePointerUp(pointer.up());
 
       expect(editorController.layout.placements.single.originCol, 0);
@@ -137,11 +136,6 @@ void main() {
       final largeController = EditorController(
         engine: EditorEngine(catalog: largeCatalog, layout: document),
       )..loadCatalog(largeCatalog);
-      final metrics = GridMetrics(
-        rows: 4,
-        cols: 4,
-        size: const Size(400, 400),
-      );
       handler.updateContext(
         mapper: GridCoordinateMapper(metrics),
         document: document,
@@ -151,8 +145,9 @@ void main() {
       );
 
       final pointer = TestPointer(4);
-      handler.handlePointerDown(pointer.down(const Offset(150, 150)));
-      handler.handlePointerMove(pointer.move(const Offset(180, 180)));
+      final footprintCenter = cellCenter(metrics, 0, 0) + const Offset(24, 24);
+      handler.handlePointerDown(pointer.down(footprintCenter));
+      handler.handlePointerMove(pointer.move(footprintCenter + const Offset(30, 30)));
       handler.handlePointerUp(pointer.up());
 
       expect(largeController.layout.placements.single.originRow, 0);

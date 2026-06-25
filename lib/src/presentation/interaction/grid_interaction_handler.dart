@@ -92,7 +92,7 @@ class GridInteractionHandler {
     _activePointerId = event.pointer;
     _pointerDownPosition = event.localPosition;
     _pointerDownPlacement = _mapper.hitTestPlacement(
-      event.localPosition,
+      _mapper.metrics.screenToWorld(event.localPosition),
       _document,
       _catalog,
     );
@@ -295,10 +295,10 @@ class GridInteractionHandler {
     _dragSession = null;
   }
 
-  void _handleCellHover(Offset worldPosition) {
+  void _handleCellHover(Offset viewportPosition) {
     if (interactionState.isDragging) return;
 
-    final (row, col) = _hitTester.cellAt(worldPosition);
+    final (row, col) = _hitTester.cellAt(viewportPosition);
     final toolManager = this.toolManager;
     final editorController = this.editorController;
 
@@ -319,12 +319,12 @@ class GridInteractionHandler {
     interactionState.setHoverCell(row, col);
   }
 
-  void _resolveTap(Offset worldPosition) {
+  void _resolveTap(Offset viewportPosition) {
     final toolManager = this.toolManager;
     final editorController = this.editorController;
 
     if (toolManager != null && editorController != null) {
-      final hit = _hitTester.classifyTap(worldPosition);
+      final hit = _hitTester.classifyTap(viewportPosition);
       final ctx = EditorToolContext(
         row: switch (hit) {
           CellHit(:final row) => row,
@@ -348,8 +348,9 @@ class GridInteractionHandler {
       return;
     }
 
+    final world = _mapper.metrics.screenToWorld(viewportPosition);
     final placement = _mapper.hitTestPlacement(
-      worldPosition,
+      world,
       _document,
       _catalog,
     );
@@ -358,7 +359,7 @@ class GridInteractionHandler {
       return;
     }
 
-    final (row, col) = _mapper.fromWorldPosition(worldPosition);
+    final (row, col) = _mapper.fromLocalPosition(viewportPosition);
     onCellTap?.call(row, col);
   }
 }

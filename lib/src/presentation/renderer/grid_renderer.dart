@@ -33,6 +33,7 @@ class GridRenderer extends StatelessWidget {
     final lineColor = Colors.grey.shade400;
 
     return Stack(
+      clipBehavior: Clip.none,
       children: [
         for (final tile in document.floorTiles)
           _FloorLayer(
@@ -40,9 +41,15 @@ class GridRenderer extends StatelessWidget {
             catalog: catalog,
             metrics: metrics,
           ),
-        CustomPaint(
-          size: metrics.size,
-          painter: _GridLinePainter(metrics: metrics, color: lineColor),
+        Positioned(
+          left: metrics.origin.dx,
+          top: metrics.origin.dy,
+          width: metrics.gridSize.width,
+          height: metrics.gridSize.height,
+          child: CustomPaint(
+            size: metrics.gridSize,
+            painter: _GridLinePainter(metrics: metrics, color: lineColor),
+          ),
         ),
         for (final placement in document.placements)
           if (!hidePlacements && placement.id != hiddenPlacementId)
@@ -83,7 +90,9 @@ class _GridLinePainter extends CustomPainter {
   bool shouldRepaint(covariant _GridLinePainter oldDelegate) {
     return oldDelegate.metrics.rows != metrics.rows ||
         oldDelegate.metrics.cols != metrics.cols ||
-        oldDelegate.metrics.size != metrics.size ||
+        oldDelegate.metrics.gridSize != metrics.gridSize ||
+        oldDelegate.metrics.origin != metrics.origin ||
+        oldDelegate.metrics.cellSize != metrics.cellSize ||
         oldDelegate.metrics.transform.offset != metrics.transform.offset ||
         oldDelegate.metrics.transform.zoom != metrics.transform.zoom ||
         oldDelegate.color != color;

@@ -35,6 +35,7 @@ class FloorOverlayLayer extends StatelessWidget {
     }
 
     return Stack(
+      clipBehavior: Clip.none,
       children: [
         for (final placement in document.placements)
           _GhostPlacement(
