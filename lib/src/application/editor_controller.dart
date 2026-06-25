@@ -7,6 +7,7 @@ import 'editor_engine.dart';
 import '../domain/placement/placement_rules.dart';
 import 'selection_state.dart';
 import 'tools/default_tool.dart';
+import 'tools/floor_tool.dart';
 import 'tools/place_tool.dart';
 import 'tools/tool_manager.dart';
 
@@ -23,6 +24,7 @@ class EditorController extends ChangeNotifier {
              layout: const GridDocument(rows: 64, cols: 64),
            ),
        _selectedItemId = selectedItemId,
+       _onPlaceError = onPlaceError,
        _toolManager = ToolManager(
          activeTool: PlaceTool(onPlaceError: onPlaceError),
          defaultTool: DefaultTool(onPlaceError: onPlaceError),
@@ -30,13 +32,16 @@ class EditorController extends ChangeNotifier {
 
   EditorEngine _engine;
   String? _selectedItemId;
+  String? _selectedFloorId;
   SelectionState _selection = const SelectionState();
   ToolManager _toolManager;
+  void Function(String error)? _onPlaceError;
 
   EditorEngine get engine => _engine;
   Catalog get catalog => _engine.catalog;
   GridDocument get layout => _engine.layout;
   String? get selectedItemId => _selectedItemId;
+  String? get selectedFloorId => _selectedFloorId;
   SelectionState get selection => _selection;
   String? get selectedPlacementId => _selection.selectedPlacementId;
   ToolManager get toolManager => _toolManager;
@@ -48,12 +53,26 @@ class EditorController extends ChangeNotifier {
   }
 
   void configurePlaceError(void Function(String error)? onPlaceError) {
+    _onPlaceError = onPlaceError;
     final activeTool = _toolManager.activeTool;
+    final newActive = switch (activeTool) {
+      PlaceTool() => PlaceTool(onPlaceError: onPlaceError),
+      FloorTool() => FloorTool(onPaintError: onPlaceError),
+      final tool => tool,
+    };
     _toolManager = ToolManager(
-      activeTool: activeTool is PlaceTool
-          ? PlaceTool(onPlaceError: onPlaceError)
-          : activeTool,
+      activeTool: newActive,
       defaultTool: DefaultTool(onPlaceError: onPlaceError),
+    );
+  }
+
+  void _syncToolsFromSelection() {
+    final onError = _onPlaceError;
+    _toolManager = ToolManager(
+      activeTool: _selectedFloorId != null
+          ? FloorTool(onPaintError: onError)
+          : PlaceTool(onPlaceError: onError),
+      defaultTool: DefaultTool(onPlaceError: onError),
     );
   }
 
@@ -65,19 +84,49 @@ class EditorController extends ChangeNotifier {
 
   void selectItem(String itemId) {
     _selectedItemId = itemId;
+    _selectedFloorId = null;
     _selection = const SelectionState();
+    _syncToolsFromSelection();
+    notifyListeners();
+  }
+
+  void selectFloor(String floorId) {
+    _selectedFloorId = floorId;
+    _selectedItemId = null;
+    _selection = const SelectionState();
+    _syncToolsFromSelection();
     notifyListeners();
   }
 
   void selectPlacement(String placementId) {
     _selection = _selection.copyWith(selectedPlacementId: placementId);
     _selectedItemId = null;
+    _selectedFloorId = null;
     notifyListeners();
   }
 
   void clearSelection() {
     _selection = const SelectionState();
     notifyListeners();
+  }
+
+  /// Paints the selected floor onto [row]/[col].
+  /// Returns an error message on failure.
+  String? paintFloorAt(int row, int col) {
+    final selectedId = _selectedFloorId;
+    if (selectedId == null) return null;
+
+    try {
+      _engine = _engine.applyFloor(
+        row: row,
+        col: col,
+        catalogFloorId: selectedId,
+      );
+      notifyListeners();
+      return null;
+    } on StateError catch (error) {
+      return error.message;
+    }
   }
 
   /// Places the selected catalog item centered on [row]/[col].

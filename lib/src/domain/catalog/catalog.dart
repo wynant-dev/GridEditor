@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'floor.dart';
 import 'item.dart';
 
 /// A named collection of placeable item definitions (user-created or loaded from JSON).
@@ -8,11 +9,13 @@ class Catalog {
     required this.id,
     required this.name,
     this.items = const [],
+    this.floors = const [],
   });
 
   final String id;
   final String name;
   final List<CatalogItem> items;
+  final List<CatalogFloor> floors;
 
   CatalogItem? itemById(String id) {
     for (final item in items) {
@@ -21,15 +24,24 @@ class Catalog {
     return null;
   }
 
+  CatalogFloor? floorById(String id) {
+    for (final floor in floors) {
+      if (floor.id == id) return floor;
+    }
+    return null;
+  }
+
   Catalog copyWith({
     String? id,
     String? name,
     List<CatalogItem>? items,
+    List<CatalogFloor>? floors,
   }) {
     return Catalog(
       id: id ?? this.id,
       name: name ?? this.name,
       items: items ?? this.items,
+      floors: floors ?? this.floors,
     );
   }
 
@@ -58,6 +70,8 @@ class Catalog {
     'id': id,
     'name': name,
     'items': [for (final item in items) item.toJson()],
+    if (floors.isNotEmpty)
+      'floors': [for (final floor in floors) floor.toJson()],
   };
 
   factory Catalog.fromJson(String source) {
@@ -68,12 +82,17 @@ class Catalog {
 
   factory Catalog.fromJsonMap(Map<String, dynamic> json) {
     final rawItems = json['items'] as List<dynamic>? ?? [];
+    final rawFloors = json['floors'] as List<dynamic>? ?? [];
     return Catalog(
       id: json['id'] as String,
       name: json['name'] as String,
       items: [
         for (final entry in rawItems)
           CatalogItem.fromJson(entry as Map<String, dynamic>),
+      ],
+      floors: [
+        for (final entry in rawFloors)
+          CatalogFloor.fromJson(entry as Map<String, dynamic>),
       ],
     );
   }

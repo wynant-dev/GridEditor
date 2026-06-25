@@ -71,7 +71,9 @@ class _GridEditorAppState extends State<GridEditorApp> {
             body: CatalogPanel(
               catalog: _controller.catalog,
               selectedItemId: _controller.selectedItemId,
+              selectedFloorId: _controller.selectedFloorId,
               onItemSelected: _controller.selectItem,
+              onFloorSelected: _controller.selectFloor,
             ),
           );
         },

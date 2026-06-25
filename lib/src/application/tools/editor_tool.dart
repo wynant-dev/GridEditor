@@ -12,5 +12,7 @@ abstract class EditorTool {
 
   void onCellHover(EditorToolContext context) {}
 
+  void onPointerUp() {}
+
   bool canStartDrag(PlacedItem placement) => true;
 }

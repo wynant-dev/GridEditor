@@ -9,6 +9,7 @@ class EditorToolContext {
     required this.engine,
     this.onHover,
     this.onClearHover,
+    this.isPointerDown = false,
   });
 
   final int row;
@@ -17,4 +18,5 @@ class EditorToolContext {
   final EditorEngine engine;
   final void Function(int row, int col)? onHover;
   final void Function()? onClearHover;
+  final bool isPointerDown;
 }

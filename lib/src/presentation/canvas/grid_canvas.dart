@@ -11,6 +11,7 @@ import 'supports_hover_preview.dart';
 import '../interaction/grid_interaction_handler.dart';
 import '../interaction/grid_interaction_layer.dart';
 import '../interaction/grid_interaction_state.dart';
+import '../renderer/floor_overlay_layer.dart';
 import '../renderer/grid_renderer.dart';
 import '../renderer/placement_overlay_layer.dart';
 import '../renderer/selection_overlay_layer.dart';
@@ -153,6 +154,7 @@ class _GridCanvasState extends State<GridCanvas> {
                     catalog: widget.catalog,
                     metrics: metrics,
                     hiddenPlacementId: _hiddenPlacementId,
+                    hidePlacements: controller?.selectedFloorId != null,
                   ),
                   GridInteractionLayer(handler: _interactionHandler),
                   if (controller != null) ...[
@@ -166,6 +168,23 @@ class _GridCanvasState extends State<GridCanvas> {
                           child: PlacementOverlayLayer(
                             interactionState: _interactionState,
                             selectedItemId: controller.selectedItemId,
+                            catalog: widget.catalog,
+                            metrics: metrics,
+                            document: document,
+                          ),
+                        );
+                      },
+                    ),
+                    ListenableBuilder(
+                      listenable: Listenable.merge([
+                        _interactionState,
+                        controller,
+                      ]),
+                      builder: (context, _) {
+                        return Positioned.fill(
+                          child: FloorOverlayLayer(
+                            interactionState: _interactionState,
+                            selectedFloorId: controller.selectedFloorId,
                             catalog: widget.catalog,
                             metrics: metrics,
                             document: document,

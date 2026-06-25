@@ -162,6 +162,9 @@ class GridInteractionHandler {
       _resolveDragEnd();
     }
 
+    final toolManager = this.toolManager;
+    toolManager?.handlePointerUp();
+
     final downPosition = _pointerDownPosition!;
     _activePointerId = null;
     _pointerDownPosition = null;
@@ -184,6 +187,7 @@ class GridInteractionHandler {
   void handlePointerCancel(PointerCancelEvent event) {
     if (_activePointerId == event.pointer) {
       _cancelLongPressTimer();
+      toolManager?.handlePointerUp();
       _activePointerId = null;
       _pointerDownPosition = null;
       _pointerDownPlacement = null;
@@ -306,6 +310,7 @@ class GridInteractionHandler {
           controller: editorController,
           engine: editorController.engine,
           onHover: (row, col) => interactionState.setHoverCell(row, col),
+          isPointerDown: _activePointerId != null,
         ),
       );
       return;

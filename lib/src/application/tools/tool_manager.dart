@@ -28,6 +28,11 @@ class ToolManager extends ChangeNotifier {
     defaultTool.onCellHover(ctx);
   }
 
+  void handlePointerUp() {
+    _activeTool.onPointerUp();
+    defaultTool.onPointerUp();
+  }
+
   void handleCellTap(EditorToolContext ctx, {bool isDragging = false}) {
     if (isDragging) return;
     if (!_activeTool.onCellTap(ctx)) {

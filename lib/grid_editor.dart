@@ -1,7 +1,9 @@
 library;
 
+export 'src/domain/catalog/floor.dart';
 export 'src/domain/catalog/item.dart';
 export 'src/domain/catalog/catalog.dart';
+export 'src/domain/layout/floor_tile.dart';
 export 'src/domain/layout/grid_document.dart';
 export 'src/domain/layout/placed_item.dart';
 export 'src/domain/placement/placement_rules.dart';
@@ -16,6 +18,7 @@ export 'src/application/tools/default_tool.dart';
 export 'src/application/tools/editor_tool.dart';
 export 'src/application/tools/erase_tool.dart';
 export 'src/application/tools/editor_tool_context.dart';
+export 'src/application/tools/floor_tool.dart';
 export 'src/application/tools/place_tool.dart';
 export 'src/application/tools/placing_tool.dart';
 export 'src/application/tools/tool_manager.dart';
@@ -27,6 +30,7 @@ export 'src/presentation/renderer/grid_renderer.dart';
 export 'src/presentation/interaction/grid_interaction_state.dart';
 export 'src/presentation/interaction/grid_hit_tester.dart';
 export 'src/presentation/interaction/grid_interaction_layer.dart';
+export 'src/presentation/renderer/floor_overlay_layer.dart';
 export 'src/presentation/renderer/placement_overlay_layer.dart';
 export 'src/presentation/renderer/selection_overlay_layer.dart';
 export 'src/presentation/viewport/viewport_controller.dart';

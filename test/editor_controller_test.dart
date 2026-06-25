@@ -70,12 +70,76 @@ void main() {
             CatalogItem(id: 'a', name: 'A', width: 1, height: 1),
             CatalogItem(id: 'b', name: 'B', width: 1, height: 1),
           ],
+          floors: [
+            CatalogFloor(id: 'water', name: 'Water', color: '#42A5F5'),
+          ],
         ),
       );
 
-    controller.selectItem('b');
+    controller.selectFloor('water');
+    expect(controller.selectedFloorId, 'water');
+    expect(controller.selectedItemId, isNull);
 
+    controller.selectItem('b');
     expect(controller.selectedItemId, 'b');
+    expect(controller.selectedFloorId, isNull);
+  });
+
+  test('paintFloorAt updates layout when floor is selected', () {
+    final controller = EditorController()
+      ..loadCatalog(
+        const Catalog(
+          id: 'test',
+          name: 'Test',
+          floors: [
+            CatalogFloor(id: 'grass', name: 'Grass', color: '#66BB6A'),
+          ],
+        ),
+      );
+
+    controller.selectFloor('grass');
+    final error = controller.paintFloorAt(3, 4);
+
+    expect(error, isNull);
+    expect(controller.layout.floorIdAt(3, 4), 'grass');
+  });
+
+  test('selectFloor switches active tool to FloorTool', () {
+    final controller = EditorController()
+      ..loadCatalog(
+        const Catalog(
+          id: 'test',
+          name: 'Test',
+          floors: [
+            CatalogFloor(id: 'water', name: 'Water', color: '#42A5F5'),
+          ],
+        ),
+      );
+
+    controller.selectFloor('water');
+
+    expect(controller.toolManager.activeTool, isA<FloorTool>());
+  });
+
+  test('selectItem switches active tool to PlaceTool', () {
+    final controller = EditorController()
+      ..loadCatalog(
+        const Catalog(
+          id: 'test',
+          name: 'Test',
+          items: [
+            CatalogItem(id: 'a', name: 'A', width: 1, height: 1),
+          ],
+          floors: [
+            CatalogFloor(id: 'water', name: 'Water', color: '#42A5F5'),
+          ],
+        ),
+      );
+
+    controller.selectFloor('water');
+    controller.selectItem('a');
+
+    expect(controller.toolManager.activeTool, isA<PlaceTool>());
   });
 
   test('movePlacement updates layout and preserves selection', () {

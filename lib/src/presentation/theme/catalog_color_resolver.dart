@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/catalog/floor.dart';
 import '../../domain/catalog/item.dart';
 
 class CatalogColorResolver {
@@ -7,6 +8,10 @@ class CatalogColorResolver {
 
   static Color fromItem(CatalogItem item) {
     return _parse(item.color) ?? Colors.blueGrey.shade200;
+  }
+
+  static Color fromFloor(CatalogFloor floor) {
+    return _parse(floor.color) ?? Colors.blueGrey.shade200;
   }
 
   static Color? _parse(String? value) {

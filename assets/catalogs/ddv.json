@@ -24,5 +24,22 @@
       "height": 3,
       "color": "#43A047"
     }
+  ],
+  "floors": [
+    {
+      "id": "water",
+      "name": "Water",
+      "color": "#42A5F5"
+    },
+    {
+      "id": "grass",
+      "name": "Grass",
+      "color": "#66BB6A"
+    },
+    {
+      "id": "sand",
+      "name": "Sand",
+      "color": "#FFD54F"
+    }
   ]
 }

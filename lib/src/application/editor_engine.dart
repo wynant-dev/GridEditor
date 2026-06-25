@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../domain/catalog/catalog.dart';
+import '../domain/layout/floor_tile.dart';
 import '../domain/layout/grid_document.dart';
 import '../domain/layout/placed_item.dart';
 import '../domain/placement/placement_rules.dart';
@@ -127,6 +128,33 @@ class EditorEngine {
   }
 
   PlacedItem? placementById(String id) => layout.placementById(id);
+
+  String? floorIdAt(int row, int col) => layout.floorIdAt(row, col);
+
+  EditorEngine applyFloor({
+    required int row,
+    required int col,
+    required String catalogFloorId,
+  }) {
+    if (row < 0 || row >= layout.rows || col < 0 || col >= layout.cols) {
+      throw StateError('Floor cell is out of bounds');
+    }
+
+    final floor = catalog.floorById(catalogFloorId);
+    if (floor == null) {
+      throw StateError('Unknown floor: $catalogFloorId');
+    }
+
+    final updatedTiles = [
+      for (final tile in layout.floorTiles)
+        if (tile.row != row || tile.col != col) tile,
+      FloorTile(row: row, col: col, catalogFloorId: catalogFloorId),
+    ];
+
+    return copyWith(
+      layout: layout.copyWith(floorTiles: updatedTiles),
+    );
+  }
 
   String layoutToJson() => jsonEncode(layout.toJsonMap());
 
