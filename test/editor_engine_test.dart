@@ -6,8 +6,8 @@ void main() {
     id: 'test',
     name: 'Test',
     items: [
-      CatalogItem(id: 'house', name: 'House', width: 2, height: 2),
-      CatalogItem(id: 'bank', name: 'Bank', width: 2, height: 1),
+      CatalogItem(id: 'house', name: 'House', categoryId: 'buildings', width: 2, height: 2),
+      CatalogItem(id: 'bank', name: 'Bank', categoryId: 'buildings', width: 2, height: 1),
     ],
   );
 
@@ -244,6 +244,7 @@ void main() {
         CatalogItem(
           id: 'house',
           name: 'House',
+          categoryId: 'buildings',
           width: 4,
           height: 4,
           color: '#E53935',

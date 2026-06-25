@@ -6,12 +6,14 @@ void main() {
     id: 'test',
     name: 'Test',
     items: [
-      CatalogItem(id: 'house', name: 'House', width: 1, height: 1),
+      CatalogItem(id: 'house', name: 'House', categoryId: 'buildings', width: 1, height: 1),
     ],
   );
 
   test('onCellTap places item and returns true', () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     final tool = PlaceTool();
     final ctx = EditorToolContext(
       row: 0,
@@ -25,7 +27,9 @@ void main() {
   });
 
   test('onPlacementTap returns false', () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     controller.placeAt(0, 0);
     final placement = controller.layout.placements.single;
     final tool = PlaceTool();
@@ -41,7 +45,9 @@ void main() {
   });
 
   test('onCellHover delegates to onHover callback', () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     final interactionState = GridInteractionState();
     final tool = PlaceTool();
     final ctx = EditorToolContext(
@@ -59,7 +65,9 @@ void main() {
   });
 
   test('onCellTap reports placement error via callback', () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     controller.placeAt(0, 0);
     String? reportedError;
     final tool = PlaceTool(onPlaceError: (error) => reportedError = error);

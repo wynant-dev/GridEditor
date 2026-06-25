@@ -27,7 +27,7 @@ void main() {
     id: 'test',
     name: 'Test',
     items: [
-      CatalogItem(id: 'house', name: 'House', width: 1, height: 1),
+      CatalogItem(id: 'house', name: 'House', categoryId: 'buildings', width: 1, height: 1),
     ],
   );
 
@@ -39,7 +39,9 @@ void main() {
   );
 
   test('handleCellHover calls active tool and default tool', () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     final tool = _RecordingTool();
     final manager = ToolManager(activeTool: tool);
 
@@ -49,7 +51,9 @@ void main() {
   });
 
   test('handleCellTap uses active tool when handled', () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     final tool = _RecordingTool();
     final manager = ToolManager(activeTool: tool);
 
@@ -60,7 +64,9 @@ void main() {
 
   test('handlePlacementTap falls back to DefaultTool when active does not handle',
       () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     controller.placeAt(0, 0);
     final placement = controller.layout.placements.single;
     final tool = _RecordingTool();
@@ -74,7 +80,9 @@ void main() {
   });
 
   test('handlePlacementTap erases when EraseTool is active', () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     controller.placeAt(0, 0);
     final placement = controller.layout.placements.single;
     final manager = ToolManager(activeTool: EraseTool());
@@ -85,7 +93,9 @@ void main() {
   });
 
   test('setTool updates active tool and notifies listeners', () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     final first = _RecordingTool();
     final second = _RecordingTool();
     final manager = ToolManager(activeTool: first);
@@ -101,7 +111,9 @@ void main() {
   });
 
   test('handlePlacementTap ignores taps while dragging', () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     controller.placeAt(0, 0);
     final placement = controller.layout.placements.single;
     final manager = ToolManager(activeTool: EraseTool());

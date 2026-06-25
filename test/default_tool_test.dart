@@ -6,7 +6,7 @@ void main() {
     id: 'test',
     name: 'Test',
     items: [
-      CatalogItem(id: 'house', name: 'House', width: 1, height: 1),
+      CatalogItem(id: 'house', name: 'House', categoryId: 'buildings', width: 1, height: 1),
     ],
   );
 
@@ -18,7 +18,9 @@ void main() {
   );
 
   test('onCellTap places item and returns true', () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     final tool = DefaultTool();
     final context = ctx(controller);
 
@@ -29,7 +31,9 @@ void main() {
   });
 
   test('onPlacementTap selects placement and returns true', () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     controller.placeAt(0, 0);
     final placement = controller.layout.placements.single;
     final tool = DefaultTool();
@@ -41,7 +45,9 @@ void main() {
   });
 
   test('onCellHover updates hover state via onHover callback', () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     final interactionState = GridInteractionState();
     final tool = DefaultTool();
     final context = EditorToolContext(

@@ -6,7 +6,7 @@ void main() {
     id: 'test',
     name: 'Test',
     items: [
-      CatalogItem(id: 'house', name: 'House', width: 1, height: 1),
+      CatalogItem(id: 'house', name: 'House', categoryId: 'buildings', width: 1, height: 1),
     ],
   );
 
@@ -24,7 +24,9 @@ void main() {
   });
 
   test('selectPlacement clears catalog item selection', () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
 
     expect(controller.selectedItemId, 'house');
 
@@ -56,7 +58,9 @@ void main() {
 
   test('removePlacement clears selection when removed placement was selected',
       () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     controller.placeAt(0, 0);
     final placement = controller.layout.placements.single;
     controller.selectPlacement(placement.id);

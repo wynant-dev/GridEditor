@@ -6,12 +6,14 @@ void main() {
     id: 'test',
     name: 'Test',
     items: [
-      CatalogItem(id: 'house', name: 'House', width: 1, height: 1),
+      CatalogItem(id: 'house', name: 'House', categoryId: 'buildings', width: 1, height: 1),
     ],
   );
 
   test('onPlacementTap removes placement and returns true', () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     controller.placeAt(0, 0);
     final placement = controller.layout.placements.single;
     final tool = EraseTool();
@@ -27,7 +29,9 @@ void main() {
   });
 
   test('onCellTap returns false', () {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     final tool = EraseTool();
     final ctx = EditorToolContext(
       row: 0,

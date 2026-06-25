@@ -5,6 +5,7 @@ import '../../domain/layout/grid_document.dart';
 import '../../domain/layout/placed_item.dart';
 import '../../application/editor_controller.dart';
 import '../canvas/grid_canvas.dart';
+import '../panels/sidebar/sidebar_theme.dart';
 
 /// Generic editor shell: renders grid state and forwards user input upward.
 class GridEditorScreen extends StatelessWidget {
@@ -29,6 +30,8 @@ class GridEditorScreen extends StatelessWidget {
   final Widget? body;
   final Color? seedColor;
 
+  static const double _sidebarInset = 16;
+
   @override
   Widget build(BuildContext context) {
     final theme = ThemeData(
@@ -43,32 +46,26 @@ class GridEditorScreen extends StatelessWidget {
       child: Scaffold(
         body: body != null
             ? Stack(
+                clipBehavior: Clip.none,
                 children: [
                   Positioned.fill(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 280),
-                      child: ClipRect(
-                        child: GridCanvas(
-                          document: document,
-                          catalog: catalog,
-                          controller: controller,
-                          onCellTap: onCellTap,
-                          onPlacementTap: onPlacementTap,
-                          onPlaceError: onPlaceError,
-                        ),
+                    child: TapRegion(
+                      groupId: catalogSubmenuTapGroup,
+                      child: GridCanvas(
+                        document: document,
+                        catalog: catalog,
+                        controller: controller,
+                        onCellTap: onCellTap,
+                        onPlacementTap: onPlacementTap,
+                        onPlaceError: onPlaceError,
                       ),
                     ),
                   ),
                   Positioned(
-                    left: 0,
-                    top: 0,
-                    bottom: 0,
-                    width: 280,
-                    child: Material(
-                      elevation: 2,
-                      color: theme.colorScheme.surfaceContainerLow,
-                      child: body!,
-                    ),
+                    left: _sidebarInset,
+                    top: _sidebarInset,
+                    bottom: _sidebarInset,
+                    child: body!,
                   ),
                 ],
               )

@@ -9,8 +9,8 @@ class GridMetrics {
     required this.cols,
     required this.size,
     this.transform = const ViewportTransform(),
-  })  : cellWidth = size.width / cols,
-        cellHeight = size.height / rows;
+  }) : cellWidth = size.width / cols,
+       cellHeight = size.height / rows;
 
   final int rows;
   final int cols;

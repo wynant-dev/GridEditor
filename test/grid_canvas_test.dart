@@ -7,7 +7,7 @@ void main() {
     id: 'test',
     name: 'Test',
     items: [
-      CatalogItem(id: 'house', name: 'House', width: 1, height: 1),
+      CatalogItem(id: 'house', name: 'House', categoryId: 'buildings', width: 1, height: 1),
     ],
   );
 
@@ -44,7 +44,9 @@ void main() {
 
   testWidgets('ghost preview renders when item selected and cell hovered',
       (tester) async {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     final interactionState = GridInteractionState();
 
     await tester.pumpWidget(
@@ -72,7 +74,9 @@ void main() {
   });
 
   testWidgets('ghost preview hidden when hover cleared', (tester) async {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     final interactionState = GridInteractionState();
 
     await tester.pumpWidget(
@@ -101,7 +105,9 @@ void main() {
 
   testWidgets('cell tap still places item when controller is attached',
       (tester) async {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -162,7 +168,9 @@ void main() {
       originRow: 0,
       originCol: 0,
     );
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
     final interactionState = GridInteractionState();
 
     await tester.pumpWidget(
@@ -281,7 +289,9 @@ void main() {
   });
 
   testWidgets('64x64 grid uses no per-cell GestureDetectors', (tester) async {
-    final controller = EditorController()..loadCatalog(catalog);
+    final controller = EditorController()
+      ..loadCatalog(catalog)
+      ..selectItem('house');
 
     await tester.pumpWidget(
       MaterialApp(

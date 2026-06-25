@@ -67,8 +67,8 @@ void main() {
         id: 'test',
         name: 'Test',
         items: [
-          CatalogItem(id: 'a', name: 'A', width: 1, height: 1),
-          CatalogItem(id: 'b', name: 'B', width: 2, height: 2),
+          CatalogItem(id: 'a', name: 'A', categoryId: 'buildings', width: 1, height: 1),
+          CatalogItem(id: 'b', name: 'B', categoryId: 'buildings', width: 2, height: 2),
         ],
       );
       const document = GridDocument(
@@ -100,7 +100,7 @@ void main() {
         id: 'test',
         name: 'Test',
         items: [
-          CatalogItem(id: 'a', name: 'A', width: 1, height: 1),
+          CatalogItem(id: 'a', name: 'A', categoryId: 'buildings', width: 1, height: 1),
         ],
       );
       const document = GridDocument(

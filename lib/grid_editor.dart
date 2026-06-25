@@ -1,5 +1,6 @@
 library;
 
+export 'src/domain/catalog/category.dart';
 export 'src/domain/catalog/floor.dart';
 export 'src/domain/catalog/item.dart';
 export 'src/domain/catalog/catalog.dart';
@@ -12,6 +13,7 @@ export 'src/domain/geometry/grid_metrics.dart';
 export 'src/domain/geometry/viewport_transform.dart';
 export 'src/application/editor_controller.dart';
 export 'src/application/editor_engine.dart';
+export 'src/application/selection_history_entry.dart';
 export 'src/application/selection_state.dart';
 export 'src/application/interaction/drag_session.dart';
 export 'src/application/tools/default_tool.dart';

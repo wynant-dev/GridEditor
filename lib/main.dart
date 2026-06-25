@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'grid_editor.dart';
-import 'src/presentation/panels/catalog_panel.dart';
+import 'src/presentation/panels/sidebar/floating_catalog_sidebar.dart';
 
 /// Bundled catalog JSON path. Override at build/run time, e.g.:
 /// `flutter run -d chrome --dart-define=CATALOG_ASSET=assets/catalogs/sandbox.json`
@@ -68,12 +68,15 @@ class _GridEditorAppState extends State<GridEditorApp> {
             document: _controller.layout,
             catalog: _controller.catalog,
             controller: _controller,
-            body: CatalogPanel(
+            body: FloatingCatalogSidebar(
               catalog: _controller.catalog,
               selectedItemId: _controller.selectedItemId,
               selectedFloorId: _controller.selectedFloorId,
+              selectionHistory: _controller.selectionHistory,
               onItemSelected: _controller.selectItem,
               onFloorSelected: _controller.selectFloor,
+              onHistorySelected: _controller.reselectFromHistory,
+              onSettingsPressed: () {},
             ),
           );
         },

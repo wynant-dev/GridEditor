@@ -11,9 +11,23 @@ void main() {
       size: const Size(800, 400),
     );
 
-    test('computes cell dimensions', () {
+    test('computes square cell dimensions', () {
       expect(metrics.cellWidth, 100);
       expect(metrics.cellHeight, 100);
+      expect(metrics.cellWidth, metrics.cellHeight);
+    });
+
+    test('keeps cells square when viewport aspect ratio differs from grid', () {
+      final wide = GridMetrics(
+        rows: 4,
+        cols: 8,
+        size: const Size(800, 600),
+      );
+
+      expect(wide.cellWidth, 75);
+      expect(wide.cellHeight, 75);
+      expect(wide.gridSize, const Size(600, 300));
+      expect(wide.origin, const Offset(100, 150));
     });
 
     test('cellTopLeft returns pixel offset for grid cell', () {

@@ -3,6 +3,7 @@ class CatalogItem {
   const CatalogItem({
     required this.id,
     required this.name,
+    required this.categoryId,
     required this.width,
     required this.height,
     this.color,
@@ -12,6 +13,7 @@ class CatalogItem {
 
   final String id;
   final String name;
+  final String categoryId;
   final int width;
   final int height;
 
@@ -24,6 +26,7 @@ class CatalogItem {
   CatalogItem copyWith({
     String? id,
     String? name,
+    String? categoryId,
     int? width,
     int? height,
     String? color,
@@ -32,6 +35,7 @@ class CatalogItem {
     return CatalogItem(
       id: id ?? this.id,
       name: name ?? this.name,
+      categoryId: categoryId ?? this.categoryId,
       width: width ?? this.width,
       height: height ?? this.height,
       color: color ?? this.color,
@@ -42,6 +46,7 @@ class CatalogItem {
   Map<String, dynamic> toJson() => {
     'id': id,
     'name': name,
+    'categoryId': categoryId,
     'width': width,
     'height': height,
     if (color != null) 'color': color,
@@ -52,6 +57,7 @@ class CatalogItem {
     return CatalogItem(
       id: json['id'] as String,
       name: json['name'] as String,
+      categoryId: json['categoryId'] as String,
       width: json['width'] as int,
       height: json['height'] as int,
       color: json['color'] as String?,

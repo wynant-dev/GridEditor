@@ -5,6 +5,7 @@ import '../domain/layout/grid_document.dart';
 import '../domain/layout/placed_item.dart';
 import 'editor_engine.dart';
 import '../domain/placement/placement_rules.dart';
+import 'selection_history_entry.dart';
 import 'selection_state.dart';
 import 'tools/default_tool.dart';
 import 'tools/floor_tool.dart';
@@ -21,7 +22,7 @@ class EditorController extends ChangeNotifier {
            engine ??
            EditorEngine(
              catalog: const Catalog(id: 'default', name: 'My catalog'),
-             layout: const GridDocument(rows: 64, cols: 64),
+             layout: const GridDocument(rows:130, cols: 130),
            ),
        _selectedItemId = selectedItemId,
        _onPlaceError = onPlaceError,
@@ -34,6 +35,7 @@ class EditorController extends ChangeNotifier {
   String? _selectedItemId;
   String? _selectedFloorId;
   SelectionState _selection = const SelectionState();
+  final List<SelectionHistoryEntry> _selectionHistory = [];
   ToolManager _toolManager;
   void Function(String error)? _onPlaceError;
 
@@ -42,6 +44,8 @@ class EditorController extends ChangeNotifier {
   GridDocument get layout => _engine.layout;
   String? get selectedItemId => _selectedItemId;
   String? get selectedFloorId => _selectedFloorId;
+  List<SelectionHistoryEntry> get selectionHistory =>
+      List.unmodifiable(_selectionHistory);
   SelectionState get selection => _selection;
   String? get selectedPlacementId => _selection.selectedPlacementId;
   ToolManager get toolManager => _toolManager;
@@ -78,7 +82,11 @@ class EditorController extends ChangeNotifier {
 
   void loadCatalog(Catalog catalog) {
     _engine = _engine.copyWith(catalog: catalog);
-    _selectedItemId = catalog.items.isNotEmpty ? catalog.items.first.id : null;
+    _selectedItemId = null;
+    _selectedFloorId = null;
+    _selection = const SelectionState();
+    _selectionHistory.clear();
+    _syncToolsFromSelection();
     notifyListeners();
   }
 
@@ -96,6 +104,23 @@ class EditorController extends ChangeNotifier {
     _selection = const SelectionState();
     _syncToolsFromSelection();
     notifyListeners();
+  }
+
+  void reselectFromHistory(SelectionHistoryEntry entry) {
+    switch (entry.kind) {
+      case SelectionKind.item:
+        selectItem(entry.id);
+      case SelectionKind.floor:
+        selectFloor(entry.id);
+    }
+  }
+
+  void _pushHistory(SelectionHistoryEntry entry) {
+    _selectionHistory.remove(entry);
+    _selectionHistory.insert(0, entry);
+    if (_selectionHistory.length > 3) {
+      _selectionHistory.removeLast();
+    }
   }
 
   void selectPlacement(String placementId) {
@@ -122,6 +147,7 @@ class EditorController extends ChangeNotifier {
         col: col,
         catalogFloorId: selectedId,
       );
+      _pushHistory(SelectionHistoryEntry(kind: SelectionKind.floor, id: selectedId));
       notifyListeners();
       return null;
     } on StateError catch (error) {
@@ -151,6 +177,7 @@ class EditorController extends ChangeNotifier {
         originRow: originRow,
         originCol: originCol,
       );
+      _pushHistory(SelectionHistoryEntry(kind: SelectionKind.item, id: selectedId));
       notifyListeners();
       return null;
     } on StateError catch (error) {
