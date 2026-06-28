@@ -137,5 +137,27 @@
       "name": "Sand",
       "color": "#FFD54F"
     }
+  ],
+  "stickers": [
+    {
+      "id": "tree",
+      "name": "Tree",
+      "iconPath": "assets/icons/nature.png"
+    },
+    {
+      "id": "building",
+      "name": "Building",
+      "iconPath": "assets/icons/buildings.png"
+    },
+    {
+      "id": "shop",
+      "name": "Shop",
+      "iconPath": "assets/icons/commerce.png"
+    },
+    {
+      "id": "furniture",
+      "name": "Furniture",
+      "iconPath": "assets/icons/furniture.png"
+    }
   ]
 }

@@ -8,6 +8,7 @@ import '../../domain/geometry/grid_metrics.dart';
 import '../theme/catalog_color_resolver.dart';
 import 'floor_cell.dart';
 import 'placement_box.dart';
+import 'sticker_layers.dart';
 
 /// Default + per-cell floor tiles (bottom paint layer).
 class FloorLayers extends StatelessWidget {
@@ -121,12 +122,14 @@ class GridRenderer extends StatelessWidget {
     required this.catalog,
     required this.metrics,
     this.hiddenPlacementId,
+    this.hiddenStickerId,
   });
 
   final GridDocument document;
   final Catalog catalog;
   final GridMetrics metrics;
   final String? hiddenPlacementId;
+  final String? hiddenStickerId;
 
   @override
   Widget build(BuildContext context) {
@@ -144,6 +147,11 @@ class GridRenderer extends StatelessWidget {
           catalog: catalog,
           metrics: metrics,
           hiddenPlacementId: hiddenPlacementId,
+        ),
+        StickerLayers(
+          document: document,
+          catalog: catalog,
+          hiddenStickerId: hiddenStickerId,
         ),
       ],
     );

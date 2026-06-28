@@ -14,6 +14,7 @@ import '../interaction/grid_interaction_state.dart';
 import '../renderer/editor_grid_scene.dart';
 import '../renderer/grid_renderer.dart';
 import '../renderer/selection_overlay_layer.dart';
+import '../renderer/sticker_selection_overlay_layer.dart';
 import '../viewport/viewport_controller.dart';
 import '../viewport/viewport_shell.dart';
 
@@ -47,6 +48,7 @@ class _GridCanvasState extends State<GridCanvas> {
   late final bool _ownsInteractionState;
   late final GridInteractionHandler _interactionHandler;
   String? _hiddenPlacementId;
+  String? _hiddenStickerId;
 
   @override
   void initState() {
@@ -66,7 +68,7 @@ class _GridCanvasState extends State<GridCanvas> {
       interactionState: _interactionState,
       supportsHover: supportsHoverPreview(),
     );
-    _interactionState.addListener(_syncHiddenPlacementFromDrag);
+    _interactionState.addListener(_syncHiddenFromDrag);
     _syncPlaceErrorCallback();
   }
 
@@ -88,7 +90,7 @@ class _GridCanvasState extends State<GridCanvas> {
 
   @override
   void dispose() {
-    _interactionState.removeListener(_syncHiddenPlacementFromDrag);
+    _interactionState.removeListener(_syncHiddenFromDrag);
     if (_ownsInteractionState) {
       _interactionState.dispose();
     }
@@ -96,12 +98,17 @@ class _GridCanvasState extends State<GridCanvas> {
     super.dispose();
   }
 
-  void _syncHiddenPlacementFromDrag() {
-    final hiddenId = _interactionState.isDragging
-        ? _interactionState.dragSession?.placementId
-        : null;
-    if (_hiddenPlacementId == hiddenId) return;
-    setState(() => _hiddenPlacementId = hiddenId);
+  void _syncHiddenFromDrag() {
+    final hiddenPlacementId = _interactionState.dragSession?.placementId;
+    final hiddenStickerId = _interactionState.stickerDragSession?.stickerId;
+    if (_hiddenPlacementId == hiddenPlacementId &&
+        _hiddenStickerId == hiddenStickerId) {
+      return;
+    }
+    setState(() {
+      _hiddenPlacementId = hiddenPlacementId;
+      _hiddenStickerId = hiddenStickerId;
+    });
   }
 
   Listenable get _contentListenable {
@@ -164,6 +171,7 @@ class _GridCanvasState extends State<GridCanvas> {
                       controller: controller,
                       interactionState: _interactionState,
                       hiddenPlacementId: _hiddenPlacementId,
+                      hiddenStickerId: _hiddenStickerId,
                     ),
               input: GridInteractionLayer(handler: _interactionHandler),
               overlay: controller != null
@@ -184,6 +192,24 @@ class _GridCanvasState extends State<GridCanvas> {
                                 final placement = controller.selectedPlacement;
                                 if (placement != null) {
                                   controller.removePlacement(placement);
+                                }
+                              },
+                            );
+                          },
+                        ),
+                        ListenableBuilder(
+                          listenable: _interactionState,
+                          builder: (context, _) {
+                            return StickerSelectionOverlayLayer(
+                              selectedStickerId: controller.selectedStickerId,
+                              document: document,
+                              catalog: widget.catalog,
+                              stickerDragSession:
+                                  _interactionState.stickerDragSession,
+                              onDelete: () {
+                                final sticker = controller.selectedSticker;
+                                if (sticker != null) {
+                                  controller.removeSticker(sticker);
                                 }
                               },
                             );

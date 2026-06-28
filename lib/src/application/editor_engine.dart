@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:ui';
 
 import '../domain/catalog/catalog.dart';
 import '../domain/layout/floor_tile.dart';
 import '../domain/layout/grid_document.dart';
 import '../domain/layout/placed_item.dart';
+import '../domain/layout/placed_sticker.dart';
 import '../domain/placement/placement_rules.dart';
+import '../domain/sticker/sticker_bounds.dart';
 
 /// Bridge between catalog (what exists) and layout (what is placed).
 class EditorEngine {
@@ -129,6 +132,109 @@ class EditorEngine {
 
   PlacedItem? placementById(String id) => layout.placementById(id);
 
+  PlacedSticker? stickerById(String id) => layout.stickerById(id);
+
+  String? stickerError({
+    required String catalogStickerId,
+    required double x,
+    required double y,
+    required double cellSize,
+    required Offset origin,
+  }) {
+    if (catalog.stickerById(catalogStickerId) == null) {
+      return 'Unknown sticker: $catalogStickerId';
+    }
+    if (!StickerBounds.isCenterInGrid(
+      rows: layout.rows,
+      cols: layout.cols,
+      cellSize: cellSize,
+      origin: origin,
+      centerX: x,
+      centerY: y,
+    )) {
+      return 'Sticker is out of bounds';
+    }
+    return null;
+  }
+
+  EditorEngine placeSticker({
+    required String catalogStickerId,
+    required double x,
+    required double y,
+    required double cellSize,
+    required Offset origin,
+    String? stickerId,
+  }) {
+    final error = stickerError(
+      catalogStickerId: catalogStickerId,
+      x: x,
+      y: y,
+      cellSize: cellSize,
+      origin: origin,
+    );
+    if (error != null) {
+      throw StateError(error);
+    }
+
+    final sticker = PlacedSticker(
+      id: stickerId ?? _nextStickerId(),
+      catalogStickerId: catalogStickerId,
+      x: x,
+      y: y,
+    );
+
+    return copyWith(
+      layout: layout.copyWith(stickers: [...layout.stickers, sticker]),
+    );
+  }
+
+  EditorEngine removeSticker(String stickerId) {
+    return copyWith(
+      layout: layout.copyWith(
+        stickers: [
+          for (final sticker in layout.stickers)
+            if (sticker.id != stickerId) sticker,
+        ],
+      ),
+    );
+  }
+
+  EditorEngine moveSticker({
+    required String stickerId,
+    required double x,
+    required double y,
+    required double cellSize,
+    required Offset origin,
+  }) {
+    final existing = stickerById(stickerId);
+    if (existing == null) {
+      throw StateError('Sticker not found');
+    }
+
+    final error = stickerError(
+      catalogStickerId: existing.catalogStickerId,
+      x: x,
+      y: y,
+      cellSize: cellSize,
+      origin: origin,
+    );
+    if (error != null) {
+      throw StateError(error);
+    }
+
+    return copyWith(
+      layout: layout.copyWith(
+        stickers: [
+          for (final sticker in layout.stickers)
+            if (sticker.id == stickerId)
+              sticker.copyWith(x: x, y: y)
+            else
+              sticker,
+        ],
+      ),
+    );
+  }
+
   String? floorIdAt(int row, int col) => layout.floorIdAt(row, col);
 
   EditorEngine applyFloor({
@@ -186,5 +292,18 @@ class EditorEngine {
       }
     }
     return 'p${max + 1}';
+  }
+
+  String _nextStickerId() {
+    var max = 0;
+    for (final sticker in layout.stickers) {
+      final match = RegExp(r'^s(\d+)$').firstMatch(sticker.id);
+      if (match == null) continue;
+      final value = int.tryParse(match.group(1)!);
+      if (value != null && value > max) {
+        max = value;
+      }
+    }
+    return 's${max + 1}';
   }
 }

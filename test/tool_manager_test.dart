@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
+import 'grid_test_helpers.dart';
+
 class _RecordingTool extends EditorTool {
   int hoverCount = 0;
   int tapCount = 0;
@@ -31,12 +33,8 @@ void main() {
     ],
   );
 
-  EditorToolContext ctx(EditorController controller) => EditorToolContext(
-    row: 0,
-    col: 0,
-    controller: controller,
-    engine: controller.engine,
-  );
+  EditorToolContext ctx(EditorController controller) =>
+      testToolContext(controller);
 
   test('handleCellHover calls active tool and default tool', () {
     final controller = EditorController()

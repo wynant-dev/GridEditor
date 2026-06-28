@@ -52,9 +52,11 @@ void main() {
               catalog: catalog,
               selectedItemId: null,
               selectedFloorId: null,
+              selectedStickerCatalogId: null,
               selectionHistory: const [],
               onItemSelected: (id) => selectedItemId = id,
               onFloorSelected: (_) {},
+              onStickerSelected: (_) {},
               onHistorySelected: (_) {},
             ),
           ),
@@ -89,9 +91,11 @@ void main() {
               catalog: catalog,
               selectedItemId: null,
               selectedFloorId: null,
+              selectedStickerCatalogId: null,
               selectionHistory: const [],
               onItemSelected: (id) => selectedItemId = id,
               onFloorSelected: (_) {},
+              onStickerSelected: (_) {},
               onHistorySelected: (_) {},
             ),
           ),
@@ -125,9 +129,11 @@ void main() {
               catalog: catalog,
               selectedItemId: null,
               selectedFloorId: null,
+              selectedStickerCatalogId: null,
               selectionHistory: const [],
               onItemSelected: (_) {},
               onFloorSelected: (id) => selectedFloorId = id,
+              onStickerSelected: (_) {},
               onHistorySelected: (_) {},
             ),
           ),
@@ -167,9 +173,11 @@ void main() {
                   catalog: catalog,
                   selectedItemId: null,
                   selectedFloorId: null,
+                  selectedStickerCatalogId: null,
                   selectionHistory: [],
                   onItemSelected: (_) {},
                   onFloorSelected: (_) {},
+                  onStickerSelected: (_) {},
                   onHistorySelected: (_) {},
                 ),
               ),
@@ -189,5 +197,47 @@ void main() {
 
     expect(find.text('House'), findsOneWidget);
     expect(find.text('Bank'), findsOneWidget);
+  });
+
+  testWidgets('tapping stickers tool opens submenu with sticker entries',
+      (tester) async {
+    const catalogWithStickers = Catalog(
+      id: 'test',
+      name: 'Test',
+      stickers: [
+        CatalogSticker(
+          id: 'tree',
+          name: 'Tree',
+          iconPath: 'assets/icons/nature.png',
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 400,
+            height: 600,
+            child: FloatingCatalogSidebar(
+              catalog: catalogWithStickers,
+              selectedItemId: null,
+              selectedFloorId: null,
+              selectedStickerCatalogId: null,
+              selectionHistory: const [],
+              onItemSelected: (_) {},
+              onFloorSelected: (_) {},
+              onStickerSelected: (_) {},
+              onHistorySelected: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byTooltip('Stickers'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tree'), findsOneWidget);
   });
 }

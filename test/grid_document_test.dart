@@ -45,4 +45,41 @@ void main() {
 
     expect(engine.placementById('p1'), placement);
   });
+
+  test('stickerById returns matching sticker', () {
+    const sticker = PlacedSticker(
+      id: 's1',
+      catalogStickerId: 'tree',
+      x: 24,
+      y: 24,
+    );
+    const document = GridDocument(
+      rows: 2,
+      cols: 2,
+      stickers: [sticker],
+    );
+
+    expect(document.stickerById('s1'), sticker);
+    expect(document.stickerById('missing'), isNull);
+  });
+
+  test('stickers round-trip through JSON', () {
+    const document = GridDocument(
+      rows: 4,
+      cols: 4,
+      stickers: [
+        PlacedSticker(
+          id: 's1',
+          catalogStickerId: 'tree',
+          x: 48,
+          y: 72,
+        ),
+      ],
+    );
+
+    final restored = GridDocument.fromJsonMap(document.toJsonMap());
+
+    expect(restored.stickers.single.x, 48);
+    expect(restored.stickers.single.y, 72);
+  });
 }

@@ -4,6 +4,31 @@ import 'package:grid_editor/grid_editor.dart';
 
 const Size kGridTestViewSize = Size(200, 200);
 
+EditorToolContext testToolContext(
+  EditorController controller, {
+  int row = 0,
+  int col = 0,
+  Offset worldPosition = Offset.zero,
+  double cellSize = GridMetrics.defaultCellSize,
+  Offset origin = Offset.zero,
+  void Function(int row, int col)? onHover,
+  void Function(Offset worldPosition)? onHoverWorld,
+  bool isPointerDown = false,
+}) {
+  return EditorToolContext(
+    row: row,
+    col: col,
+    worldPosition: worldPosition,
+    cellSize: cellSize,
+    origin: origin,
+    controller: controller,
+    engine: controller.engine,
+    onHover: onHover,
+    onHoverWorld: onHoverWorld,
+    isPointerDown: isPointerDown,
+  );
+}
+
 void setGridTestViewSize(WidgetTester tester, {Size size = kGridTestViewSize}) {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1.0;

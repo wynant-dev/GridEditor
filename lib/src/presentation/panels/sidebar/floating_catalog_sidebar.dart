@@ -9,14 +9,16 @@ import 'sidebar_history_button.dart';
 import 'sidebar_icon_button.dart';
 import 'sidebar_logo_header.dart';
 import 'sidebar_section.dart';
+import 'sidebar_submenu_icon_item.dart';
 import 'sidebar_submenu_item.dart';
 import 'sidebar_submenu_panel.dart';
 import 'sidebar_theme.dart';
 
 const _floorsSubmenuKey = '__floors__';
+const _stickersSubmenuKey = '__stickers__';
 
 /// Which submenu is currently open beside the sidebar.
-enum SidebarSubmenuKind { category, floors }
+enum SidebarSubmenuKind { category, floors, stickers }
 
 /// Floating pill-shaped catalog sidebar with icon categories and contextual submenu.
 class FloatingCatalogSidebar extends StatefulWidget {
@@ -25,9 +27,11 @@ class FloatingCatalogSidebar extends StatefulWidget {
     required this.catalog,
     required this.selectedItemId,
     required this.selectedFloorId,
+    required this.selectedStickerCatalogId,
     required this.selectionHistory,
     required this.onItemSelected,
     required this.onFloorSelected,
+    required this.onStickerSelected,
     required this.onHistorySelected,
     this.onSettingsPressed,
   });
@@ -35,9 +39,11 @@ class FloatingCatalogSidebar extends StatefulWidget {
   final Catalog catalog;
   final String? selectedItemId;
   final String? selectedFloorId;
+  final String? selectedStickerCatalogId;
   final List<SelectionHistoryEntry> selectionHistory;
   final ValueChanged<String> onItemSelected;
   final ValueChanged<String> onFloorSelected;
+  final ValueChanged<String> onStickerSelected;
   final ValueChanged<SelectionHistoryEntry> onHistorySelected;
   final VoidCallback? onSettingsPressed;
 
@@ -48,6 +54,7 @@ class FloatingCatalogSidebar extends StatefulWidget {
 class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
   final GlobalKey _stackKey = GlobalKey();
   final GlobalKey _floorAnchorKey = GlobalKey();
+  final GlobalKey _stickersAnchorKey = GlobalKey();
   final Map<String, GlobalKey> _categoryAnchorKeys = {};
 
   String? _openSubmenuKey;
@@ -111,6 +118,20 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
     );
   }
 
+  void _toggleStickersSubmenu() {
+    if (_openSubmenuKey == _stickersSubmenuKey) {
+      setState(_closeSubmenu);
+      return;
+    }
+    setState(() {
+      _openSubmenuKey = _stickersSubmenuKey;
+      _submenuPositioned = false;
+    });
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _positionSubmenuAtAnchor(_stickersAnchorKey),
+    );
+  }
+
   void _closeSubmenu() {
     _openSubmenuKey = null;
     _submenuTop = 0;
@@ -122,6 +143,10 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
     if (key == null) return;
     if (key == _floorsSubmenuKey) {
       _positionSubmenuAtAnchor(_floorAnchorKey);
+      return;
+    }
+    if (key == _stickersSubmenuKey) {
+      _positionSubmenuAtAnchor(_stickersAnchorKey);
       return;
     }
     final anchorKey = _categoryAnchorKeys[key];
@@ -161,6 +186,9 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
   SidebarSubmenuKind? get _openSubmenuKind {
     if (_openSubmenuKey == null) return null;
     if (_openSubmenuKey == _floorsSubmenuKey) return SidebarSubmenuKind.floors;
+    if (_openSubmenuKey == _stickersSubmenuKey) {
+      return SidebarSubmenuKind.stickers;
+    }
     return SidebarSubmenuKind.category;
   }
 
@@ -201,7 +229,8 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
                     ],
                   ),
                 SidebarSection(
-                  showDivider: widget.selectionHistory.isNotEmpty,
+                  showDivider: widget.catalog.stickers.isNotEmpty ||
+                      widget.selectionHistory.isNotEmpty,
                   children: [
                     KeyedSubtree(
                       key: _floorAnchorKey,
@@ -216,6 +245,20 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
                         ),
                       ),
                     ),
+                    if (widget.catalog.stickers.isNotEmpty)
+                      KeyedSubtree(
+                        key: _stickersAnchorKey,
+                        child: SidebarIconButton(
+                          selected: widget.selectedStickerCatalogId != null,
+                          tooltip: 'Stickers',
+                          onPressed: _toggleStickersSubmenu,
+                          icon: SidebarAssetIcon(
+                            assetPath: 'assets/icons/nature.png',
+                            selected: widget.selectedStickerCatalogId != null,
+                            fallbackIcon: Icons.emoji_emotions_outlined,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
                 const Spacer(),
@@ -271,6 +314,8 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
         return floor != null
             ? CatalogColorResolver.fromFloor(floor)
             : Colors.blueGrey;
+      case SelectionKind.sticker:
+        return Colors.teal;
     }
   }
 
@@ -280,6 +325,8 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
         return widget.catalog.itemById(entry.id)?.name ?? entry.id;
       case SelectionKind.floor:
         return widget.catalog.floorById(entry.id)?.name ?? entry.id;
+      case SelectionKind.sticker:
+        return widget.catalog.stickerById(entry.id)?.name ?? entry.id;
     }
   }
 
@@ -307,6 +354,20 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
               label: floor.name,
               selected: floor.id == widget.selectedFloorId,
               onPressed: () => widget.onFloorSelected(floor.id),
+            ),
+        ],
+      );
+    }
+
+    if (kind == SidebarSubmenuKind.stickers) {
+      return SidebarSubmenuPanel(
+        children: [
+          for (final sticker in widget.catalog.stickers)
+            SidebarSubmenuIconItem(
+              iconPath: sticker.iconPath,
+              label: sticker.name,
+              selected: sticker.id == widget.selectedStickerCatalogId,
+              onPressed: () => widget.onStickerSelected(sticker.id),
             ),
         ],
       );

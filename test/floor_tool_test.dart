@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
+import 'grid_test_helpers.dart';
+
 void main() {
   const catalog = Catalog(
     id: 'test',
@@ -17,12 +19,7 @@ void main() {
     final controller = EditorController()..loadCatalog(catalog);
     controller.selectFloor('water');
     final tool = FloorTool();
-    final ctx = EditorToolContext(
-      row: 2,
-      col: 3,
-      controller: controller,
-      engine: controller.engine,
-    );
+    final ctx = testToolContext(controller, row: 2, col: 3);
 
     expect(tool.onCellTap(ctx), isTrue);
     expect(controller.layout.floorTiles, hasLength(1));
@@ -36,12 +33,7 @@ void main() {
     controller.selectFloor('water');
     final placement = controller.layout.placements.single;
     final tool = FloorTool();
-    final ctx = EditorToolContext(
-      row: 1,
-      col: 1,
-      controller: controller,
-      engine: controller.engine,
-    );
+    final ctx = testToolContext(controller, row: 1, col: 1);
 
     expect(tool.onPlacementTap(ctx, placement), isTrue);
     expect(controller.layout.floorIdAt(1, 1), 'water');
@@ -63,11 +55,10 @@ void main() {
     controller.selectFloor('water');
     final interactionState = GridInteractionState();
     final tool = FloorTool();
-    final ctx = EditorToolContext(
+    final ctx = testToolContext(
+      controller,
       row: 4,
       col: 5,
-      controller: controller,
-      engine: controller.engine,
       onHover: (row, col) => interactionState.setHoverCell(row, col),
     );
 
@@ -83,13 +74,7 @@ void main() {
     final tool = FloorTool();
 
     tool.onCellHover(
-      EditorToolContext(
-        row: 1,
-        col: 1,
-        controller: controller,
-        engine: controller.engine,
-        isPointerDown: true,
-      ),
+      testToolContext(controller, row: 1, col: 1, isPointerDown: true),
     );
 
     expect(controller.layout.floorIdAt(1, 1), 'water');
@@ -99,11 +84,10 @@ void main() {
     final controller = EditorController()..loadCatalog(catalog);
     controller.selectFloor('water');
     final tool = FloorTool();
-    final ctx = EditorToolContext(
+    final ctx = testToolContext(
+      controller,
       row: 2,
       col: 2,
-      controller: controller,
-      engine: controller.engine,
       isPointerDown: true,
     );
 
@@ -119,22 +103,10 @@ void main() {
     final tool = FloorTool();
 
     tool.onCellHover(
-      EditorToolContext(
-        row: 0,
-        col: 0,
-        controller: controller,
-        engine: controller.engine,
-        isPointerDown: true,
-      ),
+      testToolContext(controller, row: 0, col: 0, isPointerDown: true),
     );
     tool.onCellHover(
-      EditorToolContext(
-        row: 0,
-        col: 1,
-        controller: controller,
-        engine: controller.engine,
-        isPointerDown: true,
-      ),
+      testToolContext(controller, row: 0, col: 1, isPointerDown: true),
     );
 
     expect(controller.layout.floorIdAt(0, 0), 'water');
@@ -145,11 +117,10 @@ void main() {
     final controller = EditorController()..loadCatalog(catalog);
     controller.selectFloor('water');
     final tool = FloorTool();
-    final ctx = EditorToolContext(
+    final ctx = testToolContext(
+      controller,
       row: 3,
       col: 3,
-      controller: controller,
-      engine: controller.engine,
       isPointerDown: true,
     );
 

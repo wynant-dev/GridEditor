@@ -9,6 +9,8 @@ import 'floor_hover_preview_layer.dart';
 import 'grid_renderer.dart';
 import 'placement_overlay_layer.dart';
 import 'placement_validity_preview_layer.dart';
+import 'sticker_layers.dart';
+import 'sticker_preview_layer.dart';
 
 /// Editor scene stack with correct z-order for floor and placement tools.
 class EditorGridScene extends StatelessWidget {
@@ -20,6 +22,7 @@ class EditorGridScene extends StatelessWidget {
     required this.controller,
     required this.interactionState,
     this.hiddenPlacementId,
+    this.hiddenStickerId,
   });
 
   final GridDocument document;
@@ -28,6 +31,7 @@ class EditorGridScene extends StatelessWidget {
   final EditorController controller;
   final GridInteractionState interactionState;
   final String? hiddenPlacementId;
+  final String? hiddenStickerId;
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +85,22 @@ class EditorGridScene extends StatelessWidget {
               selectedItemId: controller.selectedItemId,
               catalog: catalog,
               metrics: metrics,
+              document: document,
+            );
+          },
+        ),
+        StickerLayers(
+          document: document,
+          catalog: catalog,
+          hiddenStickerId: hiddenStickerId,
+        ),
+        _EditorReactive(
+          listenables: [interactionState, controller],
+          builder: (context) {
+            return StickerPreviewLayer(
+              controller: controller,
+              interactionState: interactionState,
+              catalog: catalog,
               document: document,
             );
           },

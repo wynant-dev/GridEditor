@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
+import 'grid_test_helpers.dart';
+
 void main() {
   const catalog = Catalog(
     id: 'test',
@@ -15,12 +17,7 @@ void main() {
       ..loadCatalog(catalog)
       ..selectItem('house');
     final tool = PlaceTool();
-    final ctx = EditorToolContext(
-      row: 0,
-      col: 0,
-      controller: controller,
-      engine: controller.engine,
-    );
+    final ctx = testToolContext(controller);
 
     expect(tool.onCellTap(ctx), isTrue);
     expect(controller.layout.placements, hasLength(1));
@@ -33,12 +30,7 @@ void main() {
     controller.placeAt(0, 0);
     final placement = controller.layout.placements.single;
     final tool = PlaceTool();
-    final ctx = EditorToolContext(
-      row: 0,
-      col: 0,
-      controller: controller,
-      engine: controller.engine,
-    );
+    final ctx = testToolContext(controller);
 
     expect(tool.onPlacementTap(ctx, placement), isFalse);
     expect(controller.selectedPlacementId, isNull);
@@ -50,11 +42,10 @@ void main() {
       ..selectItem('house');
     final interactionState = GridInteractionState();
     final tool = PlaceTool();
-    final ctx = EditorToolContext(
+    final ctx = testToolContext(
+      controller,
       row: 2,
       col: 3,
-      controller: controller,
-      engine: controller.engine,
       onHover: (row, col) => interactionState.setHoverCell(row, col),
     );
 
@@ -71,12 +62,7 @@ void main() {
     controller.placeAt(0, 0);
     String? reportedError;
     final tool = PlaceTool(onPlaceError: (error) => reportedError = error);
-    final ctx = EditorToolContext(
-      row: 0,
-      col: 0,
-      controller: controller,
-      engine: controller.engine,
-    );
+    final ctx = testToolContext(controller);
 
     tool.onCellTap(ctx);
 

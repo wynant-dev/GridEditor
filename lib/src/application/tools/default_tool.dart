@@ -1,4 +1,5 @@
 import '../../domain/layout/placed_item.dart';
+import '../../domain/layout/placed_sticker.dart';
 import 'editor_tool_context.dart';
 import 'placing_tool.dart';
 
@@ -8,6 +9,12 @@ class DefaultTool extends PlacingTool {
   @override
   bool onPlacementTap(EditorToolContext context, PlacedItem placement) {
     context.controller.selectPlacement(placement.id);
+    return true;
+  }
+
+  @override
+  bool onStickerTap(EditorToolContext context, PlacedSticker sticker) {
+    context.controller.selectSticker(sticker.id);
     return true;
   }
 }

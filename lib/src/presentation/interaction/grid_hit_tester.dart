@@ -5,7 +5,7 @@ import '../../domain/layout/grid_document.dart';
 import '../../domain/geometry/grid_coordinate_mapper.dart';
 import 'grid_hit.dart';
 
-/// Classifies pointer positions into cell or placement targets before tool dispatch.
+/// Classifies pointer positions into sticker, cell, or placement targets before tool dispatch.
 class GridHitTester {
   const GridHitTester({
     required this.mapper,
@@ -21,14 +21,24 @@ class GridHitTester {
     return mapper.fromLocalPosition(viewportPosition);
   }
 
+  Offset worldAt(Offset viewportPosition) {
+    return mapper.metrics.screenToWorld(viewportPosition);
+  }
+
   GridHit classifyTap(Offset viewportPosition) {
-    final world = mapper.metrics.screenToWorld(viewportPosition);
+    final world = worldAt(viewportPosition);
+    final (row, col) = cellAt(viewportPosition);
+
+    final sticker = mapper.hitTestSticker(world, document, catalog);
+    if (sticker != null) {
+      return StickerHit(sticker: sticker, row: row, col: col);
+    }
+
     final placement = mapper.hitTestPlacement(
       world,
       document,
       catalog,
     );
-    final (row, col) = mapper.fromLocalPosition(viewportPosition);
 
     if (placement != null) {
       return PlacementHit(placement: placement, row: row, col: col);

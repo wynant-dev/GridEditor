@@ -75,4 +75,50 @@ void main() {
     expect(hitTester.cellAt(cellCenter(metrics, 0, 0)), (0, 0));
     expect(hitTester.cellAt(cellCenter(metrics, 1, 1)), (1, 1));
   });
+
+  test('classifyTap returns StickerHit over PlacementHit', () {
+    const catalogWithStickers = Catalog(
+      id: 'test',
+      name: 'Test',
+      items: [
+        CatalogItem(id: 'house', name: 'House', categoryId: 'buildings', width: 1, height: 1),
+      ],
+      stickers: [
+        CatalogSticker(
+          id: 'tree',
+          name: 'Tree',
+          iconPath: 'assets/icons/nature.png',
+        ),
+      ],
+    );
+    const placement = PlacedItem(
+      id: 'p1',
+      catalogItemId: 'house',
+      originRow: 0,
+      originCol: 0,
+    );
+    final stickerCenter = cellCenter(metrics, 0, 0);
+    final document = GridDocument(
+      rows: 2,
+      cols: 2,
+      placements: const [placement],
+      stickers: [
+        PlacedSticker(
+          id: 's1',
+          catalogStickerId: 'tree',
+          x: stickerCenter.dx,
+          y: stickerCenter.dy,
+        ),
+      ],
+    );
+    final hitTester = GridHitTester(
+      mapper: mapper,
+      document: document,
+      catalog: catalogWithStickers,
+    );
+
+    final hit = hitTester.classifyTap(stickerCenter);
+
+    expect(hit, isA<StickerHit>());
+  });
 }

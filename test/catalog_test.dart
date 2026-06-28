@@ -59,5 +59,32 @@ void main() {
       expect(restored.categories, catalog.categories);
       expect(restored.items.single.categoryId, 'buildings');
     });
+
+    test('serializes stickers', () {
+      const catalog = Catalog(
+        id: 'test',
+        name: 'Test',
+        stickers: [
+          CatalogSticker(
+            id: 'tree',
+            name: 'Tree',
+            iconPath: 'assets/icons/nature.png',
+          ),
+        ],
+      );
+
+      final restored = Catalog.fromJsonMap(catalog.toJsonMap());
+
+      expect(restored.stickers.single.id, 'tree');
+      expect(restored.stickers.single.iconPath, 'assets/icons/nature.png');
+    });
+
+    test('parses stickers from sandbox.json', () async {
+      final json = await rootBundle.loadString('assets/catalogs/sandbox.json');
+      final catalog = Catalog.fromJson(json);
+
+      expect(catalog.stickers, hasLength(4));
+      expect(catalog.stickerById('tree')?.name, 'Tree');
+    });
   });
 }

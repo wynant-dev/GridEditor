@@ -1,11 +1,15 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 
 import '../../domain/catalog/catalog.dart';
 import '../../domain/layout/grid_document.dart';
 import '../../domain/layout/placed_item.dart';
+import '../../domain/layout/placed_sticker.dart';
+import '../../domain/sticker/sticker_bounds.dart';
 import '../../application/editor_controller.dart';
+import '../../application/interaction/sticker_drag_session.dart';
 import '../../application/tools/editor_tool_context.dart';
 import '../../application/tools/tool_manager.dart';
 import '../../domain/geometry/grid_coordinate_mapper.dart';
@@ -14,7 +18,7 @@ import 'grid_hit.dart';
 import 'grid_hit_tester.dart';
 import 'grid_interaction_state.dart';
 
-/// Handles pointer events for the grid canvas and resolves cell/placement taps.
+/// Handles pointer events for the grid canvas and resolves cell/placement/sticker taps.
 class GridInteractionHandler {
   GridInteractionHandler({
     required GridCoordinateMapper mapper,
@@ -47,12 +51,16 @@ class GridInteractionHandler {
   int? _activePointerId;
   Offset? _pointerDownPosition;
   PlacedItem? _pointerDownPlacement;
+  PlacedSticker? _pointerDownSticker;
   int? _grabOffsetRow;
   int? _grabOffsetCol;
+  Offset? _stickerGrabOffset;
   DragSession? _dragSession;
+  StickerDragSession? _stickerDragSession;
   Timer? _longPressTimer;
 
-  bool get isDragging => _dragSession != null;
+  bool get isDragging =>
+      _dragSession != null || _stickerDragSession != null;
 
   GridHitTester get _hitTester => GridHitTester(
         mapper: _mapper,
@@ -84,21 +92,33 @@ class GridInteractionHandler {
 
   void handlePointerHover(PointerHoverEvent event) {
     if (!supportsHover) return;
-    _handleCellHover(event.localPosition);
+    _handlePointerHover(event.localPosition);
   }
 
   void handlePointerDown(PointerDownEvent event) {
     if (event.buttons != kPrimaryButton) return;
     _activePointerId = event.pointer;
     _pointerDownPosition = event.localPosition;
-    _pointerDownPlacement = _mapper.hitTestPlacement(
-      _mapper.metrics.screenToWorld(event.localPosition),
-      _document,
-      _catalog,
-    );
+
+    final world = _hitTester.worldAt(event.localPosition);
+    _pointerDownSticker = _mapper.hitTestSticker(world, _document, _catalog);
+    _pointerDownPlacement = _pointerDownSticker == null
+        ? _mapper.hitTestPlacement(world, _document, _catalog)
+        : null;
+
     _grabOffsetRow = null;
     _grabOffsetCol = null;
+    _stickerGrabOffset = null;
     _cancelLongPressTimer();
+
+    final sticker = _pointerDownSticker;
+    if (sticker != null) {
+      _stickerGrabOffset = world - Offset(sticker.x, sticker.y);
+      _longPressTimer = Timer(_longPressDuration, () {
+        if (_activePointerId == null || _stickerDragSession != null) return;
+        _startStickerDrag(sticker, event.localPosition);
+      });
+    }
 
     final placement = _pointerDownPlacement;
     if (placement != null) {
@@ -111,10 +131,21 @@ class GridInteractionHandler {
       });
     }
 
-    _handleCellHover(event.localPosition);
+    _handlePointerHover(event.localPosition);
   }
 
   void handlePointerMove(PointerMoveEvent event) {
+    if (_activePointerId == event.pointer &&
+        _pointerDownPosition != null &&
+        _pointerDownSticker != null &&
+        _stickerDragSession == null) {
+      final distance = (event.localPosition - _pointerDownPosition!).distance;
+      if (distance > _tapSlop) {
+        _cancelLongPressTimer();
+        _startStickerDrag(_pointerDownSticker!, event.localPosition);
+      }
+    }
+
     if (_activePointerId == event.pointer &&
         _pointerDownPosition != null &&
         _pointerDownPlacement != null &&
@@ -124,6 +155,14 @@ class GridInteractionHandler {
         _cancelLongPressTimer();
         _startDrag(_pointerDownPlacement!, event.localPosition);
       }
+    }
+
+    if (_stickerDragSession != null) {
+      final world = _hitTester.worldAt(event.localPosition);
+      final grabOffset = _stickerDragSession!.grabOffset;
+      final center = _clampStickerCenter(world - grabOffset);
+      interactionState.updateStickerDragPosition(center);
+      return;
     }
 
     if (_dragSession != null) {
@@ -139,41 +178,45 @@ class GridInteractionHandler {
       return;
     }
 
-    // Always follow the pointer during move — hover events are suppressed while
-    // the primary button is down and on touch devices hover is unavailable.
-    _handleCellHover(event.localPosition);
+    _handlePointerHover(event.localPosition);
   }
 
   void handlePointerUp(PointerUpEvent event) {
     if (_activePointerId != event.pointer) {
-      _clearDragSessionIfIdle();
+      _clearDragSessionsIfIdle();
       return;
     }
 
     if (_pointerDownPosition == null) {
-      _clearDragSessionIfIdle();
+      _clearDragSessionsIfIdle();
       return;
     }
 
     _cancelLongPressTimer();
 
-    final wasDragging = _dragSession != null;
-    if (wasDragging) {
-      _resolveDragEnd();
+    final wasPlacementDragging = _dragSession != null;
+    final wasStickerDragging = _stickerDragSession != null;
+    if (wasPlacementDragging) {
+      _resolvePlacementDragEnd();
+    }
+    if (wasStickerDragging) {
+      _resolveStickerDragEnd();
     }
 
-    final toolManager = this.toolManager;
     toolManager?.handlePointerUp();
 
     final downPosition = _pointerDownPosition!;
     _activePointerId = null;
     _pointerDownPosition = null;
     _pointerDownPlacement = null;
+    _pointerDownSticker = null;
     _grabOffsetRow = null;
     _grabOffsetCol = null;
+    _stickerGrabOffset = null;
     _dragSession = null;
+    _stickerDragSession = null;
 
-    if (wasDragging) {
+    if (wasPlacementDragging || wasStickerDragging) {
       return;
     }
 
@@ -191,23 +234,30 @@ class GridInteractionHandler {
       _activePointerId = null;
       _pointerDownPosition = null;
       _pointerDownPlacement = null;
+      _pointerDownSticker = null;
       _grabOffsetRow = null;
       _grabOffsetCol = null;
+      _stickerGrabOffset = null;
       if (_dragSession != null) {
         interactionState.clearDragSession();
         _dragSession = null;
+      }
+      if (_stickerDragSession != null) {
+        interactionState.clearStickerDragSession();
+        _stickerDragSession = null;
       }
     }
   }
 
   void handleHoverExit() {
     _cancelLongPressTimer();
-    _clearDragSessionIfIdle();
+    _clearDragSessionsIfIdle();
     interactionState.setHoverCell(null, null);
+    interactionState.setHoverWorldPosition(null);
   }
 
-  void _startDrag(PlacedItem placement, Offset worldPosition) {
-    if (!_canStartDrag(placement)) return;
+  void _startDrag(PlacedItem placement, Offset viewportPosition) {
+    if (!_canStartPlacementDrag(placement)) return;
 
     final editorController = this.editorController;
     if (editorController != null &&
@@ -217,7 +267,7 @@ class GridInteractionHandler {
 
     final grabOffsetRow = _grabOffsetRow ?? 0;
     final grabOffsetCol = _grabOffsetCol ?? 0;
-    final (pointerRow, pointerCol) = _hitTester.cellAt(worldPosition);
+    final (pointerRow, pointerCol) = _hitTester.cellAt(viewportPosition);
     final origin = _originFromPointer(
       pointerRow: pointerRow,
       pointerCol: pointerCol,
@@ -238,12 +288,52 @@ class GridInteractionHandler {
     interactionState.startDragSession(session);
   }
 
-  bool _canStartDrag(PlacedItem placement) {
+  void _startStickerDrag(PlacedSticker sticker, Offset viewportPosition) {
+    if (!_canStartStickerDrag(sticker)) return;
+
+    final editorController = this.editorController;
+    if (editorController != null &&
+        editorController.selectedStickerId != sticker.id) {
+      editorController.selectSticker(sticker.id);
+    }
+
+    final world = _hitTester.worldAt(viewportPosition);
+    final grabOffset = _stickerGrabOffset ?? world - Offset(sticker.x, sticker.y);
+    final center = _clampStickerCenter(world - grabOffset);
+    final session = StickerDragSession(
+      stickerId: sticker.id,
+      grabOffset: grabOffset,
+      currentCenter: center,
+    );
+    _stickerDragSession = session;
+    interactionState.startStickerDragSession(session);
+  }
+
+  bool _canStartPlacementDrag(PlacedItem placement) {
     final toolManager = this.toolManager;
     if (toolManager != null) {
       return toolManager.canStartDrag(placement);
     }
     return true;
+  }
+
+  bool _canStartStickerDrag(PlacedSticker sticker) {
+    final toolManager = this.toolManager;
+    if (toolManager != null) {
+      return toolManager.canStartStickerDrag(sticker);
+    }
+    return true;
+  }
+
+  Offset _clampStickerCenter(Offset center) {
+    final metrics = _mapper.metrics;
+    return StickerBounds.clampCenter(
+      rows: _document.rows,
+      cols: _document.cols,
+      cellSize: metrics.cellSize,
+      origin: metrics.origin,
+      center: center,
+    );
   }
 
   (int row, int col) _originFromPointer({
@@ -267,7 +357,7 @@ class GridInteractionHandler {
     return (originRow, originCol);
   }
 
-  void _resolveDragEnd() {
+  void _resolvePlacementDragEnd() {
     final session = interactionState.dragSession ?? _dragSession;
     if (session == null) return;
 
@@ -283,40 +373,80 @@ class GridInteractionHandler {
     interactionState.clearDragSession();
   }
 
+  void _resolveStickerDragEnd() {
+    final session = interactionState.stickerDragSession ?? _stickerDragSession;
+    if (session == null) return;
+
+    final editorController = this.editorController;
+    if (editorController != null) {
+      final metrics = _mapper.metrics;
+      editorController.moveSticker(
+        stickerId: session.stickerId,
+        x: session.currentCenter.dx,
+        y: session.currentCenter.dy,
+        cellSize: metrics.cellSize,
+        origin: metrics.origin,
+      );
+    }
+
+    interactionState.clearStickerDragSession();
+  }
+
   void _cancelLongPressTimer() {
     _longPressTimer?.cancel();
     _longPressTimer = null;
   }
 
-  void _clearDragSessionIfIdle() {
+  void _clearDragSessionsIfIdle() {
     if (_activePointerId != null) return;
-    if (_dragSession == null && !interactionState.isDragging) return;
+    if (_dragSession == null &&
+        _stickerDragSession == null &&
+        !interactionState.isDragging) {
+      return;
+    }
     interactionState.clearDragSession();
+    interactionState.clearStickerDragSession();
     _dragSession = null;
+    _stickerDragSession = null;
   }
 
-  void _handleCellHover(Offset viewportPosition) {
+  void _handlePointerHover(Offset viewportPosition) {
     if (interactionState.isDragging) return;
 
     final (row, col) = _hitTester.cellAt(viewportPosition);
+    final world = _hitTester.worldAt(viewportPosition);
     final toolManager = this.toolManager;
     final editorController = this.editorController;
 
+    interactionState.setHoverCell(row, col);
+    interactionState.setHoverWorldPosition(world);
+
     if (toolManager != null && editorController != null) {
-      toolManager.handleCellHover(
-        EditorToolContext(
-          row: row,
-          col: col,
-          controller: editorController,
-          engine: editorController.engine,
-          onHover: (row, col) => interactionState.setHoverCell(row, col),
-          isPointerDown: _activePointerId != null,
-        ),
-      );
+      toolManager.handleCellHover(_toolContext(viewportPosition, row: row, col: col));
       return;
     }
+  }
 
-    interactionState.setHoverCell(row, col);
+  EditorToolContext _toolContext(
+    Offset viewportPosition, {
+    required int row,
+    required int col,
+  }) {
+    final editorController = this.editorController!;
+    final metrics = _mapper.metrics;
+    return EditorToolContext(
+      row: row,
+      col: col,
+      worldPosition: _hitTester.worldAt(viewportPosition),
+      cellSize: metrics.cellSize,
+      origin: metrics.origin,
+      controller: editorController,
+      engine: editorController.engine,
+      onHover: (row, col) => interactionState.setHoverCell(row, col),
+      onHoverWorld: (position) =>
+          interactionState.setHoverWorldPosition(position),
+      isPointerDown: _activePointerId != null,
+    );
   }
 
   void _resolveTap(Offset viewportPosition) {
@@ -325,30 +455,39 @@ class GridInteractionHandler {
 
     if (toolManager != null && editorController != null) {
       final hit = _hitTester.classifyTap(viewportPosition);
-      final ctx = EditorToolContext(
+      final ctx = _toolContext(
+        viewportPosition,
         row: switch (hit) {
           CellHit(:final row) => row,
           PlacementHit(:final row) => row,
+          StickerHit(:final row) => row,
         },
         col: switch (hit) {
           CellHit(:final col) => col,
           PlacementHit(:final col) => col,
+          StickerHit(:final col) => col,
         },
-        controller: editorController,
-        engine: editorController.engine,
-        onHover: (row, col) => interactionState.setHoverCell(row, col),
       );
 
       switch (hit) {
+        case StickerHit(:final sticker):
+          toolManager.handleStickerTap(ctx, sticker);
         case PlacementHit(:final placement):
           toolManager.handlePlacementTap(ctx, placement);
         case CellHit():
-          toolManager.handleCellTap(ctx);
+          if (!toolManager.handleWorldTap(ctx)) {
+            toolManager.handleCellTap(ctx);
+          }
       }
       return;
     }
 
     final world = _mapper.metrics.screenToWorld(viewportPosition);
+    final sticker = _mapper.hitTestSticker(world, _document, _catalog);
+    if (sticker != null) {
+      return;
+    }
+
     final placement = _mapper.hitTestPlacement(
       world,
       _document,

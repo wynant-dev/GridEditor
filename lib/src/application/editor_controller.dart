@@ -1,8 +1,11 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 
 import '../domain/catalog/catalog.dart';
 import '../domain/layout/grid_document.dart';
 import '../domain/layout/placed_item.dart';
+import '../domain/layout/placed_sticker.dart';
 import 'editor_engine.dart';
 import '../domain/placement/placement_rules.dart';
 import 'selection_history_entry.dart';
@@ -10,6 +13,7 @@ import 'selection_state.dart';
 import 'tools/default_tool.dart';
 import 'tools/floor_tool.dart';
 import 'tools/place_tool.dart';
+import 'tools/sticker_tool.dart';
 import 'tools/tool_manager.dart';
 
 /// Single source of truth for editor state: engine + UI selection.
@@ -38,6 +42,7 @@ class EditorController extends ChangeNotifier {
   EditorEngine _engine;
   String? _selectedItemId;
   String? _selectedFloorId;
+  String? _selectedStickerCatalogId;
   SelectionState _selection = const SelectionState();
   final List<SelectionHistoryEntry> _selectionHistory = [];
   ToolManager _toolManager;
@@ -48,10 +53,12 @@ class EditorController extends ChangeNotifier {
   GridDocument get layout => _engine.layout;
   String? get selectedItemId => _selectedItemId;
   String? get selectedFloorId => _selectedFloorId;
+  String? get selectedStickerCatalogId => _selectedStickerCatalogId;
   List<SelectionHistoryEntry> get selectionHistory =>
       List.unmodifiable(_selectionHistory);
   SelectionState get selection => _selection;
   String? get selectedPlacementId => _selection.selectedPlacementId;
+  String? get selectedStickerId => _selection.selectedStickerId;
   ToolManager get toolManager => _toolManager;
 
   PlacedItem? get selectedPlacement {
@@ -60,12 +67,19 @@ class EditorController extends ChangeNotifier {
     return _engine.placementById(id);
   }
 
+  PlacedSticker? get selectedSticker {
+    final id = selectedStickerId;
+    if (id == null) return null;
+    return _engine.stickerById(id);
+  }
+
   void configurePlaceError(void Function(String error)? onPlaceError) {
     _onPlaceError = onPlaceError;
     final activeTool = _toolManager.activeTool;
     final newActive = switch (activeTool) {
       PlaceTool() => PlaceTool(onPlaceError: onPlaceError),
       FloorTool() => FloorTool(onPaintError: onPlaceError),
+      StickerTool() => StickerTool(onPlaceError: onPlaceError),
       final tool => tool,
     };
     _toolManager = ToolManager(
@@ -77,9 +91,12 @@ class EditorController extends ChangeNotifier {
   void _syncToolsFromSelection() {
     final onError = _onPlaceError;
     _toolManager = ToolManager(
-      activeTool: _selectedFloorId != null
-          ? FloorTool(onPaintError: onError)
-          : PlaceTool(onPlaceError: onError),
+      activeTool: switch (null) {
+        _ when _selectedFloorId != null => FloorTool(onPaintError: onError),
+        _ when _selectedStickerCatalogId != null =>
+          StickerTool(onPlaceError: onError),
+        _ => PlaceTool(onPlaceError: onError),
+      },
       defaultTool: DefaultTool(onPlaceError: onError),
     );
   }
@@ -88,6 +105,7 @@ class EditorController extends ChangeNotifier {
     _engine = _engine.copyWith(catalog: catalog);
     _selectedItemId = null;
     _selectedFloorId = null;
+    _selectedStickerCatalogId = null;
     _selection = const SelectionState();
     _selectionHistory.clear();
     _syncToolsFromSelection();
@@ -97,6 +115,7 @@ class EditorController extends ChangeNotifier {
   void selectItem(String itemId) {
     _selectedItemId = itemId;
     _selectedFloorId = null;
+    _selectedStickerCatalogId = null;
     _selection = const SelectionState();
     _syncToolsFromSelection();
     notifyListeners();
@@ -105,8 +124,19 @@ class EditorController extends ChangeNotifier {
   void selectFloor(String floorId) {
     _selectedFloorId = floorId;
     _selectedItemId = null;
+    _selectedStickerCatalogId = null;
     _selection = const SelectionState();
     _syncToolsFromSelection();
+    notifyListeners();
+  }
+
+  void selectStickerCatalog(String stickerId) {
+    _selectedStickerCatalogId = stickerId;
+    _selectedItemId = null;
+    _selectedFloorId = null;
+    _selection = const SelectionState();
+    _syncToolsFromSelection();
+    _pushHistory(SelectionHistoryEntry(kind: SelectionKind.sticker, id: stickerId));
     notifyListeners();
   }
 
@@ -116,6 +146,8 @@ class EditorController extends ChangeNotifier {
         selectItem(entry.id);
       case SelectionKind.floor:
         selectFloor(entry.id);
+      case SelectionKind.sticker:
+        selectStickerCatalog(entry.id);
     }
   }
 
@@ -128,9 +160,20 @@ class EditorController extends ChangeNotifier {
   }
 
   void selectPlacement(String placementId) {
-    _selection = _selection.copyWith(selectedPlacementId: placementId);
+    _selection = SelectionState(selectedPlacementId: placementId);
     _selectedItemId = null;
     _selectedFloorId = null;
+    _selectedStickerCatalogId = null;
+    _syncToolsFromSelection();
+    notifyListeners();
+  }
+
+  void selectSticker(String stickerId) {
+    _selection = SelectionState(selectedStickerId: stickerId);
+    _selectedItemId = null;
+    _selectedFloorId = null;
+    _selectedStickerCatalogId = null;
+    _syncToolsFromSelection();
     notifyListeners();
   }
 
@@ -189,9 +232,42 @@ class EditorController extends ChangeNotifier {
     }
   }
 
+  /// Places the selected catalog sticker at [worldCenter].
+  /// Returns an error message on failure.
+  String? placeStickerAt({
+    required Offset worldCenter,
+    required double cellSize,
+    required Offset origin,
+  }) {
+    final selectedId = _selectedStickerCatalogId;
+    if (selectedId == null) return null;
+
+    try {
+      _engine = _engine.placeSticker(
+        catalogStickerId: selectedId,
+        x: worldCenter.dx,
+        y: worldCenter.dy,
+        cellSize: cellSize,
+        origin: origin,
+      );
+      notifyListeners();
+      return null;
+    } on StateError catch (error) {
+      return error.message;
+    }
+  }
+
   void removePlacement(PlacedItem placement) {
     _engine = _engine.removePlacement(placement.id);
     if (_selection.selectedPlacementId == placement.id) {
+      _selection = const SelectionState();
+    }
+    notifyListeners();
+  }
+
+  void removeSticker(PlacedSticker sticker) {
+    _engine = _engine.removeSticker(sticker.id);
+    if (_selection.selectedStickerId == sticker.id) {
       _selection = const SelectionState();
     }
     notifyListeners();
@@ -208,6 +284,29 @@ class EditorController extends ChangeNotifier {
         placementId: placementId,
         newRow: newRow,
         newCol: newCol,
+      );
+      notifyListeners();
+      return true;
+    } on StateError {
+      return false;
+    }
+  }
+
+  /// Moves a sticker to a new center. Returns false when the move is invalid.
+  bool moveSticker({
+    required String stickerId,
+    required double x,
+    required double y,
+    required double cellSize,
+    required Offset origin,
+  }) {
+    try {
+      _engine = _engine.moveSticker(
+        stickerId: stickerId,
+        x: x,
+        y: y,
+        cellSize: cellSize,
+        origin: origin,
       );
       notifyListeners();
       return true;

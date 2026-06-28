@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
@@ -315,5 +317,65 @@ void main() {
 
     expect(controller.selectedItemId, 'a');
     expect(controller.selectedFloorId, isNull);
+  });
+
+  group('Sticker selection', () {
+    const stickerCatalog = Catalog(
+      id: 'test',
+      name: 'Test',
+      stickers: [
+        CatalogSticker(
+          id: 'tree',
+          name: 'Tree',
+          iconPath: 'assets/icons/nature.png',
+        ),
+      ],
+    );
+
+    test('selectStickerCatalog switches active tool to StickerTool', () {
+      final controller = EditorController()..loadCatalog(stickerCatalog);
+
+      controller.selectStickerCatalog('tree');
+
+      expect(controller.selectedStickerCatalogId, 'tree');
+      expect(controller.toolManager.activeTool, isA<StickerTool>());
+    });
+
+    test('selectSticker clears placement and catalog selections', () {
+      final controller = EditorController()
+        ..loadCatalog(stickerCatalog)
+        ..selectStickerCatalog('tree');
+
+      controller.selectSticker('s1');
+
+      expect(controller.selectedStickerId, 's1');
+      expect(controller.selectedStickerCatalogId, isNull);
+      expect(controller.selectedItemId, isNull);
+    });
+
+    test('selectPlacement clears sticker selection', () {
+      final controller = EditorController()
+        ..loadCatalog(catalog)
+        ..selectSticker('s1');
+
+      controller.selectPlacement('p1');
+
+      expect(controller.selectedStickerId, isNull);
+      expect(controller.selectedPlacementId, 'p1');
+    });
+
+    test('placeStickerAt places sticker at world center', () {
+      final controller = EditorController()..loadCatalog(stickerCatalog);
+      controller.selectStickerCatalog('tree');
+
+      final error = controller.placeStickerAt(
+        worldCenter: const Offset(24, 24),
+        cellSize: 48,
+        origin: Offset.zero,
+      );
+
+      expect(error, isNull);
+      expect(controller.layout.stickers, hasLength(1));
+    });
   });
 }

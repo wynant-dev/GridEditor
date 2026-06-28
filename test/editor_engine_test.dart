@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
@@ -372,6 +374,100 @@ void main() {
         source: engine.layoutToJson(),
       );
       expect(restored.layout.placements.single.catalogItemId, 'bank');
+    });
+  });
+
+  group('Sticker operations', () {
+    const stickerCatalog = Catalog(
+      id: 'test',
+      name: 'Test',
+      stickers: [
+        CatalogSticker(
+          id: 'tree',
+          name: 'Tree',
+          iconPath: 'assets/icons/nature.png',
+        ),
+      ],
+    );
+    const origin = Offset.zero;
+    const cellSize = 48.0;
+
+    test('placeSticker appends sticker within bounds', () {
+      final engine = const EditorEngine(
+        catalog: stickerCatalog,
+        layout: GridDocument(rows: 4, cols: 4),
+      ).placeSticker(
+        catalogStickerId: 'tree',
+        x: 24,
+        y: 24,
+        cellSize: cellSize,
+        origin: origin,
+      );
+
+      expect(engine.layout.stickers, hasLength(1));
+      expect(engine.layout.stickers.single.catalogStickerId, 'tree');
+      expect(engine.layout.stickers.single.id, 's1');
+    });
+
+    test('placeSticker rejects out of bounds', () {
+      final engine = const EditorEngine(
+        catalog: stickerCatalog,
+        layout: GridDocument(rows: 4, cols: 4),
+      );
+
+      expect(
+        () => engine.placeSticker(
+          catalogStickerId: 'tree',
+          x: 5,
+          y: 24,
+          cellSize: cellSize,
+          origin: origin,
+        ),
+        throwsStateError,
+      );
+    });
+
+    test('moveSticker updates position', () {
+      final engine = const EditorEngine(
+        catalog: stickerCatalog,
+        layout: GridDocument(rows: 4, cols: 4),
+      ).placeSticker(
+        catalogStickerId: 'tree',
+        x: 24,
+        y: 24,
+        cellSize: cellSize,
+        origin: origin,
+        stickerId: 's1',
+      );
+
+      final moved = engine.moveSticker(
+        stickerId: 's1',
+        x: 72,
+        y: 72,
+        cellSize: cellSize,
+        origin: origin,
+      );
+
+      expect(moved.layout.stickers.single.x, 72);
+      expect(moved.layout.stickers.single.y, 72);
+    });
+
+    test('removeSticker removes sticker', () {
+      final engine = const EditorEngine(
+        catalog: stickerCatalog,
+        layout: GridDocument(rows: 4, cols: 4),
+      ).placeSticker(
+        catalogStickerId: 'tree',
+        x: 24,
+        y: 24,
+        cellSize: cellSize,
+        origin: origin,
+        stickerId: 's1',
+      );
+
+      final updated = engine.removeSticker('s1');
+
+      expect(updated.layout.stickers, isEmpty);
     });
   });
 

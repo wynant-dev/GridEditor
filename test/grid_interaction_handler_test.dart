@@ -154,4 +154,62 @@ void main() {
       expect(largeController.layout.placements.single.originCol, 0);
     });
   });
+
+  group('GridInteractionHandler sticker drag', () {
+    const stickerCatalog = Catalog(
+      id: 'test',
+      name: 'Test',
+      stickers: [
+        CatalogSticker(
+          id: 'tree',
+          name: 'Tree',
+          iconPath: 'assets/icons/nature.png',
+        ),
+      ],
+    );
+
+    test('drag commits sticker move', () {
+      final metrics = GridMetrics(
+        rows: 4,
+        cols: 4,
+        size: const Size(400, 400),
+      );
+      final center = cellCenter(metrics, 0, 0);
+      final document = GridDocument(
+        rows: 4,
+        cols: 4,
+        stickers: [
+          PlacedSticker(
+            id: 's1',
+            catalogStickerId: 'tree',
+            x: center.dx,
+            y: center.dy,
+          ),
+        ],
+      );
+      final editorController = EditorController(
+        engine: EditorEngine(catalog: stickerCatalog, layout: document),
+      )..loadCatalog(stickerCatalog);
+      final interactionState = GridInteractionState();
+      final handler = GridInteractionHandler(
+        mapper: GridCoordinateMapper(metrics),
+        document: document,
+        catalog: stickerCatalog,
+        interactionState: interactionState,
+        editorController: editorController,
+        toolManager: editorController.toolManager,
+      );
+
+      final pointer = TestPointer(5);
+      final target = cellCenter(metrics, 1, 1);
+      handler.handlePointerDown(pointer.down(center));
+      handler.handlePointerMove(pointer.move(target));
+      handler.handlePointerUp(pointer.up());
+
+      final sticker = editorController.layout.stickers.single;
+      expect(sticker.x, closeTo(target.dx, 0.01));
+      expect(sticker.y, closeTo(target.dy, 0.01));
+      expect(editorController.selectedStickerId, 's1');
+    });
+  });
 }

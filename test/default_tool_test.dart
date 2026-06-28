@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
+import 'grid_test_helpers.dart';
+
 void main() {
   const catalog = Catalog(
     id: 'test',
@@ -10,19 +12,12 @@ void main() {
     ],
   );
 
-  EditorToolContext ctx(EditorController controller) => EditorToolContext(
-    row: 0,
-    col: 0,
-    controller: controller,
-    engine: controller.engine,
-  );
-
   test('onCellTap places item and returns true', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
       ..selectItem('house');
     final tool = DefaultTool();
-    final context = ctx(controller);
+    final context = testToolContext(controller);
 
     final handled = tool.onCellTap(context);
 
@@ -38,7 +33,7 @@ void main() {
     final placement = controller.layout.placements.single;
     final tool = DefaultTool();
 
-    final handled = tool.onPlacementTap(ctx(controller), placement);
+    final handled = tool.onPlacementTap(testToolContext(controller), placement);
 
     expect(handled, isTrue);
     expect(controller.selectedPlacementId, placement.id);
@@ -50,11 +45,10 @@ void main() {
       ..selectItem('house');
     final interactionState = GridInteractionState();
     final tool = DefaultTool();
-    final context = EditorToolContext(
+    final context = testToolContext(
+      controller,
       row: 2,
       col: 3,
-      controller: controller,
-      engine: controller.engine,
       onHover: (row, col) => interactionState.setHoverCell(row, col),
     );
 

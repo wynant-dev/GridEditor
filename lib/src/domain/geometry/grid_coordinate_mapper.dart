@@ -3,6 +3,8 @@ import 'dart:ui';
 import '../catalog/catalog.dart';
 import '../layout/grid_document.dart';
 import '../layout/placed_item.dart';
+import '../layout/placed_sticker.dart';
+import '../sticker/sticker_bounds.dart';
 import 'grid_metrics.dart';
 
 /// Converts pointer positions on the canvas into grid cell coordinates.
@@ -54,6 +56,31 @@ class GridCoordinateMapper {
 
       if (rect.contains(worldPosition)) {
         return placement;
+      }
+    }
+
+    return null;
+  }
+
+  PlacedSticker? hitTestSticker(
+    Offset worldPosition,
+    GridDocument document,
+    Catalog catalog, {
+    double size = StickerBounds.kDefaultStickerSize,
+  }) {
+    final half = size / 2;
+    for (final sticker in document.stickers.reversed) {
+      if (catalog.stickerById(sticker.catalogStickerId) == null) continue;
+
+      final rect = Rect.fromLTWH(
+        sticker.x - half,
+        sticker.y - half,
+        size,
+        size,
+      );
+
+      if (rect.contains(worldPosition)) {
+        return sticker;
       }
     }
 

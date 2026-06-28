@@ -1,5 +1,5 @@
-/// Whether a history entry refers to a catalog item or a floor type.
-enum SelectionKind { item, floor }
+/// Whether a history entry refers to a catalog item, floor type, or sticker.
+enum SelectionKind { item, floor, sticker }
 
 /// A single entry in the recent selection history (items and floors mixed).
 class SelectionHistoryEntry {

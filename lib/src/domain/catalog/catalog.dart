@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'category.dart';
 import 'floor.dart';
 import 'item.dart';
+import 'sticker.dart';
 
 /// A named collection of placeable item definitions (user-created or loaded from JSON).
 class Catalog {
@@ -12,6 +13,7 @@ class Catalog {
     this.categories = const [],
     this.items = const [],
     this.floors = const [],
+    this.stickers = const [],
   });
 
   final String id;
@@ -19,6 +21,7 @@ class Catalog {
   final List<CatalogCategory> categories;
   final List<CatalogItem> items;
   final List<CatalogFloor> floors;
+  final List<CatalogSticker> stickers;
 
   CatalogCategory? categoryById(String id) {
     for (final category in categories) {
@@ -41,6 +44,13 @@ class Catalog {
     return null;
   }
 
+  CatalogSticker? stickerById(String id) {
+    for (final sticker in stickers) {
+      if (sticker.id == id) return sticker;
+    }
+    return null;
+  }
+
   List<CatalogItem> itemsInCategory(String categoryId) {
     return [
       for (final item in items)
@@ -54,6 +64,7 @@ class Catalog {
     List<CatalogCategory>? categories,
     List<CatalogItem>? items,
     List<CatalogFloor>? floors,
+    List<CatalogSticker>? stickers,
   }) {
     return Catalog(
       id: id ?? this.id,
@@ -61,6 +72,7 @@ class Catalog {
       categories: categories ?? this.categories,
       items: items ?? this.items,
       floors: floors ?? this.floors,
+      stickers: stickers ?? this.stickers,
     );
   }
 
@@ -93,6 +105,8 @@ class Catalog {
     'items': [for (final item in items) item.toJson()],
     if (floors.isNotEmpty)
       'floors': [for (final floor in floors) floor.toJson()],
+    if (stickers.isNotEmpty)
+      'stickers': [for (final sticker in stickers) sticker.toJson()],
   };
 
   factory Catalog.fromJson(String source) {
@@ -105,6 +119,7 @@ class Catalog {
     final rawCategories = json['categories'] as List<dynamic>? ?? [];
     final rawItems = json['items'] as List<dynamic>? ?? [];
     final rawFloors = json['floors'] as List<dynamic>? ?? [];
+    final rawStickers = json['stickers'] as List<dynamic>? ?? [];
     return Catalog(
       id: json['id'] as String,
       name: json['name'] as String,
@@ -119,6 +134,10 @@ class Catalog {
       floors: [
         for (final entry in rawFloors)
           CatalogFloor.fromJson(entry as Map<String, dynamic>),
+      ],
+      stickers: [
+        for (final entry in rawStickers)
+          CatalogSticker.fromJson(entry as Map<String, dynamic>),
       ],
     );
   }
