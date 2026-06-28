@@ -145,11 +145,16 @@ class EditorEngine {
       throw StateError('Unknown floor: $catalogFloorId');
     }
 
-    final updatedTiles = [
+    final withoutCell = [
       for (final tile in layout.floorTiles)
         if (tile.row != row || tile.col != col) tile,
-      FloorTile(row: row, col: col, catalogFloorId: catalogFloorId),
     ];
+    final updatedTiles = catalogFloorId == layout.defaultFloorId
+        ? withoutCell
+        : [
+            ...withoutCell,
+            FloorTile(row: row, col: col, catalogFloorId: catalogFloorId),
+          ];
 
     return copyWith(
       layout: layout.copyWith(floorTiles: updatedTiles),

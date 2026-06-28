@@ -25,13 +25,21 @@ class GridEditorApp extends StatefulWidget {
 class _GridEditorAppState extends State<GridEditorApp> {
   static const _title = 'Grid Editor';
 
+  final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   late final EditorController _controller;
 
   @override
   void initState() {
     super.initState();
     _controller = EditorController();
+    _controller.configurePlaceError(_showPlaceError);
     _loadCatalog();
+  }
+
+  void _showPlaceError(String error) {
+    _scaffoldMessengerKey.currentState?.showSnackBar(
+      SnackBar(content: Text(error)),
+    );
   }
 
   @override
@@ -52,14 +60,8 @@ class _GridEditorAppState extends State<GridEditorApp> {
 
   @override
   Widget build(BuildContext context) {
-    _controller.configurePlaceError((error) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error)),
-      );
-    });
-
     return MaterialApp(
+      scaffoldMessengerKey: _scaffoldMessengerKey,
       title: _title,
       home: ListenableBuilder(
         listenable: _controller,

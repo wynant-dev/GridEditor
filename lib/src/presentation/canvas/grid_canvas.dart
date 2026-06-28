@@ -11,9 +11,8 @@ import 'supports_hover_preview.dart';
 import '../interaction/grid_interaction_handler.dart';
 import '../interaction/grid_interaction_layer.dart';
 import '../interaction/grid_interaction_state.dart';
-import '../renderer/floor_overlay_layer.dart';
+import '../renderer/editor_grid_scene.dart';
 import '../renderer/grid_renderer.dart';
-import '../renderer/placement_overlay_layer.dart';
 import '../renderer/selection_overlay_layer.dart';
 import '../viewport/viewport_controller.dart';
 import '../viewport/viewport_shell.dart';
@@ -68,16 +67,22 @@ class _GridCanvasState extends State<GridCanvas> {
       supportsHover: supportsHoverPreview(),
     );
     _interactionState.addListener(_syncHiddenPlacementFromDrag);
-    widget.controller?.configurePlaceError(widget.onPlaceError);
+    _syncPlaceErrorCallback();
+  }
+
+  void _syncPlaceErrorCallback() {
+    final onPlaceError = widget.onPlaceError;
+    if (onPlaceError != null) {
+      widget.controller?.configurePlaceError(onPlaceError);
+    }
   }
 
   @override
   void didUpdateWidget(GridCanvas oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      widget.controller?.configurePlaceError(widget.onPlaceError);
-    } else if (oldWidget.onPlaceError != widget.onPlaceError) {
-      widget.controller?.configurePlaceError(widget.onPlaceError);
+    if (oldWidget.controller != widget.controller ||
+        oldWidget.onPlaceError != widget.onPlaceError) {
+      _syncPlaceErrorCallback();
     }
   }
 
@@ -146,48 +151,25 @@ class _GridCanvasState extends State<GridCanvas> {
             return ViewportShell(
               viewportController: _viewportController,
               transform: transform,
-              scene: GridRenderer(
-                document: document,
-                catalog: widget.catalog,
-                metrics: metrics,
-                hiddenPlacementId: _hiddenPlacementId,
-                hidePlacements: controller?.selectedFloorId != null,
-              ),
+              scene: controller == null
+                  ? GridRenderer(
+                      document: document,
+                      catalog: widget.catalog,
+                      metrics: metrics,
+                    )
+                  : EditorGridScene(
+                      document: document,
+                      catalog: widget.catalog,
+                      metrics: metrics,
+                      controller: controller,
+                      interactionState: _interactionState,
+                      hiddenPlacementId: _hiddenPlacementId,
+                    ),
               input: GridInteractionLayer(handler: _interactionHandler),
               overlay: controller != null
                   ? Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        ListenableBuilder(
-                          listenable: Listenable.merge([
-                            _interactionState,
-                            controller,
-                          ]),
-                          builder: (context, _) {
-                            return PlacementOverlayLayer(
-                              interactionState: _interactionState,
-                              selectedItemId: controller.selectedItemId,
-                              catalog: widget.catalog,
-                              metrics: metrics,
-                              document: document,
-                            );
-                          },
-                        ),
-                        ListenableBuilder(
-                          listenable: Listenable.merge([
-                            _interactionState,
-                            controller,
-                          ]),
-                          builder: (context, _) {
-                            return FloorOverlayLayer(
-                              interactionState: _interactionState,
-                              selectedFloorId: controller.selectedFloorId,
-                              catalog: widget.catalog,
-                              metrics: metrics,
-                              document: document,
-                            );
-                          },
-                        ),
                         ListenableBuilder(
                           listenable: _interactionState,
                           builder: (context, _) {

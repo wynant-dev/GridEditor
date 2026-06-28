@@ -8,13 +8,17 @@ class GridDocument {
     required this.cols,
     this.placements = const [],
     this.floorTiles = const [],
+    this.defaultFloorId,
   }) : assert(rows > 0),
        assert(cols > 0);
 
   final int rows;
   final int cols;
   final List<PlacedItem> placements;
+
+  /// Per-cell overrides; cells not listed use [defaultFloorId] when set.
   final List<FloorTile> floorTiles;
+  final String? defaultFloorId;
 
   PlacedItem? placementById(String id) {
     for (final placement in placements) {
@@ -29,7 +33,7 @@ class GridDocument {
         return tile.catalogFloorId;
       }
     }
-    return null;
+    return defaultFloorId;
   }
 
   GridDocument copyWith({
@@ -37,12 +41,14 @@ class GridDocument {
     int? cols,
     List<PlacedItem>? placements,
     List<FloorTile>? floorTiles,
+    String? defaultFloorId,
   }) {
     return GridDocument(
       rows: rows ?? this.rows,
       cols: cols ?? this.cols,
       placements: placements ?? this.placements,
       floorTiles: floorTiles ?? this.floorTiles,
+      defaultFloorId: defaultFloorId ?? this.defaultFloorId,
     );
   }
 
@@ -50,6 +56,7 @@ class GridDocument {
     'rows': rows,
     'cols': cols,
     'placements': [for (final p in placements) p.toJson()],
+    if (defaultFloorId != null) 'defaultFloorId': defaultFloorId,
     if (floorTiles.isNotEmpty)
       'floorTiles': [for (final tile in floorTiles) tile.toJson()],
   };
@@ -60,6 +67,7 @@ class GridDocument {
     return GridDocument(
       rows: json['rows'] as int,
       cols: json['cols'] as int,
+      defaultFloorId: json['defaultFloorId'] as String?,
       placements: [
         for (final entry in rawPlacements)
           PlacedItem.fromJson(entry as Map<String, dynamic>),

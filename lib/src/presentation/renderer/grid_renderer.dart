@@ -9,7 +9,111 @@ import '../theme/catalog_color_resolver.dart';
 import 'floor_cell.dart';
 import 'placement_box.dart';
 
-/// Paints grid lines and placements. Does not handle input or editor state.
+/// Default + per-cell floor tiles (bottom paint layer).
+class FloorLayers extends StatelessWidget {
+  const FloorLayers({
+    super.key,
+    required this.document,
+    required this.catalog,
+    required this.metrics,
+  });
+
+  final GridDocument document;
+  final Catalog catalog;
+  final GridMetrics metrics;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        _DefaultFloorLayer(
+          document: document,
+          catalog: catalog,
+          metrics: metrics,
+        ),
+        for (final tile in document.floorTiles)
+          _FloorLayer(
+            tile: tile,
+            catalog: catalog,
+            metrics: metrics,
+          ),
+      ],
+    );
+  }
+}
+
+/// Grid line overlay.
+class GridLinesLayer extends StatelessWidget {
+  static const double gridLineOpacity = 0.35;
+
+  const GridLinesLayer({
+    super.key,
+    required this.metrics,
+  });
+
+  final GridMetrics metrics;
+
+  @override
+  Widget build(BuildContext context) {
+    final lineColor = Colors.black.withValues(alpha: gridLineOpacity);
+
+    return Positioned(
+      left: metrics.origin.dx,
+      top: metrics.origin.dy,
+      width: metrics.gridSize.width,
+      height: metrics.gridSize.height,
+      child: CustomPaint(
+        size: metrics.gridSize,
+        painter: _GridLinePainter(metrics: metrics, color: lineColor),
+      ),
+    );
+  }
+}
+
+/// Catalog placements in the scene (committed or semi-transparent ghosts).
+class PlacementLayers extends StatelessWidget {
+  const PlacementLayers({
+    super.key,
+    required this.document,
+    required this.catalog,
+    required this.metrics,
+    this.hiddenPlacementId,
+    this.ghostOpacity,
+  });
+
+  final GridDocument document;
+  final Catalog catalog;
+  final GridMetrics metrics;
+
+  /// Omitted while dragging so the overlay can draw the ghost.
+  final String? hiddenPlacementId;
+
+  /// When set, all placements render at this opacity (floor-paint mode).
+  final double? ghostOpacity;
+
+  @override
+  Widget build(BuildContext context) {
+    final inGhostMode = ghostOpacity != null;
+    final opacity = ghostOpacity ?? 1.0;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        for (final placement in document.placements)
+          if (inGhostMode || placement.id != hiddenPlacementId)
+            _PlacementLayer(
+              placement: placement,
+              catalog: catalog,
+              metrics: metrics,
+              opacity: opacity,
+            ),
+      ],
+    );
+  }
+}
+
+/// Read-only stack: floors, grid lines, placements (no editor overlays).
 class GridRenderer extends StatelessWidget {
   const GridRenderer({
     super.key,
@@ -17,7 +121,6 @@ class GridRenderer extends StatelessWidget {
     required this.catalog,
     required this.metrics,
     this.hiddenPlacementId,
-    this.hidePlacements = false,
   });
 
   final GridDocument document;
@@ -25,39 +128,23 @@ class GridRenderer extends StatelessWidget {
   final GridMetrics metrics;
   final String? hiddenPlacementId;
 
-  /// When true, committed placements are omitted so an overlay can draw them.
-  final bool hidePlacements;
-
   @override
   Widget build(BuildContext context) {
-    final lineColor = Colors.grey.shade400;
-
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        for (final tile in document.floorTiles)
-          _FloorLayer(
-            tile: tile,
-            catalog: catalog,
-            metrics: metrics,
-          ),
-        Positioned(
-          left: metrics.origin.dx,
-          top: metrics.origin.dy,
-          width: metrics.gridSize.width,
-          height: metrics.gridSize.height,
-          child: CustomPaint(
-            size: metrics.gridSize,
-            painter: _GridLinePainter(metrics: metrics, color: lineColor),
-          ),
+        FloorLayers(
+          document: document,
+          catalog: catalog,
+          metrics: metrics,
         ),
-        for (final placement in document.placements)
-          if (!hidePlacements && placement.id != hiddenPlacementId)
-            _PlacementLayer(
-              placement: placement,
-              catalog: catalog,
-              metrics: metrics,
-            ),
+        GridLinesLayer(metrics: metrics),
+        PlacementLayers(
+          document: document,
+          catalog: catalog,
+          metrics: metrics,
+          hiddenPlacementId: hiddenPlacementId,
+        ),
       ],
     );
   }
@@ -99,6 +186,35 @@ class _GridLinePainter extends CustomPainter {
   }
 }
 
+class _DefaultFloorLayer extends StatelessWidget {
+  const _DefaultFloorLayer({
+    required this.document,
+    required this.catalog,
+    required this.metrics,
+  });
+
+  final GridDocument document;
+  final Catalog catalog;
+  final GridMetrics metrics;
+
+  @override
+  Widget build(BuildContext context) {
+    final defaultFloorId = document.defaultFloorId;
+    if (defaultFloorId == null) return const SizedBox.shrink();
+
+    final floor = catalog.floorById(defaultFloorId);
+    if (floor == null) return const SizedBox.shrink();
+
+    return Positioned(
+      left: metrics.origin.dx,
+      top: metrics.origin.dy,
+      width: metrics.gridSize.width,
+      height: metrics.gridSize.height,
+      child: ColoredBox(color: CatalogColorResolver.fromFloor(floor)),
+    );
+  }
+}
+
 class _FloorLayer extends StatelessWidget {
   const _FloorLayer({
     required this.tile,
@@ -129,11 +245,13 @@ class _PlacementLayer extends StatelessWidget {
     required this.placement,
     required this.catalog,
     required this.metrics,
+    required this.opacity,
   });
 
   final PlacedItem placement;
   final Catalog catalog;
   final GridMetrics metrics;
+  final double opacity;
 
   @override
   Widget build(BuildContext context) {
@@ -148,6 +266,7 @@ class _PlacementLayer extends StatelessWidget {
       col: placement.originCol,
       width: item.width,
       height: item.height,
+      opacity: opacity,
     );
   }
 }

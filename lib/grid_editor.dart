@@ -32,7 +32,7 @@ export 'src/presentation/renderer/grid_renderer.dart';
 export 'src/presentation/interaction/grid_interaction_state.dart';
 export 'src/presentation/interaction/grid_hit_tester.dart';
 export 'src/presentation/interaction/grid_interaction_layer.dart';
-export 'src/presentation/renderer/floor_overlay_layer.dart';
+export 'src/presentation/renderer/floor_hover_preview_layer.dart';
 export 'src/presentation/renderer/placement_overlay_layer.dart';
 export 'src/presentation/renderer/selection_overlay_layer.dart';
 export 'src/presentation/viewport/viewport_controller.dart';

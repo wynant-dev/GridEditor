@@ -22,7 +22,11 @@ class EditorController extends ChangeNotifier {
            engine ??
            EditorEngine(
              catalog: const Catalog(id: 'default', name: 'My catalog'),
-             layout: const GridDocument(rows:130, cols: 130),
+             layout: const GridDocument(
+               rows: 130,
+               cols: 130,
+               defaultFloorId: 'grass',
+             ),
            ),
        _selectedItemId = selectedItemId,
        _onPlaceError = onPlaceError,

@@ -24,6 +24,37 @@ void main() {
     expect(document.floorIdAt(0, 0), isNull);
   });
 
+  test('floorIdAt falls back to defaultFloorId', () {
+    const document = GridDocument(
+      rows: 4,
+      cols: 4,
+      defaultFloorId: 'grass',
+      floorTiles: [
+        FloorTile(row: 1, col: 2, catalogFloorId: 'water'),
+      ],
+    );
+
+    expect(document.floorIdAt(0, 0), 'grass');
+    expect(document.floorIdAt(1, 2), 'water');
+  });
+
+  test('defaultFloorId round-trips through JSON', () {
+    const document = GridDocument(
+      rows: 3,
+      cols: 3,
+      defaultFloorId: 'grass',
+      floorTiles: [
+        FloorTile(row: 0, col: 1, catalogFloorId: 'water'),
+      ],
+    );
+
+    final restored = GridDocument.fromJsonMap(document.toJsonMap());
+
+    expect(restored.defaultFloorId, 'grass');
+    expect(restored.floorIdAt(2, 2), 'grass');
+    expect(restored.floorIdAt(0, 1), 'water');
+  });
+
   test('floor tiles round-trip through JSON', () {
     const document = GridDocument(
       rows: 3,
@@ -71,6 +102,26 @@ void main() {
       );
 
       expect(updated.layout.floorTiles, hasLength(1));
+      expect(updated.floorIdAt(1, 2), 'grass');
+    });
+
+    test('painting default floor removes override tile', () {
+      final engine = const EditorEngine(
+        catalog: catalog,
+        layout: GridDocument(
+          rows: 4,
+          cols: 4,
+          defaultFloorId: 'grass',
+        ),
+      ).applyFloor(row: 1, col: 2, catalogFloorId: 'water');
+
+      final updated = engine.applyFloor(
+        row: 1,
+        col: 2,
+        catalogFloorId: 'grass',
+      );
+
+      expect(updated.layout.floorTiles, isEmpty);
       expect(updated.floorIdAt(1, 2), 'grass');
     });
 
