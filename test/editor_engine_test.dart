@@ -51,6 +51,145 @@ void main() {
         'Item overlaps another placement',
       );
     });
+
+    test('isFootprintCellValid marks all cells valid on empty grid', () {
+      const layout = GridDocument(rows: 4, cols: 4);
+      const item = CatalogItem(
+        id: 'house',
+        name: 'House',
+        categoryId: 'buildings',
+        width: 2,
+        height: 2,
+      );
+
+      for (var row = 0; row < 2; row++) {
+        for (var col = 0; col < 2; col++) {
+          expect(
+            PlacementRules.isFootprintCellValid(
+              catalog: catalog,
+              layout: layout,
+              item: item,
+              originRow: 0,
+              originCol: 0,
+              row: row,
+              col: col,
+            ),
+            isTrue,
+          );
+        }
+      }
+    });
+
+    test('isFootprintCellValid marks partial overlap per cell', () {
+      const layout = GridDocument(
+        rows: 4,
+        cols: 4,
+        placements: [
+          PlacedItem(
+            id: 'p1',
+            catalogItemId: 'house',
+            originRow: 0,
+            originCol: 0,
+          ),
+        ],
+      );
+      const item = CatalogItem(
+        id: 'house',
+        name: 'House',
+        categoryId: 'buildings',
+        width: 2,
+        height: 2,
+      );
+
+      expect(
+        PlacementRules.isFootprintCellValid(
+          catalog: catalog,
+          layout: layout,
+          item: item,
+          originRow: 1,
+          originCol: 1,
+          row: 1,
+          col: 1,
+        ),
+        isFalse,
+      );
+      expect(
+        PlacementRules.isFootprintCellValid(
+          catalog: catalog,
+          layout: layout,
+          item: item,
+          originRow: 1,
+          originCol: 1,
+          row: 1,
+          col: 2,
+        ),
+        isTrue,
+      );
+      expect(
+        PlacementRules.isFootprintCellValid(
+          catalog: catalog,
+          layout: layout,
+          item: item,
+          originRow: 1,
+          originCol: 1,
+          row: 2,
+          col: 1,
+        ),
+        isTrue,
+      );
+      expect(
+        PlacementRules.isFootprintCellValid(
+          catalog: catalog,
+          layout: layout,
+          item: item,
+          originRow: 1,
+          originCol: 1,
+          row: 2,
+          col: 2,
+        ),
+        isTrue,
+      );
+    });
+
+    test('isFootprintCellValid ignores dragged placement during move', () {
+      const layout = GridDocument(
+        rows: 4,
+        cols: 4,
+        placements: [
+          PlacedItem(
+            id: 'p1',
+            catalogItemId: 'house',
+            originRow: 0,
+            originCol: 0,
+          ),
+        ],
+      );
+      const item = CatalogItem(
+        id: 'house',
+        name: 'House',
+        categoryId: 'buildings',
+        width: 2,
+        height: 2,
+      );
+
+      for (var row = 0; row < 2; row++) {
+        for (var col = 0; col < 2; col++) {
+          expect(
+            PlacementRules.isFootprintCellValid(
+              catalog: catalog,
+              layout: layout,
+              item: item,
+              originRow: 0,
+              originCol: 0,
+              row: row,
+              col: col,
+              ignorePlacementId: 'p1',
+            ),
+            isTrue,
+          );
+        }
+      }
+    });
   });
 
   group('EditorEngine', () {

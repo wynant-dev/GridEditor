@@ -8,6 +8,7 @@ import '../interaction/grid_interaction_state.dart';
 import 'floor_hover_preview_layer.dart';
 import 'grid_renderer.dart';
 import 'placement_overlay_layer.dart';
+import 'placement_validity_preview_layer.dart';
 
 /// Editor scene stack with correct z-order for floor and placement tools.
 class EditorGridScene extends StatelessWidget {
@@ -59,6 +60,19 @@ class EditorGridScene extends StatelessWidget {
           hiddenPlacementId: inFloorMode ? null : hiddenPlacementId,
           ghostOpacity: inFloorMode ? 0.5 : null,
         ),
+        if (!inFloorMode)
+          _EditorReactive(
+            listenables: [interactionState, controller],
+            builder: (context) {
+              return PlacementValidityPreviewLayer(
+                interactionState: interactionState,
+                selectedItemId: controller.selectedItemId,
+                catalog: catalog,
+                metrics: metrics,
+                document: document,
+              );
+            },
+          ),
         _EditorReactive(
           listenables: [interactionState, controller],
           builder: (context) {

@@ -119,9 +119,65 @@ class PlacementRules {
     int row,
     int col,
   ) {
-    return row >= placement.originRow &&
-        row < placement.originRow + item.height &&
-        col >= placement.originCol &&
-        col < placement.originCol + item.width;
+    return cellInProposedFootprint(
+      item: item,
+      originRow: placement.originRow,
+      originCol: placement.originCol,
+      row: row,
+      col: col,
+    );
+  }
+
+  /// Whether [row]/[col] lies inside a proposed item footprint.
+  static bool cellInProposedFootprint({
+    required CatalogItem item,
+    required int originRow,
+    required int originCol,
+    required int row,
+    required int col,
+  }) {
+    return row >= originRow &&
+        row < originRow + item.height &&
+        col >= originCol &&
+        col < originCol + item.width;
+  }
+
+  /// Whether a single footprint cell can be placed at the proposed origin.
+  static bool isFootprintCellValid({
+    required Catalog catalog,
+    required GridDocument layout,
+    required CatalogItem item,
+    required int originRow,
+    required int originCol,
+    required int row,
+    required int col,
+    String? ignorePlacementId,
+  }) {
+    if (!cellInProposedFootprint(
+      item: item,
+      originRow: originRow,
+      originCol: originCol,
+      row: row,
+      col: col,
+    )) {
+      return false;
+    }
+
+    if (row < 0 ||
+        col < 0 ||
+        row >= layout.rows ||
+        col >= layout.cols) {
+      return false;
+    }
+
+    final covering = placementCovering(
+      catalog: catalog,
+      layout: layout,
+      row: row,
+      col: col,
+    );
+    if (covering == null) return true;
+    if (covering.id == ignorePlacementId) return true;
+    return false;
   }
 }
