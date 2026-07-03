@@ -1,10 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:grid_editor/main.dart' as app;
+import 'package:grid_editor/app.dart';
+import 'package:grid_editor/src/infrastructure/catalog/catalog_loader.dart';
 import 'package:grid_editor/src/presentation/panels/sidebar/floating_catalog_sidebar.dart';
 
 void main() {
   testWidgets('shows floating catalog sidebar', (tester) async {
-    await tester.pumpWidget(const app.GridEditorApp());
+    await tester.pumpWidget(
+      const GridEditorApp(
+        catalogLoader: AssetCatalogLoader(),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byType(FloatingCatalogSidebar), findsOneWidget);

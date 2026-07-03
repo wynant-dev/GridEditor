@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 import 'package:grid_editor/src/presentation/interaction/grid_interaction_handler.dart';
 
-import 'grid_test_helpers.dart';
+import '../../../helpers/grid_test_helpers.dart';
 
 void main() {
   const catalog = Catalog(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../application/editor_controller.dart';
 import '../../../application/selection_history_entry.dart';
-import '../../../domain/catalog/catalog.dart';
 import '../../theme/catalog_color_resolver.dart';
 import 'sidebar_asset_icon.dart';
 import 'sidebar_container.dart';
@@ -24,27 +24,11 @@ enum SidebarSubmenuKind { category, floors, stickers }
 class FloatingCatalogSidebar extends StatefulWidget {
   const FloatingCatalogSidebar({
     super.key,
-    required this.catalog,
-    required this.selectedItemId,
-    required this.selectedFloorId,
-    required this.selectedStickerCatalogId,
-    required this.selectionHistory,
-    required this.onItemSelected,
-    required this.onFloorSelected,
-    required this.onStickerSelected,
-    required this.onHistorySelected,
+    required this.controller,
     this.onSettingsPressed,
   });
 
-  final Catalog catalog;
-  final String? selectedItemId;
-  final String? selectedFloorId;
-  final String? selectedStickerCatalogId;
-  final List<SelectionHistoryEntry> selectionHistory;
-  final ValueChanged<String> onItemSelected;
-  final ValueChanged<String> onFloorSelected;
-  final ValueChanged<String> onStickerSelected;
-  final ValueChanged<SelectionHistoryEntry> onHistorySelected;
+  final EditorController controller;
   final VoidCallback? onSettingsPressed;
 
   @override
@@ -77,7 +61,7 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
   }
 
   void _ensureCategoryKeys() {
-    for (final category in widget.catalog.categories) {
+    for (final category in widget.controller.catalog.categories) {
       _categoryAnchorKeys.putIfAbsent(category.id, GlobalKey.new);
     }
   }
@@ -178,9 +162,9 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
 
   bool _isCategorySelected(String categoryId) {
     if (_openSubmenuKey == categoryId) return true;
-    final selectedId = widget.selectedItemId;
+    final selectedId = widget.controller.selectedItemId;
     if (selectedId == null) return false;
-    return widget.catalog.itemById(selectedId)?.categoryId == categoryId;
+    return widget.controller.catalog.itemById(selectedId)?.categoryId == categoryId;
   }
 
   SidebarSubmenuKind? get _openSubmenuKind {
@@ -208,11 +192,11 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
               children: [
                 const SidebarLogoHeader(),
                 const SizedBox(height: 8),
-                if (widget.catalog.categories.isNotEmpty)
+                if (widget.controller.catalog.categories.isNotEmpty)
                   SidebarSection(
                     showDivider: true,
                     children: [
-                      for (final category in widget.catalog.categories)
+                      for (final category in widget.controller.catalog.categories)
                         KeyedSubtree(
                           key: _categoryAnchorKeys[category.id],
                           child: SidebarIconButton(
@@ -229,32 +213,32 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
                     ],
                   ),
                 SidebarSection(
-                  showDivider: widget.catalog.stickers.isNotEmpty ||
-                      widget.selectionHistory.isNotEmpty,
+                  showDivider: widget.controller.catalog.stickers.isNotEmpty ||
+                      widget.controller.selectionHistory.isNotEmpty,
                   children: [
                     KeyedSubtree(
                       key: _floorAnchorKey,
                       child: SidebarIconButton(
-                        selected: widget.selectedFloorId != null,
+                        selected: widget.controller.selectedFloorId != null,
                         tooltip: 'Floor tool',
                         onPressed: _toggleFloorsSubmenu,
                         icon: SidebarAssetIcon(
                           assetPath: 'assets/icons/floor.png',
-                          selected: widget.selectedFloorId != null,
+                          selected: widget.controller.selectedFloorId != null,
                           fallbackIcon: Icons.format_paint_outlined,
                         ),
                       ),
                     ),
-                    if (widget.catalog.stickers.isNotEmpty)
+                    if (widget.controller.catalog.stickers.isNotEmpty)
                       KeyedSubtree(
                         key: _stickersAnchorKey,
                         child: SidebarIconButton(
-                          selected: widget.selectedStickerCatalogId != null,
+                          selected: widget.controller.selectedStickerCatalogId != null,
                           tooltip: 'Stickers',
                           onPressed: _toggleStickersSubmenu,
                           icon: SidebarAssetIcon(
                             assetPath: 'assets/icons/nature.png',
-                            selected: widget.selectedStickerCatalogId != null,
+                            selected: widget.controller.selectedStickerCatalogId != null,
                             fallbackIcon: Icons.emoji_emotions_outlined,
                           ),
                         ),
@@ -262,7 +246,7 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
                   ],
                 ),
                 const Spacer(),
-                if (widget.selectionHistory.isNotEmpty) ...[
+                if (widget.controller.selectionHistory.isNotEmpty) ...[
                   SidebarSection(
                     showDivider: true,
                     children: _buildHistoryButtons(),
@@ -293,11 +277,11 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
 
   List<Widget> _buildHistoryButtons() {
     return [
-      for (final entry in widget.selectionHistory)
+      for (final entry in widget.controller.selectionHistory)
         SidebarHistoryButton(
           color: _colorForHistoryEntry(entry),
           label: _labelForHistoryEntry(entry),
-          onPressed: () => widget.onHistorySelected(entry),
+          onPressed: () => widget.controller.reselectFromHistory(entry),
         ),
     ];
   }
@@ -305,12 +289,12 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
   Color _colorForHistoryEntry(SelectionHistoryEntry entry) {
     switch (entry.kind) {
       case SelectionKind.item:
-        final item = widget.catalog.itemById(entry.id);
+        final item = widget.controller.catalog.itemById(entry.id);
         return item != null
             ? CatalogColorResolver.fromItem(item)
             : Colors.blueGrey;
       case SelectionKind.floor:
-        final floor = widget.catalog.floorById(entry.id);
+        final floor = widget.controller.catalog.floorById(entry.id);
         return floor != null
             ? CatalogColorResolver.fromFloor(floor)
             : Colors.blueGrey;
@@ -322,11 +306,11 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
   String _labelForHistoryEntry(SelectionHistoryEntry entry) {
     switch (entry.kind) {
       case SelectionKind.item:
-        return widget.catalog.itemById(entry.id)?.name ?? entry.id;
+        return widget.controller.catalog.itemById(entry.id)?.name ?? entry.id;
       case SelectionKind.floor:
-        return widget.catalog.floorById(entry.id)?.name ?? entry.id;
+        return widget.controller.catalog.floorById(entry.id)?.name ?? entry.id;
       case SelectionKind.sticker:
-        return widget.catalog.stickerById(entry.id)?.name ?? entry.id;
+        return widget.controller.catalog.stickerById(entry.id)?.name ?? entry.id;
     }
   }
 
@@ -348,12 +332,12 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
     if (kind == SidebarSubmenuKind.floors) {
       return SidebarSubmenuPanel(
         children: [
-          for (final floor in widget.catalog.floors)
+          for (final floor in widget.controller.catalog.floors)
             SidebarSubmenuItem(
               color: CatalogColorResolver.fromFloor(floor),
               label: floor.name,
-              selected: floor.id == widget.selectedFloorId,
-              onPressed: () => widget.onFloorSelected(floor.id),
+              selected: floor.id == widget.controller.selectedFloorId,
+              onPressed: () => widget.controller.selectFloor(floor.id),
             ),
         ],
       );
@@ -362,27 +346,27 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
     if (kind == SidebarSubmenuKind.stickers) {
       return SidebarSubmenuPanel(
         children: [
-          for (final sticker in widget.catalog.stickers)
+          for (final sticker in widget.controller.catalog.stickers)
             SidebarSubmenuIconItem(
               iconPath: sticker.iconPath,
               label: sticker.name,
-              selected: sticker.id == widget.selectedStickerCatalogId,
-              onPressed: () => widget.onStickerSelected(sticker.id),
+              selected: sticker.id == widget.controller.selectedStickerCatalogId,
+              onPressed: () => widget.controller.selectStickerCatalog(sticker.id),
             ),
         ],
       );
     }
 
     final categoryId = _openSubmenuKey!;
-    final items = widget.catalog.itemsInCategory(categoryId);
+    final items = widget.controller.catalog.itemsInCategory(categoryId);
     return SidebarSubmenuPanel(
       children: [
         for (final item in items)
           SidebarSubmenuItem(
             color: CatalogColorResolver.fromItem(item),
             label: item.name,
-            selected: item.id == widget.selectedItemId,
-            onPressed: () => widget.onItemSelected(item.id),
+            selected: item.id == widget.controller.selectedItemId,
+            onPressed: () => widget.controller.selectItem(item.id),
           ),
       ],
     );

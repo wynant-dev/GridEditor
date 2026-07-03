@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
-import 'grid_test_helpers.dart';
+import '../../../helpers/grid_test_helpers.dart';
 
 void main() {
   const catalog = Catalog(

@@ -39,8 +39,22 @@ void main() {
     ],
   );
 
+  Widget buildSidebar(EditorController controller) {
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) =>
+          FloatingCatalogSidebar(controller: controller),
+    );
+  }
+
+  EditorController controllerWithCatalog(Catalog catalog) {
+    final controller = EditorController();
+    controller.loadCatalog(catalog);
+    return controller;
+  }
+
   testWidgets('tapping category icon opens submenu with items', (tester) async {
-    String? selectedItemId;
+    final controller = controllerWithCatalog(catalog);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -48,17 +62,7 @@ void main() {
           body: SizedBox(
             width: 400,
             height: 600,
-            child: FloatingCatalogSidebar(
-              catalog: catalog,
-              selectedItemId: null,
-              selectedFloorId: null,
-              selectedStickerCatalogId: null,
-              selectionHistory: const [],
-              onItemSelected: (id) => selectedItemId = id,
-              onFloorSelected: (_) {},
-              onStickerSelected: (_) {},
-              onHistorySelected: (_) {},
-            ),
+            child: buildSidebar(controller),
           ),
         ),
       ),
@@ -73,13 +77,13 @@ void main() {
     await tester.tap(find.text('Bank'));
     await tester.pumpAndSettle();
 
-    expect(selectedItemId, 'bank');
+    expect(controller.selectedItemId, 'bank');
     expect(find.text('House'), findsOneWidget);
     expect(find.text('Bank'), findsOneWidget);
   });
 
   testWidgets('tapping empty area on submenu row selects item', (tester) async {
-    String? selectedItemId;
+    final controller = controllerWithCatalog(catalog);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -87,17 +91,7 @@ void main() {
           body: SizedBox(
             width: 400,
             height: 600,
-            child: FloatingCatalogSidebar(
-              catalog: catalog,
-              selectedItemId: null,
-              selectedFloorId: null,
-              selectedStickerCatalogId: null,
-              selectionHistory: const [],
-              onItemSelected: (id) => selectedItemId = id,
-              onFloorSelected: (_) {},
-              onStickerSelected: (_) {},
-              onHistorySelected: (_) {},
-            ),
+            child: buildSidebar(controller),
           ),
         ),
       ),
@@ -113,11 +107,11 @@ void main() {
     await tester.tapAt(Offset(panelRect.right - 8, bankRect.center.dy));
     await tester.pumpAndSettle();
 
-    expect(selectedItemId, 'bank');
+    expect(controller.selectedItemId, 'bank');
   });
 
   testWidgets('tapping floor tool opens floor submenu', (tester) async {
-    String? selectedFloorId;
+    final controller = controllerWithCatalog(catalog);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -125,17 +119,7 @@ void main() {
           body: SizedBox(
             width: 400,
             height: 600,
-            child: FloatingCatalogSidebar(
-              catalog: catalog,
-              selectedItemId: null,
-              selectedFloorId: null,
-              selectedStickerCatalogId: null,
-              selectionHistory: const [],
-              onItemSelected: (_) {},
-              onFloorSelected: (id) => selectedFloorId = id,
-              onStickerSelected: (_) {},
-              onHistorySelected: (_) {},
-            ),
+            child: buildSidebar(controller),
           ),
         ),
       ),
@@ -149,11 +133,13 @@ void main() {
     await tester.tap(find.text('Sand'));
     await tester.pumpAndSettle();
 
-    expect(selectedFloorId, 'sand');
+    expect(controller.selectedFloorId, 'sand');
     expect(find.text('Sand'), findsOneWidget);
   });
 
   testWidgets('tapping grouped canvas area keeps submenu open', (tester) async {
+    final controller = controllerWithCatalog(catalog);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -169,17 +155,7 @@ void main() {
                 left: 16,
                 top: 16,
                 bottom: 16,
-                child: FloatingCatalogSidebar(
-                  catalog: catalog,
-                  selectedItemId: null,
-                  selectedFloorId: null,
-                  selectedStickerCatalogId: null,
-                  selectionHistory: [],
-                  onItemSelected: (_) {},
-                  onFloorSelected: (_) {},
-                  onStickerSelected: (_) {},
-                  onHistorySelected: (_) {},
-                ),
+                child: buildSidebar(controller),
               ),
             ],
           ),
@@ -213,23 +189,15 @@ void main() {
       ],
     );
 
+    final controller = controllerWithCatalog(catalogWithStickers);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: SizedBox(
             width: 400,
             height: 600,
-            child: FloatingCatalogSidebar(
-              catalog: catalogWithStickers,
-              selectedItemId: null,
-              selectedFloorId: null,
-              selectedStickerCatalogId: null,
-              selectionHistory: const [],
-              onItemSelected: (_) {},
-              onFloorSelected: (_) {},
-              onStickerSelected: (_) {},
-              onHistorySelected: (_) {},
-            ),
+            child: buildSidebar(controller),
           ),
         ),
       ),
