@@ -25,6 +25,7 @@ class GridCanvas extends StatefulWidget {
     required this.catalog,
     this.controller,
     this.interactionState,
+    this.viewportController,
     this.onCellTap,
     this.onPlacementTap,
     this.onPlaceError,
@@ -34,6 +35,7 @@ class GridCanvas extends StatefulWidget {
   final Catalog catalog;
   final EditorController? controller;
   final GridInteractionState? interactionState;
+  final ViewportController? viewportController;
   final void Function(int row, int col)? onCellTap;
   final void Function(PlacedItem placement)? onPlacementTap;
   final void Function(String error)? onPlaceError;
@@ -43,9 +45,10 @@ class GridCanvas extends StatefulWidget {
 }
 
 class _GridCanvasState extends State<GridCanvas> {
-  final ViewportController _viewportController = ViewportController();
+  late final ViewportController _viewportController;
   late final GridInteractionState _interactionState;
   late final bool _ownsInteractionState;
+  late final bool _ownsViewportController;
   late final GridInteractionHandler _interactionHandler;
   String? _hiddenPlacementId;
   String? _hiddenStickerId;
@@ -53,6 +56,8 @@ class _GridCanvasState extends State<GridCanvas> {
   @override
   void initState() {
     super.initState();
+    _ownsViewportController = widget.viewportController == null;
+    _viewportController = widget.viewportController ?? ViewportController();
     _ownsInteractionState = widget.interactionState == null;
     _interactionState = widget.interactionState ?? GridInteractionState();
     _interactionHandler = GridInteractionHandler(
@@ -94,7 +99,9 @@ class _GridCanvasState extends State<GridCanvas> {
     if (_ownsInteractionState) {
       _interactionState.dispose();
     }
-    _viewportController.dispose();
+    if (_ownsViewportController) {
+      _viewportController.dispose();
+    }
     super.dispose();
   }
 

@@ -1,11 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../application/editor_controller.dart';
 import '../../domain/layout/placed_item.dart';
 import '../../infrastructure/catalog/catalog_loader.dart';
 import '../canvas/grid_canvas.dart';
+import '../interaction/grid_interaction_state.dart';
+import '../panels/debug/debug_admin_panel.dart';
 import '../panels/sidebar/floating_catalog_sidebar.dart';
 import '../panels/sidebar/sidebar_theme.dart';
+import '../viewport/viewport_controller.dart';
 
 /// Editor shell: grid canvas with floating catalog sidebar.
 class GridEditorScreen extends StatefulWidget {
@@ -17,6 +21,7 @@ class GridEditorScreen extends StatefulWidget {
     this.onPlaceError,
     this.onSettingsPressed,
     this.seedColor,
+    this.showDebugPanel = kDebugMode,
   });
 
   final CatalogLoader catalogLoader;
@@ -25,6 +30,7 @@ class GridEditorScreen extends StatefulWidget {
   final void Function(String error)? onPlaceError;
   final VoidCallback? onSettingsPressed;
   final Color? seedColor;
+  final bool showDebugPanel;
 
   @override
   State<GridEditorScreen> createState() => _GridEditorScreenState();
@@ -32,14 +38,21 @@ class GridEditorScreen extends StatefulWidget {
 
 class _GridEditorScreenState extends State<GridEditorScreen> {
   static const double _sidebarInset = 16;
+  static const double _debugPanelInset = 16;
 
   late final EditorController _controller;
+  GridInteractionState? _interactionState;
+  ViewportController? _viewportController;
   bool _placeErrorConfigured = false;
 
   @override
   void initState() {
     super.initState();
     _controller = EditorController();
+    if (widget.showDebugPanel) {
+      _interactionState = GridInteractionState();
+      _viewportController = ViewportController();
+    }
     _loadCatalog();
   }
 
@@ -61,6 +74,8 @@ class _GridEditorScreenState extends State<GridEditorScreen> {
 
   @override
   void dispose() {
+    _interactionState?.dispose();
+    _viewportController?.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -103,6 +118,8 @@ class _GridEditorScreenState extends State<GridEditorScreen> {
                   document: document,
                   catalog: catalog,
                   controller: _controller,
+                  interactionState: _interactionState,
+                  viewportController: _viewportController,
                   onCellTap: widget.onCellTap,
                   onPlacementTap: widget.onPlacementTap,
                   onPlaceError: widget.onPlaceError,
@@ -118,6 +135,17 @@ class _GridEditorScreenState extends State<GridEditorScreen> {
                 onSettingsPressed: widget.onSettingsPressed,
               ),
             ),
+            if (widget.showDebugPanel)
+              Positioned(
+                right: _debugPanelInset,
+                top: _debugPanelInset,
+                bottom: _debugPanelInset,
+                child: DebugAdminPanel(
+                  controller: _controller,
+                  interactionState: _interactionState,
+                  viewportController: _viewportController,
+                ),
+              ),
           ],
         ),
       ),
