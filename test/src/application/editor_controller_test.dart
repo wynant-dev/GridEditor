@@ -378,4 +378,53 @@ void main() {
       expect(controller.layout.stickers, hasLength(1));
     });
   });
+
+  group('action log', () {
+    test('records successful and failed placements', () {
+      final controller = EditorController()
+        ..loadCatalog(catalog)
+        ..selectItem('house');
+
+      expect(controller.placeAt(0, 0), isNull);
+      expect(controller.placeAt(0, 0), isNotNull);
+
+      final entries = controller.actionLog.entries;
+      expect(entries, hasLength(2));
+      expect(entries[0].success, isFalse);
+      expect(entries[0].message, startsWith('Place failed - House (0, 0):'));
+      expect(entries[1].success, isTrue);
+      expect(entries[1].message, 'Placed - House (0, 0)');
+    });
+
+    test('records delete and move actions', () {
+      final controller = EditorController()
+        ..loadCatalog(catalog)
+        ..selectItem('house')
+        ..placeAt(0, 0);
+
+      final placement = controller.layout.placements.single;
+      controller.movePlacement(
+        placementId: placement.id,
+        newRow: 2,
+        newCol: 2,
+      );
+      controller.removePlacement(placement);
+
+      final messages = controller.actionLog.entries.map((e) => e.message).toList();
+      expect(messages[0], 'Deleted - House (2, 2)');
+      expect(messages[1], 'Moved - House (2, 2)');
+      expect(messages[2], 'Placed - House (0, 0)');
+    });
+
+    test('clears on loadCatalog', () {
+      final controller = EditorController()
+        ..loadCatalog(catalog)
+        ..selectItem('house')
+        ..placeAt(0, 0);
+
+      controller.loadCatalog(catalog);
+
+      expect(controller.actionLog.entries, isEmpty);
+    });
+  });
 }
