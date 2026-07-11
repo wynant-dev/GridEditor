@@ -8,7 +8,7 @@ import '../interaction/grid_interaction_state.dart';
 import 'floor_cell.dart';
 import 'placement_preview_target.dart';
 
-/// Per-cell green/red validity feedback during placement hover or drag move.
+/// Per-cell red validity feedback during invalid placement hover or drag move.
 class PlacementValidityPreviewLayer extends StatelessWidget {
   const PlacementValidityPreviewLayer({
     super.key,
@@ -21,8 +21,6 @@ class PlacementValidityPreviewLayer extends StatelessWidget {
 
   static const double _validityOpacity = 0.6;
 
-  static final Color _validColor =
-      Colors.green.shade600.withValues(alpha: _validityOpacity);
   static final Color _invalidColor =
       Colors.red.shade600.withValues(alpha: _validityOpacity);
 
@@ -57,14 +55,16 @@ class PlacementValidityPreviewLayer extends StatelessWidget {
           ignorePlacementId: target.ignorePlacementId,
         );
 
-        cells.add(
-          FloorCell(
-            color: isValid ? _validColor : _invalidColor,
-            metrics: metrics,
-            row: row,
-            col: col,
-          ),
-        );
+        if (!isValid) {
+          cells.add(
+            FloorCell(
+              color: _invalidColor,
+              metrics: metrics,
+              row: row,
+              col: col,
+            ),
+          );
+        }
       }
     }
 
