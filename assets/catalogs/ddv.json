@@ -21,7 +21,7 @@
           "width": 2,
           "height": 2,
           "color": "#1E88E5",
-          "iconName": "account_balance"
+          "iconName": "home"
         },
         {
           "id": "appartment",
@@ -29,14 +29,15 @@
           "width": 3,
           "height": 3,
           "color": "#8E24AA",
-          "iconName": "domain"
+          "iconName": "home"
         },
         {
           "id": "school",
           "name": "School",
           "width": 4,
           "height": 3,
-          "color": "#F4511E"
+          "color": "#F4511E",
+          "iconName": "home"
         }
       ]
     },

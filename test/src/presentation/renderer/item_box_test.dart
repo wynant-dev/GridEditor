@@ -44,6 +44,16 @@ void main() {
 
     expect(large.width, greaterThan(small.width));
     expect(large.height, greaterThan(small.height));
-    expect(large.width / small.width, closeTo(2, 0.01));
+    expect(large.width / small.width, closeTo(2, 0.15));
+  });
+
+  testWidgets('non-square icon uses fill to stretch with footprint', (tester) async {
+    await pumpItemBox(tester, width: 4, height: 3);
+
+    final fittedBox = tester.widget<FittedBox>(find.byType(FittedBox));
+    expect(fittedBox.fit, BoxFit.fill);
+
+    final size = tester.getSize(find.byType(FittedBox));
+    expect(size.width / size.height, closeTo(4 / 3, 0.05));
   });
 }

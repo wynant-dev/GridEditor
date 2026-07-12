@@ -43,17 +43,23 @@ class ItemBox extends StatelessWidget {
   Widget _buildContent(BuildContext context) {
     final Widget content;
     if (iconName != null) {
-      final footprintWidth = width * metrics.cellWidth;
-      final footprintHeight = height * metrics.cellHeight;
-      final minSide = footprintWidth < footprintHeight
-          ? footprintWidth
-          : footprintHeight;
-
       content = Padding(
-        padding: EdgeInsets.all(0),
-        child: FittedBox(
-          fit: BoxFit.contain,
-          child: Icon(CatalogIconResolver.resolve(iconName!), color: color),
+        padding: const EdgeInsets.all(2),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(2),
+            child: FittedBox(
+              fit: BoxFit.fill,
+              child: Icon(
+                CatalogIconResolver.resolve(iconName!),
+                color: color,
+              ),
+            ),
+          ),
         ),
       );
     } else {
