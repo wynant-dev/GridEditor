@@ -110,5 +110,28 @@ void main() {
       expect(catalog.stickers, hasLength(4));
       expect(catalog.stickerById('tree')?.name, 'Tree');
     });
+
+    test('parses item iconName from sandbox.json', () async {
+      final json = await rootBundle.loadString('assets/catalogs/sandbox.json');
+      final catalog = Catalog.fromJson(json);
+
+      expect(catalog.itemById('house')?.iconName, 'home');
+      expect(catalog.itemById('bank')?.iconName, isNull);
+    });
+
+    test('serializes item iconName', () {
+      const item = CatalogItem(
+        id: 'house',
+        name: 'House',
+        width: 2,
+        height: 2,
+        color: '#EF5350',
+        iconName: 'home',
+      );
+
+      final restored = CatalogItem.fromJson(item.toJson());
+
+      expect(restored.iconName, 'home');
+    });
   });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/geometry/grid_metrics.dart';
+import '../theme/catalog_icon_resolver.dart';
 
 class ItemBox extends StatelessWidget {
   const ItemBox({
@@ -12,6 +13,7 @@ class ItemBox extends StatelessWidget {
     required this.col,
     required this.width,
     required this.height,
+    this.iconName,
     this.opacity = 1,
   });
 
@@ -22,6 +24,7 @@ class ItemBox extends StatelessWidget {
   final int col;
   final int width;
   final int height;
+  final String? iconName;
   final double opacity;
 
   @override
@@ -33,32 +36,47 @@ class ItemBox extends StatelessWidget {
       top: topLeft.dy,
       width: width * metrics.cellWidth,
       height: height * metrics.cellHeight,
-      child: IgnorePointer(
-        child: _buildContent(context),
-      ),
+      child: IgnorePointer(child: _buildContent(context)),
     );
   }
 
   Widget _buildContent(BuildContext context) {
-    final box = Padding(
-      padding: const EdgeInsets.all(3),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: color,
-          border: Border.all(color: Colors.black26, width: 3),
-          borderRadius: BorderRadius.circular(6),
+    final Widget content;
+    if (iconName != null) {
+      final footprintWidth = width * metrics.cellWidth;
+      final footprintHeight = height * metrics.cellHeight;
+      final minSide = footprintWidth < footprintHeight
+          ? footprintWidth
+          : footprintHeight;
+
+      content = Padding(
+        padding: EdgeInsets.all(0),
+        child: FittedBox(
+          fit: BoxFit.contain,
+          child: Icon(CatalogIconResolver.resolve(iconName!), color: color),
         ),
-        child: Center(
-          child: Text(
-            itemName,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.labelMedium,
+      );
+    } else {
+      content = Padding(
+        padding: const EdgeInsets.all(3),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: color,
+            border: Border.all(color: Colors.black26, width: 3),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Center(
+            child: Text(
+              itemName,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
 
-    if (opacity >= 1) return box;
-    return Opacity(opacity: opacity, child: box);
+    if (opacity >= 1) return content;
+    return Opacity(opacity: opacity, child: content);
   }
 }

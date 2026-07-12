@@ -50,6 +50,7 @@ class ItemOverlayLayer extends StatelessWidget {
     return ItemBox(
       itemName: target.catalogItem.name,
       color: CatalogColorResolver.fromItem(target.catalogItem),
+      iconName: target.catalogItem.iconName,
       metrics: metrics,
       row: target.originRow,
       col: target.originCol,

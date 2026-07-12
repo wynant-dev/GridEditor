@@ -269,6 +269,7 @@ class _ItemLayer extends StatelessWidget {
     return ItemBox(
       itemName: catalogItem.name,
       color: CatalogColorResolver.fromItem(catalogItem),
+      iconName: catalogItem.iconName,
       metrics: metrics,
       row: item.originRow,
       col: item.originCol,

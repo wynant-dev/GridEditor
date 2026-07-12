@@ -6,6 +6,7 @@ class CatalogItem {
     required this.width,
     required this.height,
     this.color,
+    this.iconName,
     this.imagePath,
   }) : assert(width > 0),
        assert(height > 0);
@@ -18,6 +19,10 @@ class CatalogItem {
   /// Optional display hint, e.g. `#E53935` or `red`.
   final String? color;
 
+  /// When set, the item is drawn as this Material Symbols icon instead of a
+  /// colored rectangle (e.g. `home`, `storefront`).
+  final String? iconName;
+
   /// Optional image path (asset, file, or URL depending on the host app).
   final String? imagePath;
 
@@ -27,6 +32,7 @@ class CatalogItem {
     int? width,
     int? height,
     String? color,
+    String? iconName,
     String? imagePath,
   }) {
     return CatalogItem(
@@ -35,6 +41,7 @@ class CatalogItem {
       width: width ?? this.width,
       height: height ?? this.height,
       color: color ?? this.color,
+      iconName: iconName ?? this.iconName,
       imagePath: imagePath ?? this.imagePath,
     );
   }
@@ -45,6 +52,7 @@ class CatalogItem {
     'width': width,
     'height': height,
     if (color != null) 'color': color,
+    if (iconName != null) 'iconName': iconName,
     if (imagePath != null) 'imagePath': imagePath,
   };
 
@@ -55,6 +63,7 @@ class CatalogItem {
       width: json['width'] as int,
       height: json['height'] as int,
       color: json['color'] as String?,
+      iconName: json['iconName'] as String?,
       imagePath: json['imagePath'] as String?,
     );
   }
@@ -67,9 +76,11 @@ class CatalogItem {
         other.width == width &&
         other.height == height &&
         other.color == color &&
+        other.iconName == iconName &&
         other.imagePath == imagePath;
   }
 
   @override
-  int get hashCode => Object.hash(id, name, width, height, color, imagePath);
+  int get hashCode =>
+      Object.hash(id, name, width, height, color, iconName, imagePath);
 }

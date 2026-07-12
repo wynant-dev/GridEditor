@@ -12,21 +12,24 @@
           "name": "House",
           "width": 4,
           "height": 4,
-          "color": "#E53935"
+          "color": "#E53935",
+          "iconName": "home"
         },
         {
           "id": "bank",
           "name": "Bank",
           "width": 2,
           "height": 2,
-          "color": "#1E88E5"
+          "color": "#1E88E5",
+          "iconName": "account_balance"
         },
         {
-          "id": "apartment",
-          "name": "Apartment",
+          "id": "appartment",
+          "name": "Appartment",
           "width": 3,
           "height": 3,
-          "color": "#8E24AA"
+          "color": "#8E24AA",
+          "iconName": "domain"
         },
         {
           "id": "school",

@@ -358,12 +358,20 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
     return SidebarSubmenuPanel(
       children: [
         for (final item in items)
-          SidebarSubmenuItem(
-            color: CatalogColorResolver.fromItem(item),
-            label: item.name,
-            selected: item.id == widget.controller.selectedCatalogItemId,
-            onPressed: () => widget.controller.selectCatalogItem(item.id),
-          ),
+          if (item.iconName != null)
+            SidebarSubmenuIconItem(
+              iconName: item.iconName!,
+              label: item.name,
+              selected: item.id == widget.controller.selectedCatalogItemId,
+              onPressed: () => widget.controller.selectCatalogItem(item.id),
+            )
+          else
+            SidebarSubmenuItem(
+              color: CatalogColorResolver.fromItem(item),
+              label: item.name,
+              selected: item.id == widget.controller.selectedCatalogItemId,
+              onPressed: () => widget.controller.selectCatalogItem(item.id),
+            ),
       ],
     );
   }
