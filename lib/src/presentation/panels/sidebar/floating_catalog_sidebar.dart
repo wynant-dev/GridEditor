@@ -164,7 +164,7 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
     if (_openSubmenuKey == categoryId) return true;
     final selectedId = widget.controller.selectedCatalogItemId;
     if (selectedId == null) return false;
-    return widget.controller.catalog.itemById(selectedId)?.categoryId == categoryId;
+    return widget.controller.catalog.categoryIdForItem(selectedId) == categoryId;
   }
 
   SidebarSubmenuKind? get _openSubmenuKind {

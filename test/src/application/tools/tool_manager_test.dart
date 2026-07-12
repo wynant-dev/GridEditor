@@ -25,11 +25,11 @@ class _RecordingTool extends EditorTool {
 }
 
 void main() {
-  const catalog = Catalog(
+    final catalog = testCatalog(
     id: 'test',
     name: 'Test',
     items: [
-      CatalogItem(id: 'house', name: 'House', categoryId: 'buildings', width: 1, height: 1),
+      CatalogItem(id: 'house', name: 'House', width: 1, height: 1),
     ],
   );
 

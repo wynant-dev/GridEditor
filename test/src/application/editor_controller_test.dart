@@ -3,12 +3,16 @@ import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
+import '../../helpers/grid_test_helpers.dart';
+
+import '../../helpers/grid_test_helpers.dart';
+
 void main() {
-  const catalog = Catalog(
+    final catalog = testCatalog(
     id: 'test',
     name: 'Test',
     items: [
-      CatalogItem(id: 'house', name: 'House', categoryId: 'buildings', width: 2, height: 2),
+      CatalogItem(id: 'house', name: 'House', width: 2, height: 2),
     ],
   );
 
@@ -74,12 +78,10 @@ void main() {
   test('selectItem updates selection', () {
     final controller = EditorController()
       ..loadCatalog(
-        const Catalog(
-          id: 'test',
-          name: 'Test',
+        testCatalog(
           items: [
-            CatalogItem(id: 'a', name: 'A', categoryId: 'buildings', width: 1, height: 1),
-            CatalogItem(id: 'b', name: 'B', categoryId: 'buildings', width: 1, height: 1),
+            CatalogItem(id: 'a', name: 'A', width: 1, height: 1),
+            CatalogItem(id: 'b', name: 'B', width: 1, height: 1),
           ],
           floors: [
             CatalogFloor(id: 'water', name: 'Water', color: '#42A5F5'),
@@ -135,11 +137,9 @@ void main() {
   test('selectItem switches active tool to PlaceTool', () {
     final controller = EditorController()
       ..loadCatalog(
-        const Catalog(
-          id: 'test',
-          name: 'Test',
+        testCatalog(
           items: [
-            CatalogItem(id: 'a', name: 'A', categoryId: 'buildings', width: 1, height: 1),
+            CatalogItem(id: 'a', name: 'A', width: 1, height: 1),
           ],
           floors: [
             CatalogFloor(id: 'water', name: 'Water', color: '#42A5F5'),
@@ -194,12 +194,10 @@ void main() {
   test('selectItem does not push to selection history', () {
     final controller = EditorController()
       ..loadCatalog(
-        const Catalog(
-          id: 'test',
-          name: 'Test',
+        testCatalog(
           items: [
-            CatalogItem(id: 'a', name: 'A', categoryId: 'buildings', width: 1, height: 1),
-            CatalogItem(id: 'b', name: 'B', categoryId: 'buildings', width: 1, height: 1),
+            CatalogItem(id: 'a', name: 'A', width: 1, height: 1),
+            CatalogItem(id: 'b', name: 'B', width: 1, height: 1),
           ],
         ),
       );
@@ -213,12 +211,10 @@ void main() {
   test('placeAt pushes to selection history', () {
     final controller = EditorController()
       ..loadCatalog(
-        const Catalog(
-          id: 'test',
-          name: 'Test',
+        testCatalog(
           items: [
-            CatalogItem(id: 'a', name: 'A', categoryId: 'buildings', width: 1, height: 1),
-            CatalogItem(id: 'b', name: 'B', categoryId: 'buildings', width: 1, height: 1),
+            CatalogItem(id: 'a', name: 'A', width: 1, height: 1),
+            CatalogItem(id: 'b', name: 'B', width: 1, height: 1),
           ],
         ),
       );
@@ -261,14 +257,12 @@ void main() {
   test('selection history dedupes and caps at 3', () {
     final controller = EditorController()
       ..loadCatalog(
-        const Catalog(
-          id: 'test',
-          name: 'Test',
+        testCatalog(
           items: [
-            CatalogItem(id: 'a', name: 'A', categoryId: 'buildings', width: 1, height: 1),
-            CatalogItem(id: 'b', name: 'B', categoryId: 'buildings', width: 1, height: 1),
-            CatalogItem(id: 'c', name: 'C', categoryId: 'buildings', width: 1, height: 1),
-            CatalogItem(id: 'd', name: 'D', categoryId: 'buildings', width: 1, height: 1),
+            CatalogItem(id: 'a', name: 'A', width: 1, height: 1),
+            CatalogItem(id: 'b', name: 'B', width: 1, height: 1),
+            CatalogItem(id: 'c', name: 'C', width: 1, height: 1),
+            CatalogItem(id: 'd', name: 'D', width: 1, height: 1),
           ],
           floors: [
             CatalogFloor(id: 'sand', name: 'Sand', color: '#FFD54F'),
@@ -295,11 +289,9 @@ void main() {
   test('reselectFromHistory selects item or floor', () {
     final controller = EditorController()
       ..loadCatalog(
-        const Catalog(
-          id: 'test',
-          name: 'Test',
+        testCatalog(
           items: [
-            CatalogItem(id: 'a', name: 'A', categoryId: 'buildings', width: 1, height: 1),
+            CatalogItem(id: 'a', name: 'A', width: 1, height: 1),
           ],
           floors: [
             CatalogFloor(id: 'sand', name: 'Sand', color: '#FFD54F'),

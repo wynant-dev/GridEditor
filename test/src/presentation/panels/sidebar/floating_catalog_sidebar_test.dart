@@ -14,24 +14,22 @@ void main() {
         id: 'buildings',
         name: 'Buildings',
         iconName: 'apartment',
-      ),
-    ],
-    items: [
-      CatalogItem(
-        id: 'house',
-        name: 'House',
-        categoryId: 'buildings',
-        width: 2,
-        height: 2,
-        color: '#EF5350',
-      ),
-      CatalogItem(
-        id: 'bank',
-        name: 'Bank',
-        categoryId: 'buildings',
-        width: 2,
-        height: 2,
-        color: '#1E88E5',
+        items: [
+          CatalogItem(
+            id: 'house',
+            name: 'House',
+            width: 2,
+            height: 2,
+            color: '#EF5350',
+          ),
+          CatalogItem(
+            id: 'bank',
+            name: 'Bank',
+            width: 2,
+            height: 2,
+            color: '#1E88E5',
+          ),
+        ],
       ),
     ],
     floors: [

@@ -11,7 +11,6 @@ class Catalog {
     required this.id,
     required this.name,
     this.categories = const [],
-    this.items = const [],
     this.floors = const [],
     this.stickers = const [],
   });
@@ -19,9 +18,12 @@ class Catalog {
   final String id;
   final String name;
   final List<CatalogCategory> categories;
-  final List<CatalogItem> items;
   final List<CatalogFloor> floors;
   final List<CatalogSticker> stickers;
+
+  List<CatalogItem> get items => [
+    for (final category in categories) ...category.items,
+  ];
 
   CatalogCategory? categoryById(String id) {
     for (final category in categories) {
@@ -31,8 +33,19 @@ class Catalog {
   }
 
   CatalogItem? itemById(String id) {
-    for (final item in items) {
-      if (item.id == id) return item;
+    for (final category in categories) {
+      for (final item in category.items) {
+        if (item.id == id) return item;
+      }
+    }
+    return null;
+  }
+
+  String? categoryIdForItem(String itemId) {
+    for (final category in categories) {
+      if (category.items.any((item) => item.id == itemId)) {
+        return category.id;
+      }
     }
     return null;
   }
@@ -52,17 +65,13 @@ class Catalog {
   }
 
   List<CatalogItem> itemsInCategory(String categoryId) {
-    return [
-      for (final item in items)
-        if (item.categoryId == categoryId) item,
-    ];
+    return categoryById(categoryId)?.items ?? const [];
   }
 
   Catalog copyWith({
     String? id,
     String? name,
     List<CatalogCategory>? categories,
-    List<CatalogItem>? items,
     List<CatalogFloor>? floors,
     List<CatalogSticker>? stickers,
   }) {
@@ -70,28 +79,45 @@ class Catalog {
       id: id ?? this.id,
       name: name ?? this.name,
       categories: categories ?? this.categories,
-      items: items ?? this.items,
       floors: floors ?? this.floors,
       stickers: stickers ?? this.stickers,
     );
   }
 
-  Catalog addItem(CatalogItem item) {
-    return copyWith(items: [...items, item]);
+  Catalog addItem(String categoryId, CatalogItem item) {
+    return copyWith(
+      categories: [
+        for (final category in categories)
+          if (category.id == categoryId)
+            category.copyWith(items: [...category.items, item])
+          else
+            category,
+      ],
+    );
   }
 
   Catalog updateItem(CatalogItem item) {
     return copyWith(
-      items: [
-        for (final existing in items)
-          if (existing.id == item.id) item else existing,
+      categories: [
+        for (final category in categories)
+          category.copyWith(
+            items: [
+              for (final existing in category.items)
+                if (existing.id == item.id) item else existing,
+            ],
+          ),
       ],
     );
   }
 
   Catalog removeItem(String itemId) {
     return copyWith(
-      items: items.where((item) => item.id != itemId).toList(),
+      categories: [
+        for (final category in categories)
+          category.copyWith(
+            items: category.items.where((item) => item.id != itemId).toList(),
+          ),
+      ],
     );
   }
 
@@ -102,7 +128,6 @@ class Catalog {
     'name': name,
     if (categories.isNotEmpty)
       'categories': [for (final category in categories) category.toJson()],
-    'items': [for (final item in items) item.toJson()],
     if (floors.isNotEmpty)
       'floors': [for (final floor in floors) floor.toJson()],
     if (stickers.isNotEmpty)
@@ -117,7 +142,6 @@ class Catalog {
 
   factory Catalog.fromJsonMap(Map<String, dynamic> json) {
     final rawCategories = json['categories'] as List<dynamic>? ?? [];
-    final rawItems = json['items'] as List<dynamic>? ?? [];
     final rawFloors = json['floors'] as List<dynamic>? ?? [];
     final rawStickers = json['stickers'] as List<dynamic>? ?? [];
     return Catalog(
@@ -126,10 +150,6 @@ class Catalog {
       categories: [
         for (final entry in rawCategories)
           CatalogCategory.fromJson(entry as Map<String, dynamic>),
-      ],
-      items: [
-        for (final entry in rawItems)
-          CatalogItem.fromJson(entry as Map<String, dynamic>),
       ],
       floors: [
         for (final entry in rawFloors)

@@ -3,13 +3,15 @@ import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
+import '../../helpers/grid_test_helpers.dart';
+
 void main() {
-  const catalog = Catalog(
+    final catalog = testCatalog(
     id: 'test',
     name: 'Test',
     items: [
-      CatalogItem(id: 'house', name: 'House', categoryId: 'buildings', width: 2, height: 2),
-      CatalogItem(id: 'bank', name: 'Bank', categoryId: 'buildings', width: 2, height: 1),
+      CatalogItem(id: 'house', name: 'House', width: 2, height: 2),
+      CatalogItem(id: 'bank', name: 'Bank', width: 2, height: 1),
     ],
   );
 
@@ -59,7 +61,6 @@ void main() {
       const item = CatalogItem(
         id: 'house',
         name: 'House',
-        categoryId: 'buildings',
         width: 2,
         height: 2,
       );
@@ -98,7 +99,6 @@ void main() {
       const item = CatalogItem(
         id: 'house',
         name: 'House',
-        categoryId: 'buildings',
         width: 2,
         height: 2,
       );
@@ -169,7 +169,6 @@ void main() {
       const item = CatalogItem(
         id: 'house',
         name: 'House',
-        categoryId: 'buildings',
         width: 2,
         height: 2,
       );
@@ -197,7 +196,7 @@ void main() {
   group('EditorEngine', () {
     test('placeItem stores a footprint on the layout', () {
       const layout = GridDocument(rows: 4, cols: 4);
-      final engine = const EditorEngine(catalog: catalog, layout: layout)
+      final engine = EditorEngine(catalog: catalog, layout: layout)
           .placeItem(
             catalogItemId: 'house',
             originRow: 0,
@@ -210,7 +209,7 @@ void main() {
     });
 
     test('placeItem assigns unique ids after deletion', () {
-      var engine = const EditorEngine(
+      var engine = EditorEngine(
         catalog: catalog,
         layout: GridDocument(rows: 4, cols: 4),
       ).placeItem(
@@ -241,7 +240,7 @@ void main() {
     });
 
     test('placeItem rejects overlapping items', () {
-      final engine = const EditorEngine(
+      final engine = EditorEngine(
         catalog: catalog,
         layout: GridDocument(rows: 4, cols: 4),
       ).placeItem(
@@ -261,7 +260,7 @@ void main() {
     });
 
     test('moveItem updates item origin while preserving id', () {
-      final engine = const EditorEngine(
+      final engine = EditorEngine(
         catalog: catalog,
         layout: GridDocument(rows: 4, cols: 4),
       ).placeItem(
@@ -284,7 +283,7 @@ void main() {
     });
 
     test('moveItem rejects overlapping items', () {
-      final engine = const EditorEngine(
+      final engine = EditorEngine(
         catalog: catalog,
         layout: GridDocument(
           rows: 4,
@@ -317,7 +316,7 @@ void main() {
     });
 
     test('moveItem rejects out-of-bounds target', () {
-      final engine = const EditorEngine(
+      final engine = EditorEngine(
         catalog: catalog,
         layout: GridDocument(rows: 4, cols: 4),
       ).placeItem(
@@ -338,7 +337,7 @@ void main() {
     });
 
     test('moveItem allows no-op move to same origin', () {
-      final engine = const EditorEngine(
+      final engine = EditorEngine(
         catalog: catalog,
         layout: GridDocument(rows: 4, cols: 4),
       ).placeItem(
@@ -359,7 +358,7 @@ void main() {
     });
 
     test('layout round-trips through JSON', () {
-      final engine = const EditorEngine(
+      final engine = EditorEngine(
         catalog: catalog,
         layout: GridDocument(rows: 3, cols: 3),
       ).placeItem(
@@ -393,7 +392,7 @@ void main() {
     const cellSize = 48.0;
 
     test('placeSticker appends sticker within bounds', () {
-      final engine = const EditorEngine(
+      final engine = EditorEngine(
         catalog: stickerCatalog,
         layout: GridDocument(rows: 4, cols: 4),
       ).placeSticker(
@@ -410,7 +409,7 @@ void main() {
     });
 
     test('placeSticker rejects out of bounds', () {
-      final engine = const EditorEngine(
+      final engine = EditorEngine(
         catalog: stickerCatalog,
         layout: GridDocument(rows: 4, cols: 4),
       );
@@ -428,7 +427,7 @@ void main() {
     });
 
     test('moveSticker updates position', () {
-      final engine = const EditorEngine(
+      final engine = EditorEngine(
         catalog: stickerCatalog,
         layout: GridDocument(rows: 4, cols: 4),
       ).placeSticker(
@@ -453,7 +452,7 @@ void main() {
     });
 
     test('removeSticker removes sticker', () {
-      final engine = const EditorEngine(
+      final engine = EditorEngine(
         catalog: stickerCatalog,
         layout: GridDocument(rows: 4, cols: 4),
       ).placeSticker(
@@ -472,20 +471,19 @@ void main() {
   });
 
   test('Catalog round-trips through JSON', () {
-    const catalog = Catalog(
-      id: 'ddv',
-      name: 'DDV',
-      items: [
+      final catalog = testCatalog(
+    id: 'ddv',
+    name: 'DDV',
+    items: [
         CatalogItem(
           id: 'house',
           name: 'House',
-          categoryId: 'buildings',
           width: 4,
           height: 4,
           color: '#E53935',
         ),
       ],
-    );
+  );
 
     final restored = Catalog.fromJson(catalog.toJson());
     expect(restored.name, 'DDV');

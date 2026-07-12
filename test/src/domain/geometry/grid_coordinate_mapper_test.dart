@@ -65,14 +65,14 @@ void main() {
         size: const Size(400, 400),
       );
       final mapper = GridCoordinateMapper(metrics);
-      const catalog = Catalog(
-        id: 'test',
-        name: 'Test',
-        items: [
-          CatalogItem(id: 'a', name: 'A', categoryId: 'buildings', width: 1, height: 1),
-          CatalogItem(id: 'b', name: 'B', categoryId: 'buildings', width: 2, height: 2),
+        final catalog = testCatalog(
+    id: 'test',
+    name: 'Test',
+    items: [
+          CatalogItem(id: 'a', name: 'A', width: 1, height: 1),
+          CatalogItem(id: 'b', name: 'B', width: 2, height: 2),
         ],
-      );
+  );
       const document = GridDocument(
         rows: 4,
         cols: 4,
@@ -98,13 +98,13 @@ void main() {
         size: const Size(400, 400),
       );
       final mapper = GridCoordinateMapper(metrics);
-      const catalog = Catalog(
-        id: 'test',
-        name: 'Test',
-        items: [
-          CatalogItem(id: 'a', name: 'A', categoryId: 'buildings', width: 1, height: 1),
+        final catalog = testCatalog(
+    id: 'test',
+    name: 'Test',
+    items: [
+          CatalogItem(id: 'a', name: 'A', width: 1, height: 1),
         ],
-      );
+  );
       const document = GridDocument(
         rows: 4,
         cols: 4,

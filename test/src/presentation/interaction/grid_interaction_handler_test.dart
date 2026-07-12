@@ -7,11 +7,11 @@ import 'package:grid_editor/src/presentation/interaction/grid_interaction_handle
 import '../../../helpers/grid_test_helpers.dart';
 
 void main() {
-  const catalog = Catalog(
+    final catalog = testCatalog(
     id: 'test',
     name: 'Test',
     items: [
-      CatalogItem(id: 'house', name: 'House', categoryId: 'buildings', width: 1, height: 1),
+      CatalogItem(id: 'house', name: 'House', width: 1, height: 1),
     ],
   );
 
@@ -114,11 +114,9 @@ void main() {
     });
 
     test('drag preserves grab point when starting from footprint center', () {
-      const largeCatalog = Catalog(
-        id: 'test',
-        name: 'Test',
+      final largeCatalog = testCatalog(
         items: [
-          CatalogItem(id: 'house', name: 'House', categoryId: 'buildings', width: 2, height: 2),
+          CatalogItem(id: 'house', name: 'House', width: 2, height: 2),
         ],
       );
       const document = GridDocument(

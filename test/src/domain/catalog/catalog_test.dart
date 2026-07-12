@@ -6,22 +6,22 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Catalog category schema', () {
-    test('parses sandbox.json with categories and categoryId', () async {
+    test('parses sandbox.json with nested category items', () async {
       final json = await rootBundle.loadString('assets/catalogs/sandbox.json');
       final catalog = Catalog.fromJson(json);
 
       expect(catalog.categories, hasLength(4));
       expect(catalog.categories.first.id, 'buildings');
       expect(catalog.categories.first.iconName, 'apartment');
+      expect(catalog.categories.first.items, hasLength(3));
       expect(catalog.items, hasLength(12));
-      expect(catalog.items.every((item) => item.categoryId.isNotEmpty), isTrue);
       expect(catalog.itemsInCategory('buildings'), hasLength(3));
       expect(catalog.itemsInCategory('commerce'), hasLength(3));
       expect(catalog.itemsInCategory('furniture'), hasLength(3));
       expect(catalog.itemsInCategory('nature'), hasLength(3));
     });
 
-    test('parses ddv.json with categories and categoryId', () async {
+    test('parses ddv.json with nested category items', () async {
       final json = await rootBundle.loadString('assets/catalogs/ddv.json');
       final catalog = Catalog.fromJson(json);
 
@@ -32,7 +32,7 @@ void main() {
       expect(catalog.itemsInCategory('nature'), hasLength(4));
     });
 
-    test('serializes categories and categoryId', () {
+    test('serializes categories with nested items', () {
       const catalog = Catalog(
         id: 'test',
         name: 'Test',
@@ -41,23 +41,47 @@ void main() {
             id: 'buildings',
             name: 'Buildings',
             iconName: 'apartment',
-          ),
-        ],
-        items: [
-          CatalogItem(
-            id: 'house',
-            name: 'House',
-            categoryId: 'buildings',
-            width: 2,
-            height: 2,
+            items: [
+              CatalogItem(
+                id: 'house',
+                name: 'House',
+                width: 2,
+                height: 2,
+              ),
+            ],
           ),
         ],
       );
 
       final restored = Catalog.fromJsonMap(catalog.toJsonMap());
 
-      expect(restored.categories, catalog.categories);
-      expect(restored.items.single.categoryId, 'buildings');
+      expect(restored.categories.single.items.single.id, 'house');
+      expect(restored.items.single.width, 2);
+    });
+
+    test('categoryIdForItem resolves owning category', () {
+      const catalog = Catalog(
+        id: 'test',
+        name: 'Test',
+        categories: [
+          CatalogCategory(
+            id: 'buildings',
+            name: 'Buildings',
+            iconName: 'apartment',
+            items: [
+              CatalogItem(
+                id: 'house',
+                name: 'House',
+                width: 2,
+                height: 2,
+              ),
+            ],
+          ),
+        ],
+      );
+
+      expect(catalog.categoryIdForItem('house'), 'buildings');
+      expect(catalog.categoryIdForItem('missing'), isNull);
     });
 
     test('serializes stickers', () {

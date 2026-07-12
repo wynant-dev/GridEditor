@@ -1,12 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
+import '../../../helpers/grid_test_helpers.dart';
+
 void main() {
-  const catalog = Catalog(
+    final catalog = testCatalog(
     id: 'test',
     name: 'Test',
     items: [
-      CatalogItem(id: 'house', name: 'House', categoryId: 'buildings', width: 1, height: 1),
+      CatalogItem(id: 'house', name: 'House', width: 1, height: 1),
     ],
   );
 

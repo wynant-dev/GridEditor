@@ -5,152 +5,142 @@
     {
       "id": "buildings",
       "name": "Buildings",
-      "iconName": "apartment"
+      "iconName": "apartment",
+      "items": [
+        {
+          "id": "house",
+          "name": "House",
+          "width": 4,
+          "height": 4,
+          "color": "#E53935"
+        },
+        {
+          "id": "bank",
+          "name": "Bank",
+          "width": 2,
+          "height": 2,
+          "color": "#1E88E5"
+        },
+        {
+          "id": "apartment",
+          "name": "Apartment",
+          "width": 3,
+          "height": 3,
+          "color": "#8E24AA"
+        },
+        {
+          "id": "school",
+          "name": "School",
+          "width": 4,
+          "height": 3,
+          "color": "#F4511E"
+        }
+      ]
     },
     {
       "id": "commerce",
       "name": "Commerce",
-      "iconName": "storefront"
+      "iconName": "storefront",
+      "items": [
+        {
+          "id": "restaurant",
+          "name": "Restaurant",
+          "width": 8,
+          "height": 3,
+          "color": "#43A047"
+        },
+        {
+          "id": "shop",
+          "name": "Shop",
+          "width": 2,
+          "height": 2,
+          "color": "#FB8C00"
+        },
+        {
+          "id": "market",
+          "name": "Market",
+          "width": 3,
+          "height": 3,
+          "color": "#FDD835"
+        },
+        {
+          "id": "cafe",
+          "name": "Cafe",
+          "width": 2,
+          "height": 3,
+          "color": "#6D4C41"
+        }
+      ]
     },
     {
       "id": "furniture",
       "name": "Furniture",
-      "iconName": "chair"
+      "iconName": "chair",
+      "items": [
+        {
+          "id": "chair",
+          "name": "Chair",
+          "width": 1,
+          "height": 1,
+          "color": "#795548"
+        },
+        {
+          "id": "table",
+          "name": "Table",
+          "width": 2,
+          "height": 1,
+          "color": "#A1887F"
+        },
+        {
+          "id": "sofa",
+          "name": "Sofa",
+          "width": 2,
+          "height": 1,
+          "color": "#5D4037"
+        },
+        {
+          "id": "bed",
+          "name": "Bed",
+          "width": 2,
+          "height": 3,
+          "color": "#90A4AE"
+        }
+      ]
     },
     {
       "id": "nature",
       "name": "Nature",
-      "iconName": "park"
-    }
-  ],
-  "items": [
-    {
-      "id": "house",
-      "name": "House",
-      "categoryId": "buildings",
-      "width": 4,
-      "height": 4,
-      "color": "#E53935"
-    },
-    {
-      "id": "bank",
-      "name": "Bank",
-      "categoryId": "buildings",
-      "width": 2,
-      "height": 2,
-      "color": "#1E88E5"
-    },
-    {
-      "id": "apartment",
-      "name": "Apartment",
-      "categoryId": "buildings",
-      "width": 3,
-      "height": 3,
-      "color": "#8E24AA"
-    },
-    {
-      "id": "school",
-      "name": "School",
-      "categoryId": "buildings",
-      "width": 4,
-      "height": 3,
-      "color": "#F4511E"
-    },
-    {
-      "id": "restaurant",
-      "name": "Restaurant",
-      "categoryId": "commerce",
-      "width": 8,
-      "height": 3,
-      "color": "#43A047"
-    },
-    {
-      "id": "shop",
-      "name": "Shop",
-      "categoryId": "commerce",
-      "width": 2,
-      "height": 2,
-      "color": "#FB8C00"
-    },
-    {
-      "id": "market",
-      "name": "Market",
-      "categoryId": "commerce",
-      "width": 3,
-      "height": 3,
-      "color": "#FDD835"
-    },
-    {
-      "id": "cafe",
-      "name": "Cafe",
-      "categoryId": "commerce",
-      "width": 2,
-      "height": 3,
-      "color": "#6D4C41"
-    },
-    {
-      "id": "chair",
-      "name": "Chair",
-      "categoryId": "furniture",
-      "width": 1,
-      "height": 1,
-      "color": "#795548"
-    },
-    {
-      "id": "table",
-      "name": "Table",
-      "categoryId": "furniture",
-      "width": 2,
-      "height": 1,
-      "color": "#A1887F"
-    },
-    {
-      "id": "sofa",
-      "name": "Sofa",
-      "categoryId": "furniture",
-      "width": 2,
-      "height": 1,
-      "color": "#5D4037"
-    },
-    {
-      "id": "bed",
-      "name": "Bed",
-      "categoryId": "furniture",
-      "width": 2,
-      "height": 3,
-      "color": "#90A4AE"
-    },
-    {
-      "id": "tree",
-      "name": "Tree",
-      "categoryId": "nature",
-      "width": 1,
-      "height": 1,
-      "color": "#388E3C"
-    },
-    {
-      "id": "bush",
-      "name": "Bush",
-      "categoryId": "nature",
-      "width": 1,
-      "height": 1,
-      "color": "#66BB6A"
-    },
-    {
-      "id": "flower",
-      "name": "Flower",
-      "categoryId": "nature",
-      "width": 1,
-      "height": 1,
-      "color": "#EC407A"
-    },
-    {
-      "id": "pond",
-      "name": "Pond",
-      "categoryId": "nature",
-      "width": 2,
-      "height": 2,
-      "color": "#29B6F6"
+      "iconName": "park",
+      "items": [
+        {
+          "id": "tree",
+          "name": "Tree",
+          "width": 1,
+          "height": 1,
+          "color": "#388E3C"
+        },
+        {
+          "id": "bush",
+          "name": "Bush",
+          "width": 1,
+          "height": 1,
+          "color": "#66BB6A"
+        },
+        {
+          "id": "flower",
+          "name": "Flower",
+          "width": 1,
+          "height": 1,
+          "color": "#EC407A"
+        },
+        {
+          "id": "pond",
+          "name": "Pond",
+          "width": 2,
+          "height": 2,
+          "color": "#29B6F6"
+        }
+      ]
     }
   ],
   "floors": [

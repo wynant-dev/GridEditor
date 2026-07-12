@@ -6,11 +6,11 @@ import 'package:grid_editor/grid_editor.dart';
 import '../../../helpers/grid_test_helpers.dart';
 
 void main() {
-  const catalog = Catalog(
+    final catalog = testCatalog(
     id: 'test',
     name: 'Test',
     items: [
-      CatalogItem(id: 'house', name: 'House', categoryId: 'buildings', width: 1, height: 1),
+      CatalogItem(id: 'house', name: 'House', width: 1, height: 1),
     ],
   );
 
@@ -77,11 +77,9 @@ void main() {
   });
 
   test('classifyTap returns StickerHit over ItemHit', () {
-    const catalogWithStickers = Catalog(
-      id: 'test',
-      name: 'Test',
+    final catalogWithStickers = testCatalog(
       items: [
-        CatalogItem(id: 'house', name: 'House', categoryId: 'buildings', width: 1, height: 1),
+        CatalogItem(id: 'house', name: 'House', width: 1, height: 1),
       ],
       stickers: [
         CatalogSticker(

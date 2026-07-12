@@ -4,6 +4,31 @@ import 'package:grid_editor/grid_editor.dart';
 
 const Size kGridTestViewSize = Size(200, 200);
 
+const kTestCategory = CatalogCategory(
+  id: 'buildings',
+  name: 'Buildings',
+  iconName: 'apartment',
+);
+
+Catalog testCatalog({
+  String id = 'test',
+  String name = 'Test',
+  List<CatalogItem> items = const [],
+  List<CatalogCategory> categories = const [],
+  List<CatalogFloor> floors = const [],
+  List<CatalogSticker> stickers = const [],
+}) {
+  return Catalog(
+    id: id,
+    name: name,
+    categories: categories.isNotEmpty
+        ? categories
+        : (items.isEmpty ? const [] : [kTestCategory.copyWith(items: items)]),
+    floors: floors,
+    stickers: stickers,
+  );
+}
+
 EditorToolContext testToolContext(
   EditorController controller, {
   int row = 0,
