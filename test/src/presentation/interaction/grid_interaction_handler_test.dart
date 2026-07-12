@@ -163,7 +163,7 @@ void main() {
         CatalogSticker(
           id: 'tree',
           name: 'Tree',
-          iconPath: 'assets/icons/nature.png',
+          iconName: 'park',
         ),
       ],
     );

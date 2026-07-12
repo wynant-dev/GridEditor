@@ -3,36 +3,36 @@ class CatalogSticker {
   const CatalogSticker({
     required this.id,
     required this.name,
-    required this.iconPath,
+    required this.iconName,
   });
 
   final String id;
   final String name;
-  final String iconPath;
+  final String iconName;
 
   CatalogSticker copyWith({
     String? id,
     String? name,
-    String? iconPath,
+    String? iconName,
   }) {
     return CatalogSticker(
       id: id ?? this.id,
       name: name ?? this.name,
-      iconPath: iconPath ?? this.iconPath,
+      iconName: iconName ?? this.iconName,
     );
   }
 
   Map<String, dynamic> toJson() => {
     'id': id,
     'name': name,
-    'iconPath': iconPath,
+    'iconName': iconName,
   };
 
   factory CatalogSticker.fromJson(Map<String, dynamic> json) {
     return CatalogSticker(
       id: json['id'] as String,
       name: json['name'] as String,
-      iconPath: json['iconPath'] as String,
+      iconName: json['iconName'] as String,
     );
   }
 }

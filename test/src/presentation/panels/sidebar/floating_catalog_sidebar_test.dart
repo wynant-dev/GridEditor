@@ -13,7 +13,7 @@ void main() {
       CatalogCategory(
         id: 'buildings',
         name: 'Buildings',
-        iconPath: 'assets/icons/buildings.png',
+        iconName: 'apartment',
       ),
     ],
     items: [
@@ -184,7 +184,7 @@ void main() {
         CatalogSticker(
           id: 'tree',
           name: 'Tree',
-          iconPath: 'assets/icons/nature.png',
+          iconName: 'park',
         ),
       ],
     );

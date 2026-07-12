@@ -34,7 +34,7 @@ class StickerPreviewLayer extends StatelessWidget {
       if (definition == null) return const SizedBox.shrink();
 
       return StickerGlyph(
-        iconPath: definition.iconPath,
+        iconName: definition.iconName,
         center: dragSession.currentCenter,
         opacity: _ghostOpacity,
       );
@@ -52,7 +52,7 @@ class StickerPreviewLayer extends StatelessWidget {
     if (center == null) return const SizedBox.shrink();
 
     return StickerGlyph(
-      iconPath: definition.iconPath,
+      iconName: definition.iconName,
       center: center,
       opacity: _ghostOpacity,
     );

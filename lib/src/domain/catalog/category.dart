@@ -3,26 +3,26 @@ class CatalogCategory {
   const CatalogCategory({
     required this.id,
     required this.name,
-    required this.iconPath,
+    required this.iconName,
   });
 
   final String id;
   final String name;
 
-  /// Asset path to the category icon image.
-  final String iconPath;
+  /// Material Symbols icon name (e.g. `apartment`, `storefront`).
+  final String iconName;
 
   Map<String, dynamic> toJson() => {
     'id': id,
     'name': name,
-    'iconPath': iconPath,
+    'iconName': iconName,
   };
 
   factory CatalogCategory.fromJson(Map<String, dynamic> json) {
     return CatalogCategory(
       id: json['id'] as String,
       name: json['name'] as String,
-      iconPath: json['iconPath'] as String,
+      iconName: json['iconName'] as String,
     );
   }
 
@@ -31,9 +31,9 @@ class CatalogCategory {
     return other is CatalogCategory &&
         other.id == id &&
         other.name == name &&
-        other.iconPath == iconPath;
+        other.iconName == iconName;
   }
 
   @override
-  int get hashCode => Object.hash(id, name, iconPath);
+  int get hashCode => Object.hash(id, name, iconName);
 }

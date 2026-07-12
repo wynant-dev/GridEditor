@@ -12,7 +12,7 @@ void main() {
 
       expect(catalog.categories, hasLength(4));
       expect(catalog.categories.first.id, 'buildings');
-      expect(catalog.categories.first.iconPath, 'assets/icons/buildings.png');
+      expect(catalog.categories.first.iconName, 'apartment');
       expect(catalog.items, hasLength(12));
       expect(catalog.items.every((item) => item.categoryId.isNotEmpty), isTrue);
       expect(catalog.itemsInCategory('buildings'), hasLength(3));
@@ -40,7 +40,7 @@ void main() {
           CatalogCategory(
             id: 'buildings',
             name: 'Buildings',
-            iconPath: 'assets/icons/buildings.png',
+            iconName: 'apartment',
           ),
         ],
         items: [
@@ -68,7 +68,7 @@ void main() {
           CatalogSticker(
             id: 'tree',
             name: 'Tree',
-            iconPath: 'assets/icons/nature.png',
+            iconName: 'park',
           ),
         ],
       );
@@ -76,7 +76,7 @@ void main() {
       final restored = Catalog.fromJsonMap(catalog.toJsonMap());
 
       expect(restored.stickers.single.id, 'tree');
-      expect(restored.stickers.single.iconPath, 'assets/icons/nature.png');
+      expect(restored.stickers.single.iconName, 'park');
     });
 
     test('parses stickers from sandbox.json', () async {

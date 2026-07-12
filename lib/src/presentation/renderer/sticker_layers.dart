@@ -4,17 +4,18 @@ import '../../domain/catalog/catalog.dart';
 import '../../domain/layout/grid_document.dart';
 import '../../domain/layout/placed_sticker.dart';
 import '../../domain/sticker/sticker_bounds.dart';
+import '../theme/catalog_icon_resolver.dart';
 
 /// Renders a sticker icon centered at world coordinates.
 class StickerGlyph extends StatelessWidget {
   const StickerGlyph({
     super.key,
-    required this.iconPath,
+    required this.iconName,
     required this.center,
     this.opacity = 1.0,
   });
 
-  final String iconPath;
+  final String iconName;
   final Offset center;
   final double opacity;
 
@@ -31,9 +32,9 @@ class StickerGlyph extends StatelessWidget {
       child: IgnorePointer(
         child: Opacity(
           opacity: opacity,
-          child: Image.asset(
-            iconPath,
-            fit: BoxFit.contain,
+          child: Icon(
+            CatalogIconResolver.resolve(iconName),
+            size: size,
           ),
         ),
       ),
@@ -90,7 +91,7 @@ class _StickerWidget extends StatelessWidget {
     if (definition == null) return const SizedBox.shrink();
 
     return StickerGlyph(
-      iconPath: definition.iconPath,
+      iconName: definition.iconName,
       center: Offset(sticker.x, sticker.y),
       opacity: opacity,
     );

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../application/editor_controller.dart';
 import '../../../application/selection_history_entry.dart';
 import '../../theme/catalog_color_resolver.dart';
-import 'sidebar_asset_icon.dart';
+import 'sidebar_symbol_icon.dart';
 import 'sidebar_container.dart';
 import 'sidebar_history_button.dart';
 import 'sidebar_icon_button.dart';
@@ -203,10 +203,9 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
                             selected: _isCategorySelected(category.id),
                             tooltip: category.name,
                             onPressed: () => _toggleCategorySubmenu(category.id),
-                            icon: SidebarAssetIcon(
-                              assetPath: category.iconPath,
+                            icon: SidebarSymbolIcon(
+                              iconName: category.iconName,
                               selected: _isCategorySelected(category.id),
-                              fallbackIcon: Icons.category_outlined,
                             ),
                           ),
                         ),
@@ -222,10 +221,9 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
                         selected: widget.controller.selectedFloorId != null,
                         tooltip: 'Floor tool',
                         onPressed: _toggleFloorsSubmenu,
-                        icon: SidebarAssetIcon(
-                          assetPath: 'assets/icons/floor.png',
+                        icon: SidebarSymbolIcon(
+                          iconName: 'palette',
                           selected: widget.controller.selectedFloorId != null,
-                          fallbackIcon: Icons.format_paint_outlined,
                         ),
                       ),
                     ),
@@ -236,10 +234,9 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
                           selected: widget.controller.selectedStickerCatalogId != null,
                           tooltip: 'Stickers',
                           onPressed: _toggleStickersSubmenu,
-                          icon: SidebarAssetIcon(
-                            assetPath: 'assets/icons/nature.png',
+                          icon: SidebarSymbolIcon(
+                            iconName: 'sticker',
                             selected: widget.controller.selectedStickerCatalogId != null,
-                            fallbackIcon: Icons.emoji_emotions_outlined,
                           ),
                         ),
                       ),
@@ -257,9 +254,8 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
                     SidebarIconButton(
                       tooltip: 'Settings',
                       onPressed: widget.onSettingsPressed ?? () {},
-                      icon: const SidebarAssetIcon(
-                        assetPath: 'assets/icons/settings.png',
-                        fallbackIcon: Icons.settings_outlined,
+                      icon: const SidebarSymbolIcon(
+                        iconName: 'settings',
                       ),
                     ),
                   ],
@@ -348,7 +344,7 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
         children: [
           for (final sticker in widget.controller.catalog.stickers)
             SidebarSubmenuIconItem(
-              iconPath: sticker.iconPath,
+              iconName: sticker.iconName,
               label: sticker.name,
               selected: sticker.id == widget.controller.selectedStickerCatalogId,
               onPressed: () => widget.controller.selectStickerCatalog(sticker.id),

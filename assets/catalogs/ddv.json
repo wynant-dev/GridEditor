@@ -5,22 +5,22 @@
     {
       "id": "buildings",
       "name": "Buildings",
-      "iconPath": "assets/icons/buildings.png"
+      "iconName": "apartment"
     },
     {
       "id": "commerce",
       "name": "Commerce",
-      "iconPath": "assets/icons/commerce.png"
+      "iconName": "storefront"
     },
     {
       "id": "furniture",
       "name": "Furniture",
-      "iconPath": "assets/icons/furniture.png"
+      "iconName": "chair"
     },
     {
       "id": "nature",
       "name": "Nature",
-      "iconPath": "assets/icons/nature.png"
+      "iconName": "park"
     }
   ],
   "items": [
@@ -174,22 +174,22 @@
     {
       "id": "tree",
       "name": "Tree",
-      "iconPath": "assets/icons/nature.png"
+      "iconName": "park"
     },
     {
       "id": "building",
       "name": "Building",
-      "iconPath": "assets/icons/buildings.png"
+      "iconName": "apartment"
     },
     {
       "id": "shop",
       "name": "Shop",
-      "iconPath": "assets/icons/commerce.png"
+      "iconName": "storefront"
     },
     {
       "id": "furniture",
       "name": "Furniture",
-      "iconPath": "assets/icons/furniture.png"
+      "iconName": "chair"
     }
   ]
 }
