@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../application/editor_controller.dart';
-import '../../domain/layout/placed_item.dart';
+import '../../domain/layout/item.dart';
 import '../../infrastructure/catalog/catalog_loader.dart';
 import '../canvas/grid_canvas.dart';
 import '../interaction/grid_interaction_state.dart';
@@ -17,7 +17,7 @@ class GridEditorScreen extends StatefulWidget {
     super.key,
     required this.catalogLoader,
     this.onCellTap,
-    this.onPlacementTap,
+    this.onItemTap,
     this.onPlaceError,
     this.onSettingsPressed,
     this.seedColor,
@@ -26,7 +26,7 @@ class GridEditorScreen extends StatefulWidget {
 
   final CatalogLoader catalogLoader;
   final void Function(int row, int col)? onCellTap;
-  final void Function(PlacedItem placement)? onPlacementTap;
+  final void Function(Item item)? onItemTap;
   final void Function(String error)? onPlaceError;
   final VoidCallback? onSettingsPressed;
   final Color? seedColor;
@@ -121,7 +121,7 @@ class _GridEditorScreenState extends State<GridEditorScreen> {
                   interactionState: _interactionState,
                   viewportController: _viewportController,
                   onCellTap: widget.onCellTap,
-                  onPlacementTap: widget.onPlacementTap,
+                  onItemTap: widget.onItemTap,
                   onPlaceError: widget.onPlaceError,
                 ),
               ),

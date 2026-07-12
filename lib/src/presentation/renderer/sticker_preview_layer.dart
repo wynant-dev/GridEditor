@@ -42,7 +42,7 @@ class StickerPreviewLayer extends StatelessWidget {
 
     if (interactionState.isDragging) return const SizedBox.shrink();
 
-    final selectedId = controller.selectedStickerCatalogId;
+    final selectedId = controller.selectedCatalogStickerId;
     if (selectedId == null) return const SizedBox.shrink();
 
     final definition = catalog.stickerById(selectedId);

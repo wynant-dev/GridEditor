@@ -5,9 +5,9 @@ import 'package:flutter/gestures.dart';
 
 import '../../domain/catalog/catalog.dart';
 import '../../domain/layout/grid_document.dart';
-import '../../domain/layout/placed_item.dart';
-import '../../domain/layout/placed_sticker.dart';
-import '../../domain/sticker/sticker_bounds.dart';
+import '../../domain/layout/item.dart';
+import '../../domain/layout/sticker.dart';
+import '../../domain/rules/sticker_rules.dart';
 import '../../application/editor_controller.dart';
 import '../../application/interaction/sticker_drag_session.dart';
 import '../../application/tools/editor_tool_context.dart';
@@ -18,7 +18,7 @@ import 'grid_hit.dart';
 import 'grid_hit_tester.dart';
 import 'grid_interaction_state.dart';
 
-/// Handles pointer events for the grid canvas and resolves cell/placement/sticker taps.
+/// Handles pointer events for the grid canvas and resolves cell/item/sticker taps.
 class GridInteractionHandler {
   GridInteractionHandler({
     required GridCoordinateMapper mapper,
@@ -28,7 +28,7 @@ class GridInteractionHandler {
     this.editorController,
     this.toolManager,
     this.onCellTap,
-    this.onPlacementTap,
+    this.onItemTap,
     this.supportsHover = true,
   })  : _mapper = mapper,
         _document = document,
@@ -42,7 +42,7 @@ class GridInteractionHandler {
   EditorController? editorController;
   ToolManager? toolManager;
   void Function(int row, int col)? onCellTap;
-  void Function(PlacedItem placement)? onPlacementTap;
+  void Function(Item item)? onItemTap;
   bool supportsHover;
 
   static const _tapSlop = 18.0;
@@ -50,8 +50,8 @@ class GridInteractionHandler {
 
   int? _activePointerId;
   Offset? _pointerDownPosition;
-  PlacedItem? _pointerDownPlacement;
-  PlacedSticker? _pointerDownSticker;
+  Item? _pointerDownItem;
+  Sticker? _pointerDownSticker;
   int? _grabOffsetRow;
   int? _grabOffsetCol;
   Offset? _stickerGrabOffset;
@@ -75,7 +75,7 @@ class GridInteractionHandler {
     EditorController? editorController,
     ToolManager? toolManager,
     void Function(int row, int col)? onCellTap,
-    void Function(PlacedItem placement)? onPlacementTap,
+    void Function(Item item)? onItemTap,
     bool? supportsHover,
   }) {
     _mapper = mapper;
@@ -84,7 +84,7 @@ class GridInteractionHandler {
     this.editorController = editorController;
     this.toolManager = toolManager;
     this.onCellTap = onCellTap;
-    this.onPlacementTap = onPlacementTap;
+    this.onItemTap = onItemTap;
     if (supportsHover != null) {
       this.supportsHover = supportsHover;
     }
@@ -102,8 +102,8 @@ class GridInteractionHandler {
 
     final world = _hitTester.worldAt(event.localPosition);
     _pointerDownSticker = _mapper.hitTestSticker(world, _document, _catalog);
-    _pointerDownPlacement = _pointerDownSticker == null
-        ? _mapper.hitTestPlacement(world, _document, _catalog)
+    _pointerDownItem = _pointerDownSticker == null
+        ? _mapper.hitTestItem(world, _document, _catalog)
         : null;
 
     _grabOffsetRow = null;
@@ -120,14 +120,14 @@ class GridInteractionHandler {
       });
     }
 
-    final placement = _pointerDownPlacement;
-    if (placement != null) {
+    final layoutItem = _pointerDownItem;
+    if (layoutItem != null) {
       final (pointerRow, pointerCol) = _hitTester.cellAt(event.localPosition);
-      _grabOffsetRow = pointerRow - placement.originRow;
-      _grabOffsetCol = pointerCol - placement.originCol;
+      _grabOffsetRow = pointerRow - layoutItem.originRow;
+      _grabOffsetCol = pointerCol - layoutItem.originCol;
       _longPressTimer = Timer(_longPressDuration, () {
         if (_activePointerId == null || _dragSession != null) return;
-        _startDrag(placement, event.localPosition);
+        _startDrag(layoutItem, event.localPosition);
       });
     }
 
@@ -148,12 +148,12 @@ class GridInteractionHandler {
 
     if (_activePointerId == event.pointer &&
         _pointerDownPosition != null &&
-        _pointerDownPlacement != null &&
+        _pointerDownItem != null &&
         _dragSession == null) {
       final distance = (event.localPosition - _pointerDownPosition!).distance;
       if (distance > _tapSlop) {
         _cancelLongPressTimer();
-        _startDrag(_pointerDownPlacement!, event.localPosition);
+        _startDrag(_pointerDownItem!, event.localPosition);
       }
     }
 
@@ -172,7 +172,7 @@ class GridInteractionHandler {
         pointerCol: pointerCol,
         grabOffsetRow: _dragSession!.grabOffsetRow,
         grabOffsetCol: _dragSession!.grabOffsetCol,
-        placement: _document.placementById(_dragSession!.placementId),
+        layoutItem: _document.itemById(_dragSession!.itemId),
       );
       interactionState.updateDragPosition(origin.$1, origin.$2);
       return;
@@ -194,10 +194,10 @@ class GridInteractionHandler {
 
     _cancelLongPressTimer();
 
-    final wasPlacementDragging = _dragSession != null;
+    final wasItemDragging = _dragSession != null;
     final wasStickerDragging = _stickerDragSession != null;
-    if (wasPlacementDragging) {
-      _resolvePlacementDragEnd();
+    if (wasItemDragging) {
+      _resolveItemDragEnd();
     }
     if (wasStickerDragging) {
       _resolveStickerDragEnd();
@@ -208,7 +208,7 @@ class GridInteractionHandler {
     final downPosition = _pointerDownPosition!;
     _activePointerId = null;
     _pointerDownPosition = null;
-    _pointerDownPlacement = null;
+    _pointerDownItem = null;
     _pointerDownSticker = null;
     _grabOffsetRow = null;
     _grabOffsetCol = null;
@@ -216,7 +216,7 @@ class GridInteractionHandler {
     _dragSession = null;
     _stickerDragSession = null;
 
-    if (wasPlacementDragging || wasStickerDragging) {
+    if (wasItemDragging || wasStickerDragging) {
       return;
     }
 
@@ -233,7 +233,7 @@ class GridInteractionHandler {
       toolManager?.handlePointerUp();
       _activePointerId = null;
       _pointerDownPosition = null;
-      _pointerDownPlacement = null;
+      _pointerDownItem = null;
       _pointerDownSticker = null;
       _grabOffsetRow = null;
       _grabOffsetCol = null;
@@ -256,13 +256,13 @@ class GridInteractionHandler {
     interactionState.setHoverWorldPosition(null);
   }
 
-  void _startDrag(PlacedItem placement, Offset viewportPosition) {
-    if (!_canStartPlacementDrag(placement)) return;
+  void _startDrag(Item item, Offset viewportPosition) {
+    if (!_canStartItemDrag(item)) return;
 
     final editorController = this.editorController;
     if (editorController != null &&
-        editorController.selectedPlacementId != placement.id) {
-      editorController.selectPlacement(placement.id);
+        editorController.selectedItemId != item.id) {
+      editorController.selectItem(item.id);
     }
 
     final grabOffsetRow = _grabOffsetRow ?? 0;
@@ -273,12 +273,12 @@ class GridInteractionHandler {
       pointerCol: pointerCol,
       grabOffsetRow: grabOffsetRow,
       grabOffsetCol: grabOffsetCol,
-      placement: placement,
+      layoutItem: item,
     );
     final session = DragSession(
-      placementId: placement.id,
-      startRow: placement.originRow,
-      startCol: placement.originCol,
+      itemId: item.id,
+      startRow: item.originRow,
+      startCol: item.originCol,
       grabOffsetRow: grabOffsetRow,
       grabOffsetCol: grabOffsetCol,
       currentRow: origin.$1,
@@ -288,7 +288,7 @@ class GridInteractionHandler {
     interactionState.startDragSession(session);
   }
 
-  void _startStickerDrag(PlacedSticker sticker, Offset viewportPosition) {
+  void _startStickerDrag(Sticker sticker, Offset viewportPosition) {
     if (!_canStartStickerDrag(sticker)) return;
 
     final editorController = this.editorController;
@@ -309,15 +309,15 @@ class GridInteractionHandler {
     interactionState.startStickerDragSession(session);
   }
 
-  bool _canStartPlacementDrag(PlacedItem placement) {
+  bool _canStartItemDrag(Item item) {
     final toolManager = this.toolManager;
     if (toolManager != null) {
-      return toolManager.canStartDrag(placement);
+      return toolManager.canStartDrag(item);
     }
     return true;
   }
 
-  bool _canStartStickerDrag(PlacedSticker sticker) {
+  bool _canStartStickerDrag(Sticker sticker) {
     final toolManager = this.toolManager;
     if (toolManager != null) {
       return toolManager.canStartStickerDrag(sticker);
@@ -327,7 +327,7 @@ class GridInteractionHandler {
 
   Offset _clampStickerCenter(Offset center) {
     final metrics = _mapper.metrics;
-    return StickerBounds.clampCenter(
+    return StickerRules.clampCenter(
       rows: _document.rows,
       cols: _document.cols,
       cellSize: metrics.cellSize,
@@ -341,30 +341,30 @@ class GridInteractionHandler {
     required int pointerCol,
     required int grabOffsetRow,
     required int grabOffsetCol,
-    required PlacedItem? placement,
+    required Item? layoutItem,
   }) {
     var originRow = pointerRow - grabOffsetRow;
     var originCol = pointerCol - grabOffsetCol;
 
-    if (placement != null) {
-      final item = _catalog.itemById(placement.catalogItemId);
-      if (item != null) {
-        originRow = originRow.clamp(0, _document.rows - item.height);
-        originCol = originCol.clamp(0, _document.cols - item.width);
+    if (layoutItem != null) {
+      final catalogItem = _catalog.itemById(layoutItem.catalogItemId);
+      if (catalogItem != null) {
+        originRow = originRow.clamp(0, _document.rows - catalogItem.height);
+        originCol = originCol.clamp(0, _document.cols - catalogItem.width);
       }
     }
 
     return (originRow, originCol);
   }
 
-  void _resolvePlacementDragEnd() {
+  void _resolveItemDragEnd() {
     final session = interactionState.dragSession ?? _dragSession;
     if (session == null) return;
 
     final editorController = this.editorController;
     if (editorController != null) {
-      editorController.movePlacement(
-        placementId: session.placementId,
+      editorController.moveItem(
+        itemId: session.itemId,
         newRow: session.currentRow,
         newCol: session.currentCol,
       );
@@ -459,12 +459,12 @@ class GridInteractionHandler {
         viewportPosition,
         row: switch (hit) {
           CellHit(:final row) => row,
-          PlacementHit(:final row) => row,
+          ItemHit(:final row) => row,
           StickerHit(:final row) => row,
         },
         col: switch (hit) {
           CellHit(:final col) => col,
-          PlacementHit(:final col) => col,
+          ItemHit(:final col) => col,
           StickerHit(:final col) => col,
         },
       );
@@ -472,8 +472,8 @@ class GridInteractionHandler {
       switch (hit) {
         case StickerHit(:final sticker):
           toolManager.handleStickerTap(ctx, sticker);
-        case PlacementHit(:final placement):
-          toolManager.handlePlacementTap(ctx, placement);
+        case ItemHit(:final item):
+          toolManager.handleItemTap(ctx, item);
         case CellHit():
           if (!toolManager.handleWorldTap(ctx)) {
             toolManager.handleCellTap(ctx);
@@ -488,13 +488,13 @@ class GridInteractionHandler {
       return;
     }
 
-    final placement = _mapper.hitTestPlacement(
+    final layoutItem = _mapper.hitTestItem(
       world,
       _document,
       _catalog,
     );
-    if (placement != null) {
-      onPlacementTap?.call(placement);
+    if (layoutItem != null) {
+      onItemTap?.call(layoutItem);
       return;
     }
 

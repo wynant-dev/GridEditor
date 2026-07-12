@@ -155,21 +155,21 @@ class DebugAdminPanel extends StatelessWidget {
       _Section(
         title: 'Catalog selection',
         children: [
-          _Row(label: 'item', value: controller.selectedItemId),
-          _Row(label: 'floor', value: controller.selectedFloorId),
-          _Row(label: 'sticker', value: controller.selectedStickerCatalogId),
+          _Row(label: 'catalog item', value: controller.selectedCatalogItemId),
+          _Row(label: 'floor', value: controller.selectedCatalogFloorId),
+          _Row(label: 'sticker', value: controller.selectedCatalogStickerId),
         ],
       ),
       _Section(
         title: 'Canvas selection',
         children: [
-          _Row(label: 'placement id', value: controller.selectedPlacementId),
-          if (controller.selectedPlacement case final placement?)
+          _Row(label: 'item id', value: controller.selectedItemId),
+          if (controller.selectedItem case final layoutItem?)
             _Row(
-              label: 'placement',
+              label: 'item',
               value:
-                  '${placement.catalogItemId} @ '
-                  '(${placement.originRow}, ${placement.originCol})',
+                  '${layoutItem.catalogItemId} @ '
+                  '(${layoutItem.originRow}, ${layoutItem.originCol})',
             ),
           _Row(label: 'sticker id', value: controller.selectedStickerId),
           if (controller.selectedSticker case final sticker?)
@@ -200,8 +200,8 @@ class DebugAdminPanel extends StatelessWidget {
           ),
           _Row(label: 'default floor', value: controller.layout.defaultFloorId),
           _Row(
-            label: 'placements',
-            value: '${controller.layout.placements.length}',
+            label: 'items',
+            value: '${controller.layout.items.length}',
           ),
           _Row(
             label: 'stickers',
@@ -209,22 +209,22 @@ class DebugAdminPanel extends StatelessWidget {
           ),
           _Row(
             label: 'floor tiles',
-            value: '${controller.layout.floorTiles.length}',
+            value: '${controller.layout.floors.length}',
           ),
         ],
       ),
       _Section(
-        title: 'Placements',
+        title: 'Items',
         children: [
-          if (controller.layout.placements.isEmpty)
+          if (controller.layout.items.isEmpty)
             const _MutedText('(none)')
           else
-            for (final placement in controller.layout.placements)
+            for (final item in controller.layout.items)
               _Row(
-                label: placement.id,
+                label: item.id,
                 value:
-                    '${placement.catalogItemId} '
-                    '(${placement.originRow}, ${placement.originCol})',
+                    '${item.catalogItemId} '
+                    '(${item.originRow}, ${item.originCol})',
               ),
         ],
       ),
@@ -266,9 +266,9 @@ class DebugAdminPanel extends StatelessWidget {
             ),
             if (interaction.dragSession case final session?)
               _Row(
-                label: 'placement drag',
+                label: 'item drag',
                 value:
-                    '${session.placementId} → '
+                    '${session.itemId} → '
                     '(${session.currentRow}, ${session.currentCol})',
               ),
             if (interaction.stickerDragSession case final session?)

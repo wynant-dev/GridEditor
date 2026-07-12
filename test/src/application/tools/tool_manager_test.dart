@@ -6,7 +6,7 @@ import '../../../helpers/grid_test_helpers.dart';
 class _RecordingTool extends EditorTool {
   int hoverCount = 0;
   int tapCount = 0;
-  bool placementHandled = false;
+  bool itemHandled = false;
 
   @override
   void onCellHover(EditorToolContext ctx) => hoverCount++;
@@ -18,8 +18,8 @@ class _RecordingTool extends EditorTool {
   }
 
   @override
-  bool onPlacementTap(EditorToolContext ctx, PlacedItem placement) {
-    placementHandled = true;
+  bool onItemTap(EditorToolContext ctx, Item item) {
+    itemHandled = true;
     return false;
   }
 }
@@ -39,7 +39,7 @@ void main() {
   test('handleCellHover calls active tool and default tool', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     final tool = _RecordingTool();
     final manager = ToolManager(activeTool: tool);
 
@@ -51,7 +51,7 @@ void main() {
   test('handleCellTap uses active tool when handled', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     final tool = _RecordingTool();
     final manager = ToolManager(activeTool: tool);
 
@@ -60,40 +60,40 @@ void main() {
     expect(tool.tapCount, 1);
   });
 
-  test('handlePlacementTap falls back to DefaultTool when active does not handle',
+  test('handleItemTap falls back to DefaultTool when active does not handle',
       () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     controller.placeAt(0, 0);
-    final placement = controller.layout.placements.single;
+    final item = controller.layout.items.single;
     final tool = _RecordingTool();
     final manager = ToolManager(activeTool: tool);
 
-    manager.handlePlacementTap(ctx(controller), placement);
+    manager.handleItemTap(ctx(controller), item);
 
-    expect(tool.placementHandled, isTrue);
-    expect(controller.selectedPlacementId, placement.id);
-    expect(controller.layout.placements, hasLength(1));
+    expect(tool.itemHandled, isTrue);
+    expect(controller.selectedItemId, item.id);
+    expect(controller.layout.items, hasLength(1));
   });
 
-  test('handlePlacementTap erases when EraseTool is active', () {
+  test('handleItemTap erases when EraseTool is active', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     controller.placeAt(0, 0);
-    final placement = controller.layout.placements.single;
+    final item = controller.layout.items.single;
     final manager = ToolManager(activeTool: EraseTool());
 
-    manager.handlePlacementTap(ctx(controller), placement);
+    manager.handleItemTap(ctx(controller), item);
 
-    expect(controller.layout.placements, isEmpty);
+    expect(controller.layout.items, isEmpty);
   });
 
   test('setTool updates active tool and notifies listeners', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     final first = _RecordingTool();
     final second = _RecordingTool();
     final manager = ToolManager(activeTool: first);
@@ -108,20 +108,20 @@ void main() {
     expect(notified, 1);
   });
 
-  test('handlePlacementTap ignores taps while dragging', () {
+  test('handleItemTap ignores taps while dragging', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     controller.placeAt(0, 0);
-    final placement = controller.layout.placements.single;
+    final item = controller.layout.items.single;
     final manager = ToolManager(activeTool: EraseTool());
 
-    manager.handlePlacementTap(
+    manager.handleItemTap(
       ctx(controller),
-      placement,
+      item,
       isDragging: true,
     );
 
-    expect(controller.layout.placements, hasLength(1));
+    expect(controller.layout.items, hasLength(1));
   });
 }

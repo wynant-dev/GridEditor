@@ -1,8 +1,8 @@
 import 'dart:ui';
 
-/// Pure sticker placement bounds checks (no Flutter widgets).
-class StickerBounds {
-  const StickerBounds._();
+/// Rules for [CatalogSticker] → [Sticker].
+class StickerRules {
+  const StickerRules._();
 
   static const double kDefaultStickerSize = 48.0;
 

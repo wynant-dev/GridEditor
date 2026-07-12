@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'dart:ui';
 
 import '../domain/catalog/catalog.dart';
-import '../domain/layout/floor_tile.dart';
+import '../domain/layout/floor.dart';
 import '../domain/layout/grid_document.dart';
-import '../domain/layout/placed_item.dart';
-import '../domain/layout/placed_sticker.dart';
-import '../domain/placement/placement_rules.dart';
-import '../domain/sticker/sticker_bounds.dart';
+import '../domain/layout/item.dart';
+import '../domain/layout/sticker.dart';
+import '../domain/rules/floor_rules.dart';
+import '../domain/rules/item_rules.dart';
+import '../domain/rules/sticker_rules.dart';
 
 /// Bridge between catalog (what exists) and layout (what is placed).
 class EditorEngine {
@@ -29,19 +30,19 @@ class EditorEngine {
     );
   }
 
-  String? placementError({
+  String? itemError({
     required String catalogItemId,
     required int originRow,
     required int originCol,
-    String? ignorePlacementId,
+    String? ignoreItemId,
   }) {
-    return PlacementRules.placementError(
+    return ItemRules.itemError(
       catalog: catalog,
       layout: layout,
       catalogItemId: catalogItemId,
       originRow: originRow,
       originCol: originCol,
-      ignorePlacementId: ignorePlacementId,
+      ignoreItemId: ignoreItemId,
     );
   }
 
@@ -49,9 +50,9 @@ class EditorEngine {
     required String catalogItemId,
     required int originRow,
     required int originCol,
-    String? placementId,
+    String? itemId,
   }) {
-    final error = placementError(
+    final error = itemError(
       catalogItemId: catalogItemId,
       originRow: originRow,
       originCol: originCol,
@@ -60,60 +61,60 @@ class EditorEngine {
       throw StateError(error);
     }
 
-    final placement = PlacedItem(
-      id: placementId ?? _nextPlacementId(),
+    final item = Item(
+      id: itemId ?? _nextItemId(),
       catalogItemId: catalogItemId,
       originRow: originRow,
       originCol: originCol,
     );
 
     return copyWith(
-      layout: layout.copyWith(placements: [...layout.placements, placement]),
+      layout: layout.copyWith(items: [...layout.items, item]),
     );
   }
 
-  EditorEngine removePlacement(String placementId) {
+  EditorEngine removeItem(String itemId) {
     return copyWith(
       layout: layout.copyWith(
-        placements: [
-          for (final placement in layout.placements)
-            if (placement.id != placementId) placement,
+        items: [
+          for (final item in layout.items)
+            if (item.id != itemId) item,
         ],
       ),
     );
   }
 
-  EditorEngine movePlacement({
-    required String placementId,
+  EditorEngine moveItem({
+    required String itemId,
     required int newRow,
     required int newCol,
   }) {
-    final existing = placementById(placementId);
+    final existing = itemById(itemId);
     if (existing == null) {
-      throw StateError('Placement not found');
+      throw StateError('Item not found');
     }
 
-    final error = placementError(
+    final error = itemError(
       catalogItemId: existing.catalogItemId,
       originRow: newRow,
       originCol: newCol,
-      ignorePlacementId: placementId,
+      ignoreItemId: itemId,
     );
     if (error != null) {
       throw StateError(error);
     }
 
-    final without = removePlacement(placementId);
+    final without = removeItem(itemId);
     return without.placeItem(
       catalogItemId: existing.catalogItemId,
       originRow: newRow,
       originCol: newCol,
-      placementId: placementId,
+      itemId: itemId,
     );
   }
 
   bool occupiesCell({required int row, required int col}) {
-    return PlacementRules.occupiesCell(
+    return ItemRules.occupiesCell(
       catalog: catalog,
       layout: layout,
       row: row,
@@ -121,8 +122,8 @@ class EditorEngine {
     );
   }
 
-  PlacedItem? placementCovering({required int row, required int col}) {
-    return PlacementRules.placementCovering(
+  Item? itemCovering({required int row, required int col}) {
+    return ItemRules.itemCovering(
       catalog: catalog,
       layout: layout,
       row: row,
@@ -130,9 +131,9 @@ class EditorEngine {
     );
   }
 
-  PlacedItem? placementById(String id) => layout.placementById(id);
+  Item? itemById(String id) => layout.itemById(id);
 
-  PlacedSticker? stickerById(String id) => layout.stickerById(id);
+  Sticker? stickerById(String id) => layout.stickerById(id);
 
   String? stickerError({
     required String catalogStickerId,
@@ -144,7 +145,7 @@ class EditorEngine {
     if (catalog.stickerById(catalogStickerId) == null) {
       return 'Unknown sticker: $catalogStickerId';
     }
-    if (!StickerBounds.isCenterInGrid(
+    if (!StickerRules.isCenterInGrid(
       rows: layout.rows,
       cols: layout.cols,
       cellSize: cellSize,
@@ -176,7 +177,7 @@ class EditorEngine {
       throw StateError(error);
     }
 
-    final sticker = PlacedSticker(
+    final sticker = Sticker(
       id: stickerId ?? _nextStickerId(),
       catalogStickerId: catalogStickerId,
       x: x,
@@ -242,28 +243,30 @@ class EditorEngine {
     required int col,
     required String catalogFloorId,
   }) {
-    if (row < 0 || row >= layout.rows || col < 0 || col >= layout.cols) {
-      throw StateError('Floor cell is out of bounds');
-    }
-
-    final floor = catalog.floorById(catalogFloorId);
-    if (floor == null) {
-      throw StateError('Unknown floor: $catalogFloorId');
+    final error = FloorRules.floorError(
+      catalog: catalog,
+      layout: layout,
+      row: row,
+      col: col,
+      catalogFloorId: catalogFloorId,
+    );
+    if (error != null) {
+      throw StateError(error);
     }
 
     final withoutCell = [
-      for (final tile in layout.floorTiles)
-        if (tile.row != row || tile.col != col) tile,
+      for (final floor in layout.floors)
+        if (floor.row != row || floor.col != col) floor,
     ];
-    final updatedTiles = catalogFloorId == layout.defaultFloorId
+    final updatedFloors = catalogFloorId == layout.defaultFloorId
         ? withoutCell
         : [
             ...withoutCell,
-            FloorTile(row: row, col: col, catalogFloorId: catalogFloorId),
+            Floor(row: row, col: col, catalogFloorId: catalogFloorId),
           ];
 
     return copyWith(
-      layout: layout.copyWith(floorTiles: updatedTiles),
+      layout: layout.copyWith(floors: updatedFloors),
     );
   }
 
@@ -281,10 +284,10 @@ class EditorEngine {
     );
   }
 
-  String _nextPlacementId() {
+  String _nextItemId() {
     var max = 0;
-    for (final placement in layout.placements) {
-      final match = RegExp(r'^p(\d+)$').firstMatch(placement.id);
+    for (final item in layout.items) {
+      final match = RegExp(r'^p(\d+)$').firstMatch(item.id);
       if (match == null) continue;
       final value = int.tryParse(match.group(1)!);
       if (value != null && value > max) {

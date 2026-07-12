@@ -4,10 +4,10 @@ import 'package:flutter/foundation.dart';
 
 import '../domain/catalog/catalog.dart';
 import '../domain/layout/grid_document.dart';
-import '../domain/layout/placed_item.dart';
-import '../domain/layout/placed_sticker.dart';
+import '../domain/layout/item.dart';
+import '../domain/layout/sticker.dart';
 import 'editor_engine.dart';
-import '../domain/placement/placement_rules.dart';
+import '../domain/rules/item_rules.dart';
 import 'selection_history_entry.dart';
 import 'selection_state.dart';
 import 'editor_action_log.dart';
@@ -21,7 +21,7 @@ import 'tools/tool_manager.dart';
 class EditorController extends ChangeNotifier {
   EditorController({
     EditorEngine? engine,
-    String? selectedItemId,
+    String? selectedCatalogItemId,
     void Function(String error)? onPlaceError,
     EditorActionLog? actionLog,
   }) : _engine =
@@ -34,7 +34,7 @@ class EditorController extends ChangeNotifier {
                defaultFloorId: 'grass',
              ),
            ),
-       _selectedItemId = selectedItemId,
+       _selectedCatalogItemId = selectedCatalogItemId,
        _onPlaceError = onPlaceError,
        _actionLog = actionLog ?? EditorActionLog(),
        _toolManager = ToolManager(
@@ -43,9 +43,9 @@ class EditorController extends ChangeNotifier {
        );
 
   EditorEngine _engine;
-  String? _selectedItemId;
-  String? _selectedFloorId;
-  String? _selectedStickerCatalogId;
+  String? _selectedCatalogItemId;
+  String? _selectedCatalogFloorId;
+  String? _selectedCatalogStickerId;
   SelectionState _selection = const SelectionState();
   final List<SelectionHistoryEntry> _selectionHistory = [];
   ToolManager _toolManager;
@@ -55,24 +55,30 @@ class EditorController extends ChangeNotifier {
   EditorEngine get engine => _engine;
   Catalog get catalog => _engine.catalog;
   GridDocument get layout => _engine.layout;
-  String? get selectedItemId => _selectedItemId;
-  String? get selectedFloorId => _selectedFloorId;
-  String? get selectedStickerCatalogId => _selectedStickerCatalogId;
+
+  /// Catalog template selected for placing new items.
+  String? get selectedCatalogItemId => _selectedCatalogItemId;
+
+  String? get selectedCatalogFloorId => _selectedCatalogFloorId;
+  String? get selectedCatalogStickerId => _selectedCatalogStickerId;
+
+  /// Grid [Item] instance selected on the canvas.
+  String? get selectedItemId => _selection.selectedItemId;
+
+  String? get selectedStickerId => _selection.selectedStickerId;
   List<SelectionHistoryEntry> get selectionHistory =>
       List.unmodifiable(_selectionHistory);
   SelectionState get selection => _selection;
-  String? get selectedPlacementId => _selection.selectedPlacementId;
-  String? get selectedStickerId => _selection.selectedStickerId;
   ToolManager get toolManager => _toolManager;
   EditorActionLog get actionLog => _actionLog;
 
-  PlacedItem? get selectedPlacement {
-    final id = selectedPlacementId;
+  Item? get selectedItem {
+    final id = selectedItemId;
     if (id == null) return null;
-    return _engine.placementById(id);
+    return _engine.itemById(id);
   }
 
-  PlacedSticker? get selectedSticker {
+  Sticker? get selectedSticker {
     final id = selectedStickerId;
     if (id == null) return null;
     return _engine.stickerById(id);
@@ -97,8 +103,8 @@ class EditorController extends ChangeNotifier {
     final onError = _onPlaceError;
     _toolManager = ToolManager(
       activeTool: switch (null) {
-        _ when _selectedFloorId != null => FloorTool(onPaintError: onError),
-        _ when _selectedStickerCatalogId != null =>
+        _ when _selectedCatalogFloorId != null => FloorTool(onPaintError: onError),
+        _ when _selectedCatalogStickerId != null =>
           StickerTool(onPlaceError: onError),
         _ => PlaceTool(onPlaceError: onError),
       },
@@ -108,9 +114,9 @@ class EditorController extends ChangeNotifier {
 
   void loadCatalog(Catalog catalog) {
     _engine = _engine.copyWith(catalog: catalog);
-    _selectedItemId = null;
-    _selectedFloorId = null;
-    _selectedStickerCatalogId = null;
+    _selectedCatalogItemId = null;
+    _selectedCatalogFloorId = null;
+    _selectedCatalogStickerId = null;
     _selection = const SelectionState();
     _selectionHistory.clear();
     _actionLog.clear();
@@ -118,28 +124,28 @@ class EditorController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void selectItem(String itemId) {
-    _selectedItemId = itemId;
-    _selectedFloorId = null;
-    _selectedStickerCatalogId = null;
+  void selectCatalogItem(String catalogItemId) {
+    _selectedCatalogItemId = catalogItemId;
+    _selectedCatalogFloorId = null;
+    _selectedCatalogStickerId = null;
     _selection = const SelectionState();
     _syncToolsFromSelection();
     notifyListeners();
   }
 
-  void selectFloor(String floorId) {
-    _selectedFloorId = floorId;
-    _selectedItemId = null;
-    _selectedStickerCatalogId = null;
+  void selectCatalogFloor(String floorId) {
+    _selectedCatalogFloorId = floorId;
+    _selectedCatalogItemId = null;
+    _selectedCatalogStickerId = null;
     _selection = const SelectionState();
     _syncToolsFromSelection();
     notifyListeners();
   }
 
-  void selectStickerCatalog(String stickerId) {
-    _selectedStickerCatalogId = stickerId;
-    _selectedItemId = null;
-    _selectedFloorId = null;
+  void selectCatalogSticker(String stickerId) {
+    _selectedCatalogStickerId = stickerId;
+    _selectedCatalogItemId = null;
+    _selectedCatalogFloorId = null;
     _selection = const SelectionState();
     _syncToolsFromSelection();
     _pushHistory(SelectionHistoryEntry(kind: SelectionKind.sticker, id: stickerId));
@@ -149,11 +155,11 @@ class EditorController extends ChangeNotifier {
   void reselectFromHistory(SelectionHistoryEntry entry) {
     switch (entry.kind) {
       case SelectionKind.item:
-        selectItem(entry.id);
+        selectCatalogItem(entry.id);
       case SelectionKind.floor:
-        selectFloor(entry.id);
+        selectCatalogFloor(entry.id);
       case SelectionKind.sticker:
-        selectStickerCatalog(entry.id);
+        selectCatalogSticker(entry.id);
     }
   }
 
@@ -165,20 +171,20 @@ class EditorController extends ChangeNotifier {
     }
   }
 
-  void selectPlacement(String placementId) {
-    _selection = SelectionState(selectedPlacementId: placementId);
-    _selectedItemId = null;
-    _selectedFloorId = null;
-    _selectedStickerCatalogId = null;
+  void selectItem(String itemId) {
+    _selection = SelectionState(selectedItemId: itemId);
+    _selectedCatalogItemId = null;
+    _selectedCatalogFloorId = null;
+    _selectedCatalogStickerId = null;
     _syncToolsFromSelection();
     notifyListeners();
   }
 
   void selectSticker(String stickerId) {
     _selection = SelectionState(selectedStickerId: stickerId);
-    _selectedItemId = null;
-    _selectedFloorId = null;
-    _selectedStickerCatalogId = null;
+    _selectedCatalogItemId = null;
+    _selectedCatalogFloorId = null;
+    _selectedCatalogStickerId = null;
     _syncToolsFromSelection();
     notifyListeners();
   }
@@ -208,7 +214,7 @@ class EditorController extends ChangeNotifier {
   /// Paints the selected floor onto [row]/[col].
   /// Returns an error message on failure.
   String? paintFloorAt(int row, int col) {
-    final selectedId = _selectedFloorId;
+    final selectedId = _selectedCatalogFloorId;
     if (selectedId == null) return null;
 
     try {
@@ -239,12 +245,12 @@ class EditorController extends ChangeNotifier {
   /// Places the selected catalog item centered on [row]/[col].
   /// Returns an error message on failure.
   String? placeAt(int row, int col) {
-    final selectedId = _selectedItemId;
+    final selectedId = _selectedCatalogItemId;
     if (selectedId == null) return null;
 
-    final item = _engine.catalog.itemById(selectedId);
-    if (item == null) {
-      final error = 'Unknown item: $selectedId';
+    final catalogItem = _engine.catalog.itemById(selectedId);
+    if (catalogItem == null) {
+      final error = 'Unknown catalog item: $selectedId';
       _recordAction(
         success: false,
         message:
@@ -253,9 +259,9 @@ class EditorController extends ChangeNotifier {
       return error;
     }
 
-    final (originRow, originCol) = PlacementRules.originFromCenterAnchor(
+    final (originRow, originCol) = ItemRules.originFromCenterAnchor(
       layout: _engine.layout,
-      item: item,
+      catalogItem: catalogItem,
       anchorRow: row,
       anchorCol: col,
     );
@@ -293,7 +299,7 @@ class EditorController extends ChangeNotifier {
     required double cellSize,
     required Offset origin,
   }) {
-    final selectedId = _selectedStickerCatalogId;
+    final selectedId = _selectedCatalogStickerId;
     if (selectedId == null) return null;
 
     try {
@@ -323,22 +329,22 @@ class EditorController extends ChangeNotifier {
     }
   }
 
-  void removePlacement(PlacedItem placement) {
-    final current = _engine.placementById(placement.id) ?? placement;
+  void removeItem(Item item) {
+    final current = _engine.itemById(item.id) ?? item;
     _recordAction(
       success: true,
       message:
           'Deleted - ${_catalogItemLabel(current.catalogItemId)} '
           '${_cellCoords(current.originRow, current.originCol)}',
     );
-    _engine = _engine.removePlacement(placement.id);
-    if (_selection.selectedPlacementId == placement.id) {
+    _engine = _engine.removeItem(item.id);
+    if (_selection.selectedItemId == item.id) {
       _selection = const SelectionState();
     }
     notifyListeners();
   }
 
-  void removeSticker(PlacedSticker sticker) {
+  void removeSticker(Sticker sticker) {
     final current = _engine.stickerById(sticker.id) ?? sticker;
     _recordAction(
       success: true,
@@ -353,20 +359,20 @@ class EditorController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Moves a placement to a new origin. Returns false when the move is invalid.
-  bool movePlacement({
-    required String placementId,
+  /// Moves an item to a new origin. Returns false when the move is invalid.
+  bool moveItem({
+    required String itemId,
     required int newRow,
     required int newCol,
   }) {
-    final existing = _engine.placementById(placementId);
+    final existing = _engine.itemById(itemId);
     final label = existing == null
-        ? placementId
+        ? itemId
         : _catalogItemLabel(existing.catalogItemId);
 
     try {
-      _engine = _engine.movePlacement(
-        placementId: placementId,
+      _engine = _engine.moveItem(
+        itemId: itemId,
         newRow: newRow,
         newCol: newCol,
       );

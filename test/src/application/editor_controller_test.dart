@@ -20,38 +20,38 @@ void main() {
     controller.loadCatalog(catalog);
 
     expect(controller.catalog, catalog);
-    expect(controller.selectedItemId, isNull);
-    expect(controller.selectedFloorId, isNull);
+    expect(controller.selectedCatalogItemId, isNull);
+    expect(controller.selectedCatalogFloorId, isNull);
     expect(notified, 1);
   });
 
   test('placeAt updates layout when item is selected', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
 
     final error = controller.placeAt(0, 0);
 
     expect(error, isNull);
-    expect(controller.layout.placements, hasLength(1));
+    expect(controller.layout.items, hasLength(1));
   });
 
   test('placeAt centers item on anchor cell', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
 
     controller.placeAt(5, 5);
 
-    final placement = controller.layout.placements.single;
-    expect(placement.originRow, 4);
-    expect(placement.originCol, 4);
+    final item = controller.layout.items.single;
+    expect(item.originRow, 4);
+    expect(item.originCol, 4);
   });
 
-  test('placeAt returns error message on invalid placement', () {
+  test('placeAt returns error message when place is invalid', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     controller.placeAt(0, 0);
 
     final error = controller.placeAt(0, 1);
@@ -59,16 +59,16 @@ void main() {
     expect(error, isNotNull);
   });
 
-  test('removePlacement clears placement from layout', () {
+  test('removeItem clears item from layout', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     controller.placeAt(0, 0);
-    final placement = controller.layout.placements.single;
+    final item = controller.layout.items.single;
 
-    controller.removePlacement(placement);
+    controller.removeItem(item);
 
-    expect(controller.layout.placements, isEmpty);
+    expect(controller.layout.items, isEmpty);
   });
 
   test('selectItem updates selection', () {
@@ -87,13 +87,13 @@ void main() {
         ),
       );
 
-    controller.selectFloor('water');
-    expect(controller.selectedFloorId, 'water');
-    expect(controller.selectedItemId, isNull);
+    controller.selectCatalogFloor('water');
+    expect(controller.selectedCatalogFloorId, 'water');
+    expect(controller.selectedCatalogItemId, isNull);
 
-    controller.selectItem('b');
-    expect(controller.selectedItemId, 'b');
-    expect(controller.selectedFloorId, isNull);
+    controller.selectCatalogItem('b');
+    expect(controller.selectedCatalogItemId, 'b');
+    expect(controller.selectedCatalogFloorId, isNull);
   });
 
   test('paintFloorAt updates layout when floor is selected', () {
@@ -108,14 +108,14 @@ void main() {
         ),
       );
 
-    controller.selectFloor('grass');
+    controller.selectCatalogFloor('grass');
     final error = controller.paintFloorAt(3, 4);
 
     expect(error, isNull);
     expect(controller.layout.floorIdAt(3, 4), 'grass');
   });
 
-  test('selectFloor switches active tool to FloorTool', () {
+  test('selectCatalogFloor switches active tool to FloorTool', () {
     final controller = EditorController()
       ..loadCatalog(
         const Catalog(
@@ -127,7 +127,7 @@ void main() {
         ),
       );
 
-    controller.selectFloor('water');
+    controller.selectCatalogFloor('water');
 
     expect(controller.toolManager.activeTool, isA<FloorTool>());
   });
@@ -147,48 +147,48 @@ void main() {
         ),
       );
 
-    controller.selectFloor('water');
-    controller.selectItem('a');
+    controller.selectCatalogFloor('water');
+    controller.selectCatalogItem('a');
 
     expect(controller.toolManager.activeTool, isA<PlaceTool>());
   });
 
-  test('movePlacement updates layout and preserves selection', () {
+  test('moveItem updates layout and preserves selection', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     controller.placeAt(0, 0);
-    final placement = controller.layout.placements.single;
-    controller.selectPlacement(placement.id);
+    final item = controller.layout.items.single;
+    controller.selectItem(item.id);
 
-    final moved = controller.movePlacement(
-      placementId: placement.id,
+    final moved = controller.moveItem(
+      itemId: item.id,
       newRow: 2,
       newCol: 2,
     );
 
     expect(moved, isTrue);
-    expect(controller.layout.placements.single.originRow, 2);
-    expect(controller.layout.placements.single.originCol, 2);
-    expect(controller.selectedPlacementId, placement.id);
+    expect(controller.layout.items.single.originRow, 2);
+    expect(controller.layout.items.single.originCol, 2);
+    expect(controller.selectedItemId, item.id);
   });
 
-  test('movePlacement returns false for invalid move', () {
+  test('moveItem returns false for invalid move', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     controller.placeAt(0, 0);
-    final placement = controller.layout.placements.single;
+    final item = controller.layout.items.single;
 
-    final moved = controller.movePlacement(
-      placementId: placement.id,
+    final moved = controller.moveItem(
+      itemId: item.id,
       newRow: 129,
       newCol: 129,
     );
 
     expect(moved, isFalse);
-    expect(controller.layout.placements.single.originRow, 0);
-    expect(controller.layout.placements.single.originCol, 0);
+    expect(controller.layout.items.single.originRow, 0);
+    expect(controller.layout.items.single.originCol, 0);
   });
 
   test('selectItem does not push to selection history', () {
@@ -204,8 +204,8 @@ void main() {
         ),
       );
 
-    controller.selectItem('a');
-    controller.selectItem('b');
+    controller.selectCatalogItem('a');
+    controller.selectCatalogItem('b');
 
     expect(controller.selectionHistory, isEmpty);
   });
@@ -223,9 +223,9 @@ void main() {
         ),
       );
 
-    controller.selectItem('a');
+    controller.selectCatalogItem('a');
     controller.placeAt(0, 0);
-    controller.selectItem('b');
+    controller.selectCatalogItem('b');
     controller.placeAt(2, 0);
 
     expect(controller.selectionHistory, [
@@ -247,9 +247,9 @@ void main() {
         ),
       );
 
-    controller.selectFloor('sand');
+    controller.selectCatalogFloor('sand');
     controller.paintFloorAt(0, 0);
-    controller.selectFloor('grass');
+    controller.selectCatalogFloor('grass');
     controller.paintFloorAt(1, 0);
 
     expect(controller.selectionHistory, [
@@ -276,15 +276,15 @@ void main() {
         ),
       );
 
-    controller.selectItem('a');
+    controller.selectCatalogItem('a');
     controller.placeAt(0, 0);
-    controller.selectItem('b');
+    controller.selectCatalogItem('b');
     controller.placeAt(2, 0);
-    controller.selectItem('c');
+    controller.selectCatalogItem('c');
     controller.placeAt(4, 0);
-    controller.selectFloor('sand');
+    controller.selectCatalogFloor('sand');
     controller.paintFloorAt(0, 1);
-    controller.selectItem('a');
+    controller.selectCatalogItem('a');
     controller.placeAt(6, 0);
 
     expect(controller.selectionHistory, hasLength(3));
@@ -307,16 +307,16 @@ void main() {
         ),
       );
 
-    controller.selectItem('a');
+    controller.selectCatalogItem('a');
     controller.placeAt(0, 0);
-    controller.selectFloor('sand');
+    controller.selectCatalogFloor('sand');
     controller.paintFloorAt(1, 0);
     controller.reselectFromHistory(
       const SelectionHistoryEntry(kind: SelectionKind.item, id: 'a'),
     );
 
-    expect(controller.selectedItemId, 'a');
-    expect(controller.selectedFloorId, isNull);
+    expect(controller.selectedCatalogItemId, 'a');
+    expect(controller.selectedCatalogFloorId, isNull);
   });
 
   group('Sticker selection', () {
@@ -332,41 +332,41 @@ void main() {
       ],
     );
 
-    test('selectStickerCatalog switches active tool to StickerTool', () {
+    test('selectCatalogSticker switches active tool to StickerTool', () {
       final controller = EditorController()..loadCatalog(stickerCatalog);
 
-      controller.selectStickerCatalog('tree');
+      controller.selectCatalogSticker('tree');
 
-      expect(controller.selectedStickerCatalogId, 'tree');
+      expect(controller.selectedCatalogStickerId, 'tree');
       expect(controller.toolManager.activeTool, isA<StickerTool>());
     });
 
-    test('selectSticker clears placement and catalog selections', () {
+    test('selectSticker clears item and catalog selections', () {
       final controller = EditorController()
         ..loadCatalog(stickerCatalog)
-        ..selectStickerCatalog('tree');
+        ..selectCatalogSticker('tree');
 
       controller.selectSticker('s1');
 
       expect(controller.selectedStickerId, 's1');
-      expect(controller.selectedStickerCatalogId, isNull);
-      expect(controller.selectedItemId, isNull);
+      expect(controller.selectedCatalogStickerId, isNull);
+      expect(controller.selectedCatalogItemId, isNull);
     });
 
-    test('selectPlacement clears sticker selection', () {
+    test('selectCatalogItem clears sticker selection', () {
       final controller = EditorController()
         ..loadCatalog(catalog)
         ..selectSticker('s1');
 
-      controller.selectPlacement('p1');
+      controller.selectCatalogItem('house');
 
       expect(controller.selectedStickerId, isNull);
-      expect(controller.selectedPlacementId, 'p1');
+      expect(controller.selectedCatalogItemId, 'house');
     });
 
     test('placeStickerAt places sticker at world center', () {
       final controller = EditorController()..loadCatalog(stickerCatalog);
-      controller.selectStickerCatalog('tree');
+      controller.selectCatalogSticker('tree');
 
       final error = controller.placeStickerAt(
         worldCenter: const Offset(24, 24),
@@ -380,10 +380,10 @@ void main() {
   });
 
   group('action log', () {
-    test('records successful and failed placements', () {
+    test('records successful and failed place attempts', () {
       final controller = EditorController()
         ..loadCatalog(catalog)
-        ..selectItem('house');
+        ..selectCatalogItem('house');
 
       expect(controller.placeAt(0, 0), isNull);
       expect(controller.placeAt(0, 0), isNotNull);
@@ -399,16 +399,16 @@ void main() {
     test('records delete and move actions', () {
       final controller = EditorController()
         ..loadCatalog(catalog)
-        ..selectItem('house')
+        ..selectCatalogItem('house')
         ..placeAt(0, 0);
 
-      final placement = controller.layout.placements.single;
-      controller.movePlacement(
-        placementId: placement.id,
+      final item = controller.layout.items.single;
+      controller.moveItem(
+        itemId: item.id,
         newRow: 2,
         newCol: 2,
       );
-      controller.removePlacement(placement);
+      controller.removeItem(item);
 
       final messages = controller.actionLog.entries.map((e) => e.message).toList();
       expect(messages[0], 'Deleted - House (2, 2)');
@@ -419,7 +419,7 @@ void main() {
     test('clears on loadCatalog', () {
       final controller = EditorController()
         ..loadCatalog(catalog)
-        ..selectItem('house')
+        ..selectCatalogItem('house')
         ..placeAt(0, 0);
 
       controller.loadCatalog(catalog);

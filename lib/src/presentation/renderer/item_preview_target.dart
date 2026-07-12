@@ -1,66 +1,66 @@
 import '../../domain/catalog/catalog.dart';
 import '../../domain/catalog/item.dart';
 import '../../domain/layout/grid_document.dart';
-import '../../domain/placement/placement_rules.dart';
+import '../../domain/rules/item_rules.dart';
 import '../interaction/grid_interaction_state.dart';
 
-/// Resolved hover/drag placement preview position for overlay layers.
-class PlacementPreviewTarget {
-  const PlacementPreviewTarget({
-    required this.item,
+/// Resolved hover/drag item preview position for overlay layers.
+class ItemPreviewTarget {
+  const ItemPreviewTarget({
+    required this.catalogItem,
     required this.originRow,
     required this.originCol,
-    this.ignorePlacementId,
+    this.ignoreItemId,
   });
 
-  final CatalogItem item;
+  final CatalogItem catalogItem;
   final int originRow;
   final int originCol;
-  final String? ignorePlacementId;
+  final String? ignoreItemId;
 
-  static PlacementPreviewTarget? resolve({
+  static ItemPreviewTarget? resolve({
     required GridInteractionState interactionState,
-    required String? selectedItemId,
+    required String? selectedCatalogItemId,
     required Catalog catalog,
     required GridDocument document,
   }) {
     final dragSession = interactionState.dragSession;
     if (dragSession != null) {
-      final placement = document.placementById(dragSession.placementId);
-      if (placement == null) return null;
+      final layoutItem = document.itemById(dragSession.itemId);
+      if (layoutItem == null) return null;
 
-      final item = catalog.itemById(placement.catalogItemId);
-      if (item == null) return null;
+      final catalogItem = catalog.itemById(layoutItem.catalogItemId);
+      if (catalogItem == null) return null;
 
-      return PlacementPreviewTarget(
-        item: item,
+      return ItemPreviewTarget(
+        catalogItem: catalogItem,
         originRow: dragSession.currentRow,
         originCol: dragSession.currentCol,
-        ignorePlacementId: dragSession.placementId,
+        ignoreItemId: dragSession.itemId,
       );
     }
 
     if (interactionState.isDragging) return null;
 
-    final selectedId = selectedItemId;
+    final selectedId = selectedCatalogItemId;
     final hoverRow = interactionState.hoverRow;
     final hoverCol = interactionState.hoverCol;
     if (selectedId == null || hoverRow == null || hoverCol == null) {
       return null;
     }
 
-    final item = catalog.itemById(selectedId);
-    if (item == null) return null;
+    final catalogItem = catalog.itemById(selectedId);
+    if (catalogItem == null) return null;
 
-    final (originRow, originCol) = PlacementRules.originFromCenterAnchor(
+    final (originRow, originCol) = ItemRules.originFromCenterAnchor(
       layout: document,
-      item: item,
+      catalogItem: catalogItem,
       anchorRow: hoverRow,
       anchorCol: hoverCol,
     );
 
-    return PlacementPreviewTarget(
-      item: item,
+    return ItemPreviewTarget(
+      catalogItem: catalogItem,
       originRow: originRow,
       originCol: originCol,
     );

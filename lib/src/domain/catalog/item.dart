@@ -1,4 +1,4 @@
-/// A user-defined item type that can be placed on the grid.
+/// Catalog template for placeable items. On the grid this becomes an [Item].
 class CatalogItem {
   const CatalogItem({
     required this.id,

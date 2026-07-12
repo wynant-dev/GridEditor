@@ -12,27 +12,27 @@ void main() {
     ],
   );
 
-  test('onPlacementTap removes placement and returns true', () {
+  test('onItemTap removes item and returns true', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     controller.placeAt(0, 0);
-    final placement = controller.layout.placements.single;
+    final item = controller.layout.items.single;
     final tool = EraseTool();
     final ctx = testToolContext(controller);
 
-    expect(tool.onPlacementTap(ctx, placement), isTrue);
-    expect(controller.layout.placements, isEmpty);
+    expect(tool.onItemTap(ctx, item), isTrue);
+    expect(controller.layout.items, isEmpty);
   });
 
   test('onCellTap returns false', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     final tool = EraseTool();
     final ctx = testToolContext(controller);
 
     expect(tool.onCellTap(ctx), isFalse);
-    expect(controller.layout.placements, isEmpty);
+    expect(controller.layout.items, isEmpty);
   });
 }

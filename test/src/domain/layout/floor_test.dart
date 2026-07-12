@@ -15,8 +15,8 @@ void main() {
     const document = GridDocument(
       rows: 4,
       cols: 4,
-      floorTiles: [
-        FloorTile(row: 1, col: 2, catalogFloorId: 'water'),
+      floors: [
+        Floor(row: 1, col: 2, catalogFloorId: 'water'),
       ],
     );
 
@@ -29,8 +29,8 @@ void main() {
       rows: 4,
       cols: 4,
       defaultFloorId: 'grass',
-      floorTiles: [
-        FloorTile(row: 1, col: 2, catalogFloorId: 'water'),
+      floors: [
+        Floor(row: 1, col: 2, catalogFloorId: 'water'),
       ],
     );
 
@@ -43,8 +43,8 @@ void main() {
       rows: 3,
       cols: 3,
       defaultFloorId: 'grass',
-      floorTiles: [
-        FloorTile(row: 0, col: 1, catalogFloorId: 'water'),
+      floors: [
+        Floor(row: 0, col: 1, catalogFloorId: 'water'),
       ],
     );
 
@@ -59,15 +59,15 @@ void main() {
     const document = GridDocument(
       rows: 3,
       cols: 3,
-      floorTiles: [
-        FloorTile(row: 0, col: 1, catalogFloorId: 'grass'),
-        FloorTile(row: 2, col: 0, catalogFloorId: 'water'),
+      floors: [
+        Floor(row: 0, col: 1, catalogFloorId: 'grass'),
+        Floor(row: 2, col: 0, catalogFloorId: 'water'),
       ],
     );
 
     final restored = GridDocument.fromJsonMap(document.toJsonMap());
 
-    expect(restored.floorTiles, hasLength(2));
+    expect(restored.floors, hasLength(2));
     expect(restored.floorIdAt(0, 1), 'grass');
     expect(restored.floorIdAt(2, 0), 'water');
   });
@@ -85,7 +85,7 @@ void main() {
         catalogFloorId: 'water',
       );
 
-      expect(updated.layout.floorTiles, hasLength(1));
+      expect(updated.layout.floors, hasLength(1));
       expect(updated.floorIdAt(1, 2), 'water');
     });
 
@@ -101,7 +101,7 @@ void main() {
         catalogFloorId: 'grass',
       );
 
-      expect(updated.layout.floorTiles, hasLength(1));
+      expect(updated.layout.floors, hasLength(1));
       expect(updated.floorIdAt(1, 2), 'grass');
     });
 
@@ -121,7 +121,7 @@ void main() {
         catalogFloorId: 'grass',
       );
 
-      expect(updated.layout.floorTiles, isEmpty);
+      expect(updated.layout.floors, isEmpty);
       expect(updated.floorIdAt(1, 2), 'grass');
     });
 

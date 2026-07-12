@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
-import '../../domain/layout/placed_item.dart';
-import '../../domain/layout/placed_sticker.dart';
+import '../../domain/layout/item.dart';
+import '../../domain/layout/sticker.dart';
 import 'default_tool.dart';
 import 'editor_tool.dart';
 import 'editor_tool_context.dart';
@@ -47,20 +47,20 @@ class ToolManager extends ChangeNotifier {
     return defaultTool.onWorldTap(ctx);
   }
 
-  void handlePlacementTap(
+  void handleItemTap(
     EditorToolContext ctx,
-    PlacedItem placement, {
+    Item item, {
     bool isDragging = false,
   }) {
     if (isDragging) return;
-    if (!_activeTool.onPlacementTap(ctx, placement)) {
-      defaultTool.onPlacementTap(ctx, placement);
+    if (!_activeTool.onItemTap(ctx, item)) {
+      defaultTool.onItemTap(ctx, item);
     }
   }
 
   void handleStickerTap(
     EditorToolContext ctx,
-    PlacedSticker sticker, {
+    Sticker sticker, {
     bool isDragging = false,
   }) {
     if (isDragging) return;
@@ -69,12 +69,12 @@ class ToolManager extends ChangeNotifier {
     }
   }
 
-  bool canStartDrag(PlacedItem placement) {
-    return _activeTool.canStartDrag(placement) &&
-        defaultTool.canStartDrag(placement);
+  bool canStartDrag(Item item) {
+    return _activeTool.canStartDrag(item) &&
+        defaultTool.canStartDrag(item);
   }
 
-  bool canStartStickerDrag(PlacedSticker sticker) {
+  bool canStartStickerDrag(Sticker sticker) {
     return _activeTool.canStartStickerDrag(sticker) &&
         defaultTool.canStartStickerDrag(sticker);
   }

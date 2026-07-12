@@ -13,15 +13,15 @@ void main() {
     ],
   );
 
-  testWidgets('tapping a placement invokes onPlacementTap', (tester) async {
+  testWidgets('tapping an item invokes onItemTap', (tester) async {
     setGridTestViewSize(tester);
-    const placement = PlacedItem(
+    const item = Item(
       id: 'p1',
       catalogItemId: 'house',
       originRow: 0,
       originCol: 0,
     );
-    PlacedItem? tapped;
+    Item? tapped;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -32,10 +32,10 @@ void main() {
             document: const GridDocument(
               rows: 2,
               cols: 2,
-              placements: [placement],
+              items: [item],
             ),
             catalog: catalog,
-            onPlacementTap: (p) => tapped = p,
+            onItemTap: (p) => tapped = p,
           ),
         ),
       ),
@@ -47,15 +47,15 @@ void main() {
       row: 0,
       col: 0,
     );
-    expect(tapped, placement);
+    expect(tapped, item);
   });
 
-  testWidgets('placement preview renders at full opacity when hover is valid',
+  testWidgets('item preview renders at full opacity when hover is valid',
       (tester) async {
     setGridTestViewSize(tester);
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     final interactionState = GridInteractionState();
 
     await tester.pumpWidget(
@@ -82,10 +82,10 @@ void main() {
     expect(find.byType(Opacity), findsNothing);
   });
 
-  testWidgets('placement preview is ghosted when hover is invalid',
+  testWidgets('item preview is ghosted when hover is invalid',
       (tester) async {
     setGridTestViewSize(tester);
-    const placement = PlacedItem(
+    const item = Item(
       id: 'p1',
       catalogItemId: 'house',
       originRow: 0,
@@ -93,7 +93,7 @@ void main() {
     );
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     final interactionState = GridInteractionState();
 
     await tester.pumpWidget(
@@ -105,7 +105,7 @@ void main() {
             document: const GridDocument(
               rows: 2,
               cols: 2,
-              placements: [placement],
+              items: [item],
             ),
             catalog: catalog,
             controller: controller,
@@ -126,7 +126,7 @@ void main() {
     setGridTestViewSize(tester);
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     final interactionState = GridInteractionState();
 
     await tester.pumpWidget(
@@ -158,7 +158,7 @@ void main() {
     setGridTestViewSize(tester);
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -180,13 +180,13 @@ void main() {
       row: 0,
       col: 0,
     );
-    expect(controller.layout.placements, hasLength(1));
+    expect(controller.layout.items, hasLength(1));
   });
 
-  testWidgets('tapping a placement selects it when controller is attached',
+  testWidgets('tapping an item selects it when controller is attached',
       (tester) async {
     setGridTestViewSize(tester);
-    const placement = PlacedItem(
+    const item = Item(
       id: 'p1',
       catalogItemId: 'house',
       originRow: 0,
@@ -203,7 +203,7 @@ void main() {
             document: const GridDocument(
               rows: 2,
               cols: 2,
-              placements: [placement],
+              items: [item],
             ),
             catalog: catalog,
             controller: controller,
@@ -218,14 +218,14 @@ void main() {
       row: 0,
       col: 0,
     );
-    expect(controller.selectedPlacementId, 'p1');
-    expect(controller.selectedItemId, isNull);
+    expect(controller.selectedItemId, 'p1');
+    expect(controller.selectedCatalogItemId, isNull);
     expect(find.byType(SelectionOverlayLayer), findsOneWidget);
   });
 
-  testWidgets('ghost preview hidden when placement is selected', (tester) async {
+  testWidgets('ghost preview hidden when item is selected', (tester) async {
     setGridTestViewSize(tester);
-    const placement = PlacedItem(
+    const item = Item(
       id: 'p1',
       catalogItemId: 'house',
       originRow: 0,
@@ -233,7 +233,7 @@ void main() {
     );
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     final interactionState = GridInteractionState();
 
     await tester.pumpWidget(
@@ -245,7 +245,7 @@ void main() {
             document: const GridDocument(
               rows: 2,
               cols: 2,
-              placements: [placement],
+              items: [item],
             ),
             catalog: catalog,
             controller: controller,
@@ -267,14 +267,14 @@ void main() {
     );
     await tester.pump();
 
-    expect(controller.selectedPlacementId, 'p1');
-    expect(controller.selectedItemId, isNull);
+    expect(controller.selectedItemId, 'p1');
+    expect(controller.selectedCatalogItemId, isNull);
     expect(find.byType(Opacity), findsNothing);
   });
 
-  testWidgets('delete button removes selected placement', (tester) async {
+  testWidgets('delete button removes selected item', (tester) async {
     setGridTestViewSize(tester);
-    const placement = PlacedItem(
+    const item = Item(
       id: 'p1',
       catalogItemId: 'house',
       originRow: 0,
@@ -286,7 +286,7 @@ void main() {
         layout: const GridDocument(
           rows: 2,
           cols: 2,
-          placements: [placement],
+          items: [item],
         ),
       ),
     )..loadCatalog(catalog);
@@ -312,18 +312,18 @@ void main() {
       col: 0,
     );
     await tester.pump();
-    expect(controller.selectedPlacementId, 'p1');
+    expect(controller.selectedItemId, 'p1');
 
-    await tester.tap(find.byKey(const Key('delete_placement_button')));
+    await tester.tap(find.byKey(const Key('delete_item_button')));
     await tester.pump();
 
-    expect(controller.layout.placements, isEmpty);
-    expect(controller.selectedPlacementId, isNull);
+    expect(controller.layout.items, isEmpty);
+    expect(controller.selectedCatalogItemId, isNull);
   });
 
-  testWidgets('EraseTool active removes placement on tap', (tester) async {
+  testWidgets('EraseTool active removes item on tap', (tester) async {
     setGridTestViewSize(tester);
-    const placement = PlacedItem(
+    const item = Item(
       id: 'p1',
       catalogItemId: 'house',
       originRow: 0,
@@ -335,7 +335,7 @@ void main() {
         layout: const GridDocument(
           rows: 2,
           cols: 2,
-          placements: [placement],
+          items: [item],
         ),
       ),
     )..loadCatalog(catalog);
@@ -350,7 +350,7 @@ void main() {
             document: const GridDocument(
               rows: 2,
               cols: 2,
-              placements: [placement],
+              items: [item],
             ),
             catalog: catalog,
             controller: controller,
@@ -365,14 +365,14 @@ void main() {
       row: 0,
       col: 0,
     );
-    expect(controller.layout.placements, isEmpty);
+    expect(controller.layout.items, isEmpty);
   });
 
   testWidgets('64x64 grid uses no per-cell GestureDetectors', (tester) async {
     setGridTestViewSize(tester, size: const Size(640, 640));
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -397,18 +397,18 @@ void main() {
       row: 32,
       col: 32,
     );
-    expect(controller.layout.placements, hasLength(1));
+    expect(controller.layout.items, hasLength(1));
   });
 
-  testWidgets('dragging to invalid cell reverts placement', (tester) async {
+  testWidgets('dragging to invalid cell reverts item', (tester) async {
     setGridTestViewSize(tester, size: const Size(400, 400));
-    const placement = PlacedItem(
+    const item = Item(
       id: 'p1',
       catalogItemId: 'house',
       originRow: 0,
       originCol: 0,
     );
-    const blocker = PlacedItem(
+    const blocker = Item(
       id: 'p2',
       catalogItemId: 'house',
       originRow: 0,
@@ -420,7 +420,7 @@ void main() {
         layout: const GridDocument(
           rows: 4,
           cols: 4,
-          placements: [placement, blocker],
+          items: [item, blocker],
         ),
       ),
     )..loadCatalog(catalog);
@@ -453,7 +453,7 @@ void main() {
     );
     await tester.pump();
 
-    final moved = controller.layout.placementById('p1');
+    final moved = controller.layout.itemById('p1');
     expect(moved?.originRow, 0);
     expect(moved?.originCol, 0);
   });

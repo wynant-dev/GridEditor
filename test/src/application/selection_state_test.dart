@@ -10,64 +10,64 @@ void main() {
     ],
   );
 
-  test('selectPlacement updates selection and notifies listeners', () {
+  test('selectItem updates selection and notifies listeners', () {
     final controller = EditorController()..loadCatalog(catalog);
     var notified = 0;
     controller.addListener(() => notified++);
 
-    controller.selectPlacement('p1');
+    controller.selectItem('p1');
 
-    expect(controller.selectedPlacementId, 'p1');
-    expect(controller.selection.selectedPlacementId, 'p1');
-    expect(controller.selectedItemId, isNull);
+    expect(controller.selectedItemId, 'p1');
+    expect(controller.selection.selectedItemId, 'p1');
+    expect(controller.selectedCatalogItemId, isNull);
     expect(notified, 1);
   });
 
-  test('selectPlacement clears catalog item selection', () {
+  test('selectItem clears catalog item selection', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
 
-    expect(controller.selectedItemId, 'house');
+    expect(controller.selectedCatalogItemId, 'house');
 
-    controller.selectPlacement('p1');
+    controller.selectItem('p1');
 
-    expect(controller.selectedItemId, isNull);
+    expect(controller.selectedCatalogItemId, isNull);
+    expect(controller.selectedItemId, 'p1');
   });
 
-  test('selectItem clears placement selection', () {
+  test('selectCatalogItem clears grid item selection', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectPlacement('p1');
+      ..selectItem('p1');
 
-    controller.selectItem('house');
+    controller.selectCatalogItem('house');
 
-    expect(controller.selectedPlacementId, isNull);
-    expect(controller.selectedItemId, 'house');
+    expect(controller.selectedItemId, isNull);
+    expect(controller.selectedCatalogItemId, 'house');
   });
 
   test('clearSelection resets selection', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectPlacement('p1');
+      ..selectItem('p1');
 
     controller.clearSelection();
 
-    expect(controller.selectedPlacementId, isNull);
+    expect(controller.selectedItemId, isNull);
   });
 
-  test('removePlacement clears selection when removed placement was selected',
-      () {
+  test('removeItem clears selection when removed item was selected', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     controller.placeAt(0, 0);
-    final placement = controller.layout.placements.single;
-    controller.selectPlacement(placement.id);
+    final item = controller.layout.items.single;
+    controller.selectItem(item.id);
 
-    controller.removePlacement(placement);
+    controller.removeItem(item);
 
-    expect(controller.selectedPlacementId, isNull);
-    expect(controller.layout.placements, isEmpty);
+    expect(controller.selectedItemId, isNull);
+    expect(controller.layout.items, isEmpty);
   });
 }

@@ -1,5 +1,5 @@
-import '../../domain/layout/placed_item.dart';
-import '../../domain/layout/placed_sticker.dart';
+import '../../domain/layout/item.dart';
+import '../../domain/layout/sticker.dart';
 import 'editor_tool.dart';
 import 'editor_tool_context.dart';
 
@@ -27,6 +27,6 @@ class StickerTool extends EditorTool {
   }
 
   @override
-  bool onStickerTap(EditorToolContext context, PlacedSticker sticker) =>
+  bool onStickerTap(EditorToolContext context, Sticker sticker) =>
       false;
 }

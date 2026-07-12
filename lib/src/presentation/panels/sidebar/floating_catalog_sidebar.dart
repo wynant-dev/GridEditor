@@ -162,7 +162,7 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
 
   bool _isCategorySelected(String categoryId) {
     if (_openSubmenuKey == categoryId) return true;
-    final selectedId = widget.controller.selectedItemId;
+    final selectedId = widget.controller.selectedCatalogItemId;
     if (selectedId == null) return false;
     return widget.controller.catalog.itemById(selectedId)?.categoryId == categoryId;
   }
@@ -218,12 +218,12 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
                     KeyedSubtree(
                       key: _floorAnchorKey,
                       child: SidebarIconButton(
-                        selected: widget.controller.selectedFloorId != null,
+                        selected: widget.controller.selectedCatalogFloorId != null,
                         tooltip: 'Floor tool',
                         onPressed: _toggleFloorsSubmenu,
                         icon: SidebarSymbolIcon(
                           iconName: 'palette',
-                          selected: widget.controller.selectedFloorId != null,
+                          selected: widget.controller.selectedCatalogFloorId != null,
                         ),
                       ),
                     ),
@@ -231,12 +231,12 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
                       KeyedSubtree(
                         key: _stickersAnchorKey,
                         child: SidebarIconButton(
-                          selected: widget.controller.selectedStickerCatalogId != null,
+                          selected: widget.controller.selectedCatalogStickerId != null,
                           tooltip: 'Stickers',
                           onPressed: _toggleStickersSubmenu,
                           icon: SidebarSymbolIcon(
                             iconName: 'sticker',
-                            selected: widget.controller.selectedStickerCatalogId != null,
+                            selected: widget.controller.selectedCatalogStickerId != null,
                           ),
                         ),
                       ),
@@ -332,8 +332,8 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
             SidebarSubmenuItem(
               color: CatalogColorResolver.fromFloor(floor),
               label: floor.name,
-              selected: floor.id == widget.controller.selectedFloorId,
-              onPressed: () => widget.controller.selectFloor(floor.id),
+              selected: floor.id == widget.controller.selectedCatalogFloorId,
+              onPressed: () => widget.controller.selectCatalogFloor(floor.id),
             ),
         ],
       );
@@ -346,8 +346,8 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
             SidebarSubmenuIconItem(
               iconName: sticker.iconName,
               label: sticker.name,
-              selected: sticker.id == widget.controller.selectedStickerCatalogId,
-              onPressed: () => widget.controller.selectStickerCatalog(sticker.id),
+              selected: sticker.id == widget.controller.selectedCatalogStickerId,
+              onPressed: () => widget.controller.selectCatalogSticker(sticker.id),
             ),
         ],
       );
@@ -361,8 +361,8 @@ class _FloatingCatalogSidebarState extends State<FloatingCatalogSidebar> {
           SidebarSubmenuItem(
             color: CatalogColorResolver.fromItem(item),
             label: item.name,
-            selected: item.id == widget.controller.selectedItemId,
-            onPressed: () => widget.controller.selectItem(item.id),
+            selected: item.id == widget.controller.selectedCatalogItemId,
+            onPressed: () => widget.controller.selectCatalogItem(item.id),
           ),
       ],
     );

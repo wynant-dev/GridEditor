@@ -58,7 +58,7 @@ void main() {
       expect(mapper.fromWorldPosition(const Offset(-10, -10)), (0, 0));
     });
 
-    test('hitTestPlacement returns topmost placement at position', () {
+    test('hitTestItem returns topmost item at position', () {
       final metrics = GridMetrics(
         rows: 4,
         cols: 4,
@@ -76,13 +76,13 @@ void main() {
       const document = GridDocument(
         rows: 4,
         cols: 4,
-        placements: [
-          PlacedItem(id: 'p1', catalogItemId: 'a', originRow: 0, originCol: 0),
-          PlacedItem(id: 'p2', catalogItemId: 'b', originRow: 0, originCol: 0),
+        items: [
+          Item(id: 'p1', catalogItemId: 'a', originRow: 0, originCol: 0),
+          Item(id: 'p2', catalogItemId: 'b', originRow: 0, originCol: 0),
         ],
       );
 
-      final hit = mapper.hitTestPlacement(
+      final hit = mapper.hitTestItem(
         cellCenter(metrics, 0, 0),
         document,
         catalog,
@@ -91,7 +91,7 @@ void main() {
       expect(hit?.id, 'p2');
     });
 
-    test('hitTestPlacement returns null for empty cell', () {
+    test('hitTestItem returns null for empty cell', () {
       final metrics = GridMetrics(
         rows: 4,
         cols: 4,
@@ -108,13 +108,13 @@ void main() {
       const document = GridDocument(
         rows: 4,
         cols: 4,
-        placements: [
-          PlacedItem(id: 'p1', catalogItemId: 'a', originRow: 0, originCol: 0),
+        items: [
+          Item(id: 'p1', catalogItemId: 'a', originRow: 0, originCol: 0),
         ],
       );
 
       expect(
-        mapper.hitTestPlacement(cellCenter(metrics, 3, 3), document, catalog),
+        mapper.hitTestItem(cellCenter(metrics, 3, 3), document, catalog),
         isNull,
       );
     });

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/catalog/catalog.dart';
 import '../../domain/layout/grid_document.dart';
-import '../../domain/sticker/sticker_bounds.dart';
+import '../../domain/rules/sticker_rules.dart';
 import '../../application/interaction/sticker_drag_session.dart';
 
 /// Renders a selection outline around the currently selected sticker.
@@ -43,7 +43,7 @@ class StickerSelectionOverlayLayer extends StatelessWidget {
         ? session.currentCenter
         : Offset(sticker.x, sticker.y);
 
-    const size = StickerBounds.kDefaultStickerSize;
+    const size = StickerRules.kDefaultStickerSize;
     final half = size / 2;
 
     return Positioned(

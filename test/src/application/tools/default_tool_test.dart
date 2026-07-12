@@ -15,34 +15,34 @@ void main() {
   test('onCellTap places item and returns true', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     final tool = DefaultTool();
     final context = testToolContext(controller);
 
     final handled = tool.onCellTap(context);
 
     expect(handled, isTrue);
-    expect(controller.layout.placements, hasLength(1));
+    expect(controller.layout.items, hasLength(1));
   });
 
-  test('onPlacementTap selects placement and returns true', () {
+  test('onItemTap selects item and returns true', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     controller.placeAt(0, 0);
-    final placement = controller.layout.placements.single;
+    final item = controller.layout.items.single;
     final tool = DefaultTool();
 
-    final handled = tool.onPlacementTap(testToolContext(controller), placement);
+    final handled = tool.onItemTap(testToolContext(controller), item);
 
     expect(handled, isTrue);
-    expect(controller.selectedPlacementId, placement.id);
+    expect(controller.selectedItemId, item.id);
   });
 
   test('onCellHover updates hover state via onHover callback', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     final interactionState = GridInteractionState();
     final tool = DefaultTool();
     final context = testToolContext(

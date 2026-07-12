@@ -15,31 +15,31 @@ void main() {
   test('onCellTap places item and returns true', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     final tool = PlaceTool();
     final ctx = testToolContext(controller);
 
     expect(tool.onCellTap(ctx), isTrue);
-    expect(controller.layout.placements, hasLength(1));
+    expect(controller.layout.items, hasLength(1));
   });
 
-  test('onPlacementTap returns false', () {
+  test('onItemTap returns false', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     controller.placeAt(0, 0);
-    final placement = controller.layout.placements.single;
+    final item = controller.layout.items.single;
     final tool = PlaceTool();
     final ctx = testToolContext(controller);
 
-    expect(tool.onPlacementTap(ctx, placement), isFalse);
-    expect(controller.selectedPlacementId, isNull);
+    expect(tool.onItemTap(ctx, item), isFalse);
+    expect(controller.selectedCatalogItemId, 'house');
   });
 
   test('onCellHover delegates to onHover callback', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     final interactionState = GridInteractionState();
     final tool = PlaceTool();
     final ctx = testToolContext(
@@ -55,10 +55,10 @@ void main() {
     expect(interactionState.hoverCol, 3);
   });
 
-  test('onCellTap reports placement error via callback', () {
+  test('onCellTap reports place error via callback', () {
     final controller = EditorController()
       ..loadCatalog(catalog)
-      ..selectItem('house');
+      ..selectCatalogItem('house');
     controller.placeAt(0, 0);
     String? reportedError;
     final tool = PlaceTool(onPlaceError: (error) => reportedError = error);
@@ -67,6 +67,6 @@ void main() {
     tool.onCellTap(ctx);
 
     expect(reportedError, isNotNull);
-    expect(controller.layout.placements, hasLength(1));
+    expect(controller.layout.items, hasLength(1));
   });
 }

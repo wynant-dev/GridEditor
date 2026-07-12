@@ -1,5 +1,5 @@
-import '../../domain/layout/placed_item.dart';
-import '../../domain/layout/placed_sticker.dart';
+import '../../domain/layout/item.dart';
+import '../../domain/layout/sticker.dart';
 
 sealed class GridHit {}
 
@@ -10,14 +10,14 @@ class CellHit extends GridHit {
   final int col;
 }
 
-class PlacementHit extends GridHit {
-  PlacementHit({
-    required this.placement,
+class ItemHit extends GridHit {
+  ItemHit({
+    required this.item,
     required this.row,
     required this.col,
   });
 
-  final PlacedItem placement;
+  final Item item;
   final int row;
   final int col;
 }
@@ -29,7 +29,7 @@ class StickerHit extends GridHit {
     required this.col,
   });
 
-  final PlacedSticker sticker;
+  final Sticker sticker;
   final int row;
   final int col;
 }

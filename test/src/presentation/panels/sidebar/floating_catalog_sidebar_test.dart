@@ -77,7 +77,7 @@ void main() {
     await tester.tap(find.text('Bank'));
     await tester.pumpAndSettle();
 
-    expect(controller.selectedItemId, 'bank');
+    expect(controller.selectedCatalogItemId, 'bank');
     expect(find.text('House'), findsOneWidget);
     expect(find.text('Bank'), findsOneWidget);
   });
@@ -107,7 +107,7 @@ void main() {
     await tester.tapAt(Offset(panelRect.right - 8, bankRect.center.dy));
     await tester.pumpAndSettle();
 
-    expect(controller.selectedItemId, 'bank');
+    expect(controller.selectedCatalogItemId, 'bank');
   });
 
   testWidgets('tapping floor tool opens floor submenu', (tester) async {
@@ -133,7 +133,7 @@ void main() {
     await tester.tap(find.text('Sand'));
     await tester.pumpAndSettle();
 
-    expect(controller.selectedFloorId, 'sand');
+    expect(controller.selectedCatalogFloorId, 'sand');
     expect(find.text('Sand'), findsOneWidget);
   });
 

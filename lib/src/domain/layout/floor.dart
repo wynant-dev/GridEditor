@@ -1,6 +1,6 @@
-/// A floor painted onto a single grid cell.
-class FloorTile {
-  const FloorTile({
+/// A placed floor cell referencing a [CatalogFloor].
+class Floor {
+  const Floor({
     required this.row,
     required this.col,
     required this.catalogFloorId,
@@ -16,8 +16,8 @@ class FloorTile {
     'catalogFloorId': catalogFloorId,
   };
 
-  factory FloorTile.fromJson(Map<String, dynamic> json) {
-    return FloorTile(
+  factory Floor.fromJson(Map<String, dynamic> json) {
+    return Floor(
       row: json['row'] as int,
       col: json['col'] as int,
       catalogFloorId: json['catalogFloorId'] as String,

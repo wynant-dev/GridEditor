@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/catalog/catalog.dart';
-import '../../domain/layout/floor_tile.dart';
+import '../../domain/layout/floor.dart';
 import '../../domain/layout/grid_document.dart';
-import '../../domain/layout/placed_item.dart';
+import '../../domain/layout/item.dart';
 import '../../domain/geometry/grid_metrics.dart';
 import '../theme/catalog_color_resolver.dart';
 import 'floor_cell.dart';
-import 'placement_box.dart';
+import 'item_box.dart';
 import 'sticker_layers.dart';
 
 /// Default + per-cell floor tiles (bottom paint layer).
@@ -33,9 +33,9 @@ class FloorLayers extends StatelessWidget {
           catalog: catalog,
           metrics: metrics,
         ),
-        for (final tile in document.floorTiles)
+        for (final floor in document.floors)
           _FloorLayer(
-            tile: tile,
+            floor: floor,
             catalog: catalog,
             metrics: metrics,
           ),
@@ -72,14 +72,14 @@ class GridLinesLayer extends StatelessWidget {
   }
 }
 
-/// Catalog placements in the scene (committed or semi-transparent ghosts).
-class PlacementLayers extends StatelessWidget {
-  const PlacementLayers({
+/// Catalog items in the scene (committed or semi-transparent ghosts).
+class ItemLayers extends StatelessWidget {
+  const ItemLayers({
     super.key,
     required this.document,
     required this.catalog,
     required this.metrics,
-    this.hiddenPlacementId,
+    this.hiddenItemId,
     this.ghostOpacity,
   });
 
@@ -88,9 +88,9 @@ class PlacementLayers extends StatelessWidget {
   final GridMetrics metrics;
 
   /// Omitted while dragging so the overlay can draw the ghost.
-  final String? hiddenPlacementId;
+  final String? hiddenItemId;
 
-  /// When set, all placements render at this opacity (floor-paint mode).
+  /// When set, all items render at this opacity (floor-paint mode).
   final double? ghostOpacity;
 
   @override
@@ -101,10 +101,10 @@ class PlacementLayers extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        for (final placement in document.placements)
-          if (inGhostMode || placement.id != hiddenPlacementId)
-            _PlacementLayer(
-              placement: placement,
+        for (final item in document.items)
+          if (inGhostMode || item.id != hiddenItemId)
+            _ItemLayer(
+              item: item,
               catalog: catalog,
               metrics: metrics,
               opacity: opacity,
@@ -114,21 +114,21 @@ class PlacementLayers extends StatelessWidget {
   }
 }
 
-/// Read-only stack: floors, grid lines, placements (no editor overlays).
+/// Read-only stack: floors, grid lines, items (no editor overlays).
 class GridRenderer extends StatelessWidget {
   const GridRenderer({
     super.key,
     required this.document,
     required this.catalog,
     required this.metrics,
-    this.hiddenPlacementId,
+    this.hiddenItemId,
     this.hiddenStickerId,
   });
 
   final GridDocument document;
   final Catalog catalog;
   final GridMetrics metrics;
-  final String? hiddenPlacementId;
+  final String? hiddenItemId;
   final String? hiddenStickerId;
 
   @override
@@ -142,11 +142,11 @@ class GridRenderer extends StatelessWidget {
           metrics: metrics,
         ),
         GridLinesLayer(metrics: metrics),
-        PlacementLayers(
+        ItemLayers(
           document: document,
           catalog: catalog,
           metrics: metrics,
-          hiddenPlacementId: hiddenPlacementId,
+          hiddenItemId: hiddenItemId,
         ),
         StickerLayers(
           document: document,
@@ -225,55 +225,55 @@ class _DefaultFloorLayer extends StatelessWidget {
 
 class _FloorLayer extends StatelessWidget {
   const _FloorLayer({
-    required this.tile,
+    required this.floor,
     required this.catalog,
     required this.metrics,
   });
 
-  final FloorTile tile;
+  final Floor floor;
   final Catalog catalog;
   final GridMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
-    final floor = catalog.floorById(tile.catalogFloorId);
-    if (floor == null) return const SizedBox.shrink();
+    final catalogFloor = catalog.floorById(floor.catalogFloorId);
+    if (catalogFloor == null) return const SizedBox.shrink();
 
     return FloorCell(
-      color: CatalogColorResolver.fromFloor(floor),
+      color: CatalogColorResolver.fromFloor(catalogFloor),
       metrics: metrics,
-      row: tile.row,
-      col: tile.col,
+      row: floor.row,
+      col: floor.col,
     );
   }
 }
 
-class _PlacementLayer extends StatelessWidget {
-  const _PlacementLayer({
-    required this.placement,
+class _ItemLayer extends StatelessWidget {
+  const _ItemLayer({
+    required this.item,
     required this.catalog,
     required this.metrics,
     required this.opacity,
   });
 
-  final PlacedItem placement;
+  final Item item;
   final Catalog catalog;
   final GridMetrics metrics;
   final double opacity;
 
   @override
   Widget build(BuildContext context) {
-    final item = catalog.itemById(placement.catalogItemId);
-    if (item == null) return const SizedBox.shrink();
+    final catalogItem = catalog.itemById(item.catalogItemId);
+    if (catalogItem == null) return const SizedBox.shrink();
 
-    return PlacementBox(
-      itemName: item.name,
-      color: CatalogColorResolver.fromItem(item),
+    return ItemBox(
+      itemName: catalogItem.name,
+      color: CatalogColorResolver.fromItem(catalogItem),
       metrics: metrics,
-      row: placement.originRow,
-      col: placement.originCol,
-      width: item.width,
-      height: item.height,
+      row: item.originRow,
+      col: item.originCol,
+      width: catalogItem.width,
+      height: catalogItem.height,
       opacity: opacity,
     );
   }

@@ -7,12 +7,12 @@ import '../../domain/geometry/grid_metrics.dart';
 import '../interaction/grid_interaction_state.dart';
 import 'floor_hover_preview_layer.dart';
 import 'grid_renderer.dart';
-import 'placement_overlay_layer.dart';
-import 'placement_validity_preview_layer.dart';
+import 'item_overlay_layer.dart';
+import 'item_validity_preview_layer.dart';
 import 'sticker_layers.dart';
 import 'sticker_preview_layer.dart';
 
-/// Editor scene stack with correct z-order for floor and placement tools.
+/// Editor scene stack with correct z-order for floor and item tools.
 class EditorGridScene extends StatelessWidget {
   const EditorGridScene({
     super.key,
@@ -21,7 +21,7 @@ class EditorGridScene extends StatelessWidget {
     required this.metrics,
     required this.controller,
     required this.interactionState,
-    this.hiddenPlacementId,
+    this.hiddenItemId,
     this.hiddenStickerId,
   });
 
@@ -30,12 +30,12 @@ class EditorGridScene extends StatelessWidget {
   final GridMetrics metrics;
   final EditorController controller;
   final GridInteractionState interactionState;
-  final String? hiddenPlacementId;
+  final String? hiddenItemId;
   final String? hiddenStickerId;
 
   @override
   Widget build(BuildContext context) {
-    final inFloorMode = controller.selectedFloorId != null;
+    final inFloorMode = controller.selectedCatalogFloorId != null;
 
     return Stack(
       clipBehavior: Clip.none,
@@ -50,27 +50,27 @@ class EditorGridScene extends StatelessWidget {
           builder: (context) {
             return FloorHoverPreviewLayer(
               interactionState: interactionState,
-              selectedFloorId: controller.selectedFloorId,
+              selectedCatalogFloorId: controller.selectedCatalogFloorId,
               catalog: catalog,
               metrics: metrics,
             );
           },
         ),
         GridLinesLayer(metrics: metrics),
-        PlacementLayers(
+        ItemLayers(
           document: document,
           catalog: catalog,
           metrics: metrics,
-          hiddenPlacementId: inFloorMode ? null : hiddenPlacementId,
+          hiddenItemId: inFloorMode ? null : hiddenItemId,
           ghostOpacity: inFloorMode ? 0.5 : null,
         ),
         if (!inFloorMode)
           _EditorReactive(
             listenables: [interactionState, controller],
             builder: (context) {
-              return PlacementValidityPreviewLayer(
+              return ItemValidityPreviewLayer(
                 interactionState: interactionState,
-                selectedItemId: controller.selectedItemId,
+                selectedCatalogItemId: controller.selectedCatalogItemId,
                 catalog: catalog,
                 metrics: metrics,
                 document: document,
@@ -80,9 +80,9 @@ class EditorGridScene extends StatelessWidget {
         _EditorReactive(
           listenables: [interactionState, controller],
           builder: (context) {
-            return PlacementOverlayLayer(
+            return ItemOverlayLayer(
               interactionState: interactionState,
-              selectedItemId: controller.selectedItemId,
+              selectedCatalogItemId: controller.selectedCatalogItemId,
               catalog: catalog,
               metrics: metrics,
               document: document,

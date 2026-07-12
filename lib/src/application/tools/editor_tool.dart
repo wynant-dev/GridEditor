@@ -1,19 +1,19 @@
-import '../../domain/layout/placed_item.dart';
-import '../../domain/layout/placed_sticker.dart';
+import '../../domain/layout/item.dart';
+import '../../domain/layout/sticker.dart';
 import 'editor_tool_context.dart';
 
 abstract class EditorTool {
   bool onCellTap(EditorToolContext context) => false;
 
-  bool onPlacementTap(
+  bool onItemTap(
     EditorToolContext context,
-    PlacedItem placement,
+    Item item,
   ) =>
       false;
 
   bool onStickerTap(
     EditorToolContext context,
-    PlacedSticker sticker,
+    Sticker sticker,
   ) =>
       false;
 
@@ -23,7 +23,7 @@ abstract class EditorTool {
 
   void onPointerUp() {}
 
-  bool canStartDrag(PlacedItem placement) => true;
+  bool canStartDrag(Item item) => true;
 
-  bool canStartStickerDrag(PlacedSticker sticker) => true;
+  bool canStartStickerDrag(Sticker sticker) => true;
 }

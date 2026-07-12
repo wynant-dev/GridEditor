@@ -1,6 +1,6 @@
-/// A sticker instance placed freely on the grid (world-space center coordinates).
-class PlacedSticker {
-  const PlacedSticker({
+/// A placed sticker referencing a [CatalogSticker].
+class Sticker {
+  const Sticker({
     required this.id,
     required this.catalogStickerId,
     required this.x,
@@ -16,13 +16,13 @@ class PlacedSticker {
   /// World-space center Y (grid coordinates, pre-zoom).
   final double y;
 
-  PlacedSticker copyWith({
+  Sticker copyWith({
     String? id,
     String? catalogStickerId,
     double? x,
     double? y,
   }) {
-    return PlacedSticker(
+    return Sticker(
       id: id ?? this.id,
       catalogStickerId: catalogStickerId ?? this.catalogStickerId,
       x: x ?? this.x,
@@ -37,8 +37,8 @@ class PlacedSticker {
     'y': y,
   };
 
-  factory PlacedSticker.fromJson(Map<String, dynamic> json) {
-    return PlacedSticker(
+  factory Sticker.fromJson(Map<String, dynamic> json) {
+    return Sticker(
       id: json['id'] as String,
       catalogStickerId: json['catalogStickerId'] as String,
       x: (json['x'] as num).toDouble(),

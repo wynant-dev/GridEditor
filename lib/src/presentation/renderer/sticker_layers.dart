@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../domain/catalog/catalog.dart';
 import '../../domain/layout/grid_document.dart';
-import '../../domain/layout/placed_sticker.dart';
-import '../../domain/sticker/sticker_bounds.dart';
+import '../../domain/layout/sticker.dart';
+import '../../domain/rules/sticker_rules.dart';
 import '../theme/catalog_icon_resolver.dart';
 
 /// Renders a sticker icon centered at world coordinates.
@@ -21,7 +21,7 @@ class StickerGlyph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const size = StickerBounds.kDefaultStickerSize;
+    const size = StickerRules.kDefaultStickerSize;
     final half = size / 2;
 
     return Positioned(
@@ -81,7 +81,7 @@ class _StickerWidget extends StatelessWidget {
     required this.opacity,
   });
 
-  final PlacedSticker sticker;
+  final Sticker sticker;
   final Catalog catalog;
   final double opacity;
 

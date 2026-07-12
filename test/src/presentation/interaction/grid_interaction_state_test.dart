@@ -29,7 +29,7 @@ void main() {
       interactionState.addListener(() => notified++);
 
       final session = DragSession(
-        placementId: 'p1',
+        itemId: 'p1',
         startRow: 0,
         startCol: 0,
         grabOffsetRow: 0,

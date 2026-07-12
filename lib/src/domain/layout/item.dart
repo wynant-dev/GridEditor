@@ -1,6 +1,6 @@
-/// An instance of a catalog item positioned on the grid.
-class PlacedItem {
-  const PlacedItem({
+/// A placed catalog item referencing a [CatalogItem].
+class Item {
+  const Item({
     required this.id,
     required this.catalogItemId,
     required this.originRow,
@@ -19,8 +19,8 @@ class PlacedItem {
     'originCol': originCol,
   };
 
-  factory PlacedItem.fromJson(Map<String, dynamic> json) {
-    return PlacedItem(
+  factory Item.fromJson(Map<String, dynamic> json) {
+    return Item(
       id: json['id'] as String,
       catalogItemId: json['catalogItemId'] as String,
       originRow: json['originRow'] as int,

@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grid_editor/grid_editor.dart';
 
 void main() {
-  group('StickerBounds', () {
+  group('StickerRules', () {
     const origin = Offset.zero;
     const cellSize = 48.0;
     const rows = 4;
@@ -12,7 +12,7 @@ void main() {
 
     test('accepts center inside grid', () {
       expect(
-        StickerBounds.isCenterInGrid(
+        StickerRules.isCenterInGrid(
           rows: rows,
           cols: cols,
           cellSize: cellSize,
@@ -26,7 +26,7 @@ void main() {
 
     test('rejects center too close to edge', () {
       expect(
-        StickerBounds.isCenterInGrid(
+        StickerRules.isCenterInGrid(
           rows: rows,
           cols: cols,
           cellSize: cellSize,
@@ -39,7 +39,7 @@ void main() {
     });
 
     test('clampCenter keeps sticker inside grid', () {
-      final clamped = StickerBounds.clampCenter(
+      final clamped = StickerRules.clampCenter(
         rows: rows,
         cols: cols,
         cellSize: cellSize,

@@ -1,4 +1,4 @@
-/// A user-defined sticker type that can be placed freely on the grid.
+/// Catalog template for stickers. On the grid this becomes a [Sticker].
 class CatalogSticker {
   const CatalogSticker({
     required this.id,

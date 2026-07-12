@@ -11,23 +11,23 @@ class FloorHoverPreviewLayer extends StatelessWidget {
   const FloorHoverPreviewLayer({
     super.key,
     required this.interactionState,
-    required this.selectedFloorId,
+    required this.selectedCatalogFloorId,
     required this.catalog,
     required this.metrics,
   });
 
   final GridInteractionState interactionState;
-  final String? selectedFloorId;
+  final String? selectedCatalogFloorId;
   final Catalog catalog;
   final GridMetrics metrics;
 
   @override
   Widget build(BuildContext context) {
-    if (interactionState.isDragging || selectedFloorId == null) {
+    if (interactionState.isDragging || selectedCatalogFloorId == null) {
       return const SizedBox.shrink();
     }
 
-    final selectedId = selectedFloorId;
+    final selectedId = selectedCatalogFloorId;
     final hoverRow = interactionState.hoverRow;
     final hoverCol = interactionState.hoverCol;
     if (selectedId == null || hoverRow == null || hoverCol == null) {

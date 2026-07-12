@@ -1,4 +1,4 @@
-import '../../domain/layout/placed_item.dart';
+import '../../domain/layout/item.dart';
 import 'editor_tool.dart';
 import 'editor_tool_context.dart';
 
@@ -30,16 +30,16 @@ class FloorTool extends EditorTool {
   }
 
   @override
-  bool onPlacementTap(
+  bool onItemTap(
     EditorToolContext context,
-    PlacedItem placement,
+    Item item,
   ) {
     _paintAt(context);
     return true;
   }
 
   @override
-  bool canStartDrag(PlacedItem placement) => false;
+  bool canStartDrag(Item item) => false;
 
   void _paintAt(EditorToolContext context) {
     if (_lastStrokeRow == context.row && _lastStrokeCol == context.col) {

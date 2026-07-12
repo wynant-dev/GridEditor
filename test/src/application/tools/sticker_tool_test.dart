@@ -18,7 +18,7 @@ void main() {
 
   test('onWorldTap places sticker and returns true', () {
     final controller = EditorController()..loadCatalog(stickerCatalog);
-    controller.selectStickerCatalog('tree');
+    controller.selectCatalogSticker('tree');
     final tool = StickerTool();
     final ctx = testToolContext(
       controller,
@@ -31,7 +31,7 @@ void main() {
 
   test('onCellHover delegates to onHoverWorld callback', () {
     final controller = EditorController()..loadCatalog(stickerCatalog);
-    controller.selectStickerCatalog('tree');
+    controller.selectCatalogSticker('tree');
     final interactionState = GridInteractionState();
     final tool = StickerTool();
     final ctx = testToolContext(

@@ -1,4 +1,4 @@
-/// A floor type that can be painted onto individual grid cells.
+/// Catalog template for floors. On the grid this becomes a [Floor] per cell.
 class CatalogFloor {
   const CatalogFloor({
     required this.id,

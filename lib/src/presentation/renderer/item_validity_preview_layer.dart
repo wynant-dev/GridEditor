@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 
 import '../../domain/catalog/catalog.dart';
 import '../../domain/layout/grid_document.dart';
-import '../../domain/placement/placement_rules.dart';
+import '../../domain/rules/item_rules.dart';
 import '../../domain/geometry/grid_metrics.dart';
 import '../interaction/grid_interaction_state.dart';
 import 'floor_cell.dart';
-import 'placement_preview_target.dart';
+import 'item_preview_target.dart';
 
-/// Per-cell red validity feedback during invalid placement hover or drag move.
-class PlacementValidityPreviewLayer extends StatelessWidget {
-  const PlacementValidityPreviewLayer({
+/// Per-cell red validity feedback during invalid item hover or drag move.
+class ItemValidityPreviewLayer extends StatelessWidget {
+  const ItemValidityPreviewLayer({
     super.key,
     required this.interactionState,
-    required this.selectedItemId,
+    required this.selectedCatalogItemId,
     required this.catalog,
     required this.metrics,
     required this.document,
@@ -25,16 +25,16 @@ class PlacementValidityPreviewLayer extends StatelessWidget {
       Colors.red.shade600.withValues(alpha: _validityOpacity);
 
   final GridInteractionState interactionState;
-  final String? selectedItemId;
+  final String? selectedCatalogItemId;
   final Catalog catalog;
   final GridMetrics metrics;
   final GridDocument document;
 
   @override
   Widget build(BuildContext context) {
-    final target = PlacementPreviewTarget.resolve(
+    final target = ItemPreviewTarget.resolve(
       interactionState: interactionState,
-      selectedItemId: selectedItemId,
+      selectedCatalogItemId: selectedCatalogItemId,
       catalog: catalog,
       document: document,
     );
@@ -42,17 +42,21 @@ class PlacementValidityPreviewLayer extends StatelessWidget {
 
     final cells = <Widget>[];
 
-    for (var row = target.originRow; row < target.originRow + target.item.height; row++) {
-      for (var col = target.originCol; col < target.originCol + target.item.width; col++) {
-        final isValid = PlacementRules.isFootprintCellValid(
+    for (var row = target.originRow;
+        row < target.originRow + target.catalogItem.height;
+        row++) {
+      for (var col = target.originCol;
+          col < target.originCol + target.catalogItem.width;
+          col++) {
+        final isValid = ItemRules.isFootprintCellValid(
           catalog: catalog,
           layout: document,
-          item: target.item,
+          catalogItem: target.catalogItem,
           originRow: target.originRow,
           originCol: target.originCol,
           row: row,
           col: col,
-          ignorePlacementId: target.ignorePlacementId,
+          ignoreItemId: target.ignoreItemId,
         );
 
         if (!isValid) {

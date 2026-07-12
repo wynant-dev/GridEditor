@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../domain/geometry/grid_metrics.dart';
 
-class PlacementBox extends StatelessWidget {
-  const PlacementBox({
+class ItemBox extends StatelessWidget {
+  const ItemBox({
     super.key,
     required this.itemName,
     required this.color,

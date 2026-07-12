@@ -1,22 +1,24 @@
 class SelectionState {
   const SelectionState({
-    this.selectedPlacementId,
+    this.selectedItemId,
     this.selectedStickerId,
   });
 
-  final String? selectedPlacementId;
+  /// Selected [Item] instance on the grid.
+  final String? selectedItemId;
+
+  /// Selected [Sticker] instance on the grid.
   final String? selectedStickerId;
 
   SelectionState copyWith({
-    String? selectedPlacementId,
+    String? selectedItemId,
     String? selectedStickerId,
-    bool clearPlacement = false,
+    bool clearItem = false,
     bool clearSticker = false,
   }) {
     return SelectionState(
-      selectedPlacementId: clearPlacement
-          ? null
-          : (selectedPlacementId ?? this.selectedPlacementId),
+      selectedItemId:
+          clearItem ? null : (selectedItemId ?? this.selectedItemId),
       selectedStickerId: clearSticker
           ? null
           : (selectedStickerId ?? this.selectedStickerId),

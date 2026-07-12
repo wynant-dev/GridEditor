@@ -17,42 +17,42 @@ void main() {
 
   test('onCellTap paints floor and returns true', () {
     final controller = EditorController()..loadCatalog(catalog);
-    controller.selectFloor('water');
+    controller.selectCatalogFloor('water');
     final tool = FloorTool();
     final ctx = testToolContext(controller, row: 2, col: 3);
 
     expect(tool.onCellTap(ctx), isTrue);
-    expect(controller.layout.floorTiles, hasLength(1));
+    expect(controller.layout.floors, hasLength(1));
     expect(controller.layout.floorIdAt(2, 3), 'water');
   });
 
-  test('onPlacementTap paints floor under item', () {
+  test('onItemTap paints floor under item', () {
     final controller = EditorController()..loadCatalog(catalog);
-    controller.selectItem('house');
+    controller.selectCatalogItem('house');
     controller.placeAt(1, 1);
-    controller.selectFloor('water');
-    final placement = controller.layout.placements.single;
+    controller.selectCatalogFloor('water');
+    final item = controller.layout.items.single;
     final tool = FloorTool();
     final ctx = testToolContext(controller, row: 1, col: 1);
 
-    expect(tool.onPlacementTap(ctx, placement), isTrue);
+    expect(tool.onItemTap(ctx, item), isTrue);
     expect(controller.layout.floorIdAt(1, 1), 'water');
-    expect(controller.layout.placements, hasLength(1));
+    expect(controller.layout.items, hasLength(1));
   });
 
   test('canStartDrag returns false', () {
     final controller = EditorController()..loadCatalog(catalog);
-    controller.selectItem('house');
+    controller.selectCatalogItem('house');
     controller.placeAt(0, 0);
-    final placement = controller.layout.placements.single;
+    final item = controller.layout.items.single;
     final tool = FloorTool();
 
-    expect(tool.canStartDrag(placement), isFalse);
+    expect(tool.canStartDrag(item), isFalse);
   });
 
   test('onCellHover delegates to onHover callback', () {
     final controller = EditorController()..loadCatalog(catalog);
-    controller.selectFloor('water');
+    controller.selectCatalogFloor('water');
     final interactionState = GridInteractionState();
     final tool = FloorTool();
     final ctx = testToolContext(
@@ -70,7 +70,7 @@ void main() {
 
   test('onCellHover paints while pointer is down', () {
     final controller = EditorController()..loadCatalog(catalog);
-    controller.selectFloor('water');
+    controller.selectCatalogFloor('water');
     final tool = FloorTool();
 
     tool.onCellHover(
@@ -82,7 +82,7 @@ void main() {
 
   test('onCellHover stroke skips duplicate cells', () {
     final controller = EditorController()..loadCatalog(catalog);
-    controller.selectFloor('water');
+    controller.selectCatalogFloor('water');
     final tool = FloorTool();
     final ctx = testToolContext(
       controller,
@@ -94,12 +94,12 @@ void main() {
     tool.onCellHover(ctx);
     tool.onCellHover(ctx);
 
-    expect(controller.layout.floorTiles, hasLength(1));
+    expect(controller.layout.floors, hasLength(1));
   });
 
   test('onCellHover stroke paints each new cell', () {
     final controller = EditorController()..loadCatalog(catalog);
-    controller.selectFloor('water');
+    controller.selectCatalogFloor('water');
     final tool = FloorTool();
 
     tool.onCellHover(
@@ -115,7 +115,7 @@ void main() {
 
   test('onPointerUp resets stroke so same cell can be painted again', () {
     final controller = EditorController()..loadCatalog(catalog);
-    controller.selectFloor('water');
+    controller.selectCatalogFloor('water');
     final tool = FloorTool();
     final ctx = testToolContext(
       controller,

@@ -21,8 +21,8 @@ void main() {
   );
   final mapper = GridCoordinateMapper(metrics);
 
-  test('classifyTap returns PlacementHit when pointer is over placement', () {
-    const placement = PlacedItem(
+  test('classifyTap returns ItemHit when pointer is over item', () {
+    const item = Item(
       id: 'p1',
       catalogItemId: 'house',
       originRow: 0,
@@ -31,7 +31,7 @@ void main() {
     const document = GridDocument(
       rows: 2,
       cols: 2,
-      placements: [placement],
+      items: [item],
     );
     final hitTester = GridHitTester(
       mapper: mapper,
@@ -41,11 +41,11 @@ void main() {
 
     final hit = hitTester.classifyTap(cellCenter(metrics, 0, 0));
 
-    expect(hit, isA<PlacementHit>());
-    final placementHit = hit as PlacementHit;
-    expect(placementHit.placement, placement);
-    expect(placementHit.row, 0);
-    expect(placementHit.col, 0);
+    expect(hit, isA<ItemHit>());
+    final itemHit = hit as ItemHit;
+    expect(itemHit.item, item);
+    expect(itemHit.row, 0);
+    expect(itemHit.col, 0);
   });
 
   test('classifyTap returns CellHit when pointer is on empty cell', () {
@@ -76,7 +76,7 @@ void main() {
     expect(hitTester.cellAt(cellCenter(metrics, 1, 1)), (1, 1));
   });
 
-  test('classifyTap returns StickerHit over PlacementHit', () {
+  test('classifyTap returns StickerHit over ItemHit', () {
     const catalogWithStickers = Catalog(
       id: 'test',
       name: 'Test',
@@ -91,7 +91,7 @@ void main() {
         ),
       ],
     );
-    const placement = PlacedItem(
+    const item = Item(
       id: 'p1',
       catalogItemId: 'house',
       originRow: 0,
@@ -101,9 +101,9 @@ void main() {
     final document = GridDocument(
       rows: 2,
       cols: 2,
-      placements: const [placement],
+      items: const [item],
       stickers: [
-        PlacedSticker(
+        Sticker(
           id: 's1',
           catalogStickerId: 'tree',
           x: stickerCenter.dx,

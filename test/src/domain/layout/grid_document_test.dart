@@ -10,8 +10,8 @@ void main() {
     ],
   );
 
-  test('placementById returns matching placement', () {
-    const placement = PlacedItem(
+  test('itemById returns matching item', () {
+    const item = Item(
       id: 'p1',
       catalogItemId: 'house',
       originRow: 0,
@@ -20,15 +20,15 @@ void main() {
     const document = GridDocument(
       rows: 2,
       cols: 2,
-      placements: [placement],
+      items: [item],
     );
 
-    expect(document.placementById('p1'), placement);
-    expect(document.placementById('missing'), isNull);
+    expect(document.itemById('p1'), item);
+    expect(document.itemById('missing'), isNull);
   });
 
-  test('EditorEngine placementById delegates to layout', () {
-    const placement = PlacedItem(
+  test('EditorEngine itemById delegates to layout', () {
+    const item = Item(
       id: 'p1',
       catalogItemId: 'house',
       originRow: 0,
@@ -39,15 +39,15 @@ void main() {
       layout: const GridDocument(
         rows: 2,
         cols: 2,
-        placements: [placement],
+        items: [item],
       ),
     );
 
-    expect(engine.placementById('p1'), placement);
+    expect(engine.itemById('p1'), item);
   });
 
   test('stickerById returns matching sticker', () {
-    const sticker = PlacedSticker(
+    const sticker = Sticker(
       id: 's1',
       catalogStickerId: 'tree',
       x: 24,
@@ -68,7 +68,7 @@ void main() {
       rows: 4,
       cols: 4,
       stickers: [
-        PlacedSticker(
+        Sticker(
           id: 's1',
           catalogStickerId: 'tree',
           x: 48,

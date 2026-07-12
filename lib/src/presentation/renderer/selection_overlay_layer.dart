@@ -5,11 +5,11 @@ import '../../domain/layout/grid_document.dart';
 import '../../domain/geometry/grid_metrics.dart';
 import '../../application/interaction/drag_session.dart';
 
-/// Renders a selection outline around the currently selected placement.
+/// Renders a selection outline around the currently selected item.
 class SelectionOverlayLayer extends StatelessWidget {
   const SelectionOverlayLayer({
     super.key,
-    required this.selectedPlacementId,
+    required this.selectedItemId,
     required this.document,
     required this.catalog,
     required this.metrics,
@@ -17,7 +17,7 @@ class SelectionOverlayLayer extends StatelessWidget {
     this.dragSession,
   });
 
-  final String? selectedPlacementId;
+  final String? selectedItemId;
   final GridDocument document;
   final Catalog catalog;
   final GridMetrics metrics;
@@ -26,36 +26,36 @@ class SelectionOverlayLayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final placementId = selectedPlacementId;
-    if (placementId == null) {
+    final itemId = selectedItemId;
+    if (itemId == null) {
       return const SizedBox.shrink();
     }
 
-    final placement = document.placementById(placementId);
-    if (placement == null) {
+    final layoutItem = document.itemById(itemId);
+    if (layoutItem == null) {
       return const SizedBox.shrink();
     }
 
-    final item = catalog.itemById(placement.catalogItemId);
-    if (item == null) {
+    final catalogItem = catalog.itemById(layoutItem.catalogItemId);
+    if (catalogItem == null) {
       return const SizedBox.shrink();
     }
 
     final session = dragSession;
-    final originRow = session != null && session.placementId == placementId
+    final originRow = session != null && session.itemId == itemId
         ? session.currentRow
-        : placement.originRow;
-    final originCol = session != null && session.placementId == placementId
+        : layoutItem.originRow;
+    final originCol = session != null && session.itemId == itemId
         ? session.currentCol
-        : placement.originCol;
+        : layoutItem.originCol;
 
     final topLeft = metrics.cellTopLeft(originRow, originCol);
 
     return Positioned(
       left: topLeft.dx,
       top: topLeft.dy,
-      width: item.width * metrics.cellWidth,
-      height: item.height * metrics.cellHeight,
+      width: catalogItem.width * metrics.cellWidth,
+      height: catalogItem.height * metrics.cellHeight,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -74,7 +74,7 @@ class SelectionOverlayLayer extends StatelessWidget {
           Positioned(
             top: 2,
             right: 2,
-            child: _DeletePlacementButton(onPressed: onDelete),
+            child: _DeleteItemButton(onPressed: onDelete),
           ),
         ],
       ),
@@ -82,8 +82,8 @@ class SelectionOverlayLayer extends StatelessWidget {
   }
 }
 
-class _DeletePlacementButton extends StatelessWidget {
-  const _DeletePlacementButton({required this.onPressed});
+class _DeleteItemButton extends StatelessWidget {
+  const _DeleteItemButton({required this.onPressed});
 
   final VoidCallback onPressed;
 
@@ -92,7 +92,7 @@ class _DeletePlacementButton extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Listener(
-      key: const Key('delete_placement_button'),
+      key: const Key('delete_item_button'),
       behavior: HitTestBehavior.opaque,
       onPointerDown: (_) => onPressed(),
       child: Container(

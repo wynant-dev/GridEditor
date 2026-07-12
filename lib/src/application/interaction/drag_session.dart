@@ -1,7 +1,7 @@
-/// Tracks an in-progress placement drag interaction.
+/// Tracks an in-progress item drag on the grid.
 class DragSession {
   DragSession({
-    required this.placementId,
+    required this.itemId,
     required this.startRow,
     required this.startCol,
     required this.grabOffsetRow,
@@ -10,11 +10,11 @@ class DragSession {
     required this.currentCol,
   });
 
-  final String placementId;
+  final String itemId;
   final int startRow;
   final int startCol;
 
-  /// Pointer cell minus placement origin at drag start.
+  /// Pointer cell minus item origin at drag start.
   final int grabOffsetRow;
   final int grabOffsetCol;
 

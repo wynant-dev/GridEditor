@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/catalog/catalog.dart';
 import '../../domain/layout/grid_document.dart';
-import '../../domain/layout/placed_item.dart';
+import '../../domain/layout/item.dart';
 import '../../application/editor_controller.dart';
 import '../../domain/geometry/grid_coordinate_mapper.dart';
 import '../../domain/geometry/grid_metrics.dart';
@@ -27,7 +27,7 @@ class GridCanvas extends StatefulWidget {
     this.interactionState,
     this.viewportController,
     this.onCellTap,
-    this.onPlacementTap,
+    this.onItemTap,
     this.onPlaceError,
   });
 
@@ -37,7 +37,7 @@ class GridCanvas extends StatefulWidget {
   final GridInteractionState? interactionState;
   final ViewportController? viewportController;
   final void Function(int row, int col)? onCellTap;
-  final void Function(PlacedItem placement)? onPlacementTap;
+  final void Function(Item item)? onItemTap;
   final void Function(String error)? onPlaceError;
 
   @override
@@ -50,7 +50,7 @@ class _GridCanvasState extends State<GridCanvas> {
   late final bool _ownsInteractionState;
   late final bool _ownsViewportController;
   late final GridInteractionHandler _interactionHandler;
-  String? _hiddenPlacementId;
+  String? _hiddenItemId;
   String? _hiddenStickerId;
 
   @override
@@ -106,14 +106,14 @@ class _GridCanvasState extends State<GridCanvas> {
   }
 
   void _syncHiddenFromDrag() {
-    final hiddenPlacementId = _interactionState.dragSession?.placementId;
+    final hiddenItemId = _interactionState.dragSession?.itemId;
     final hiddenStickerId = _interactionState.stickerDragSession?.stickerId;
-    if (_hiddenPlacementId == hiddenPlacementId &&
+    if (_hiddenItemId == hiddenItemId &&
         _hiddenStickerId == hiddenStickerId) {
       return;
     }
     setState(() {
-      _hiddenPlacementId = hiddenPlacementId;
+      _hiddenItemId = hiddenItemId;
       _hiddenStickerId = hiddenStickerId;
     });
   }
@@ -158,7 +158,7 @@ class _GridCanvasState extends State<GridCanvas> {
               editorController: controller,
               toolManager: useTools ? controller.toolManager : null,
               onCellTap: useTools ? null : widget.onCellTap,
-              onPlacementTap: useTools ? null : widget.onPlacementTap,
+              onItemTap: useTools ? null : widget.onItemTap,
               supportsHover: supportsHover,
             );
 
@@ -177,7 +177,7 @@ class _GridCanvasState extends State<GridCanvas> {
                       metrics: metrics,
                       controller: controller,
                       interactionState: _interactionState,
-                      hiddenPlacementId: _hiddenPlacementId,
+                      hiddenItemId: _hiddenItemId,
                       hiddenStickerId: _hiddenStickerId,
                     ),
               input: GridInteractionLayer(handler: _interactionHandler),
@@ -189,16 +189,16 @@ class _GridCanvasState extends State<GridCanvas> {
                           listenable: _interactionState,
                           builder: (context, _) {
                             return SelectionOverlayLayer(
-                              selectedPlacementId:
-                                  controller.selectedPlacementId,
+                              selectedItemId:
+                                  controller.selectedItemId,
                               document: document,
                               catalog: widget.catalog,
                               metrics: metrics,
                               dragSession: _interactionState.dragSession,
                               onDelete: () {
-                                final placement = controller.selectedPlacement;
-                                if (placement != null) {
-                                  controller.removePlacement(placement);
+                                final layoutItem = controller.selectedItem;
+                                if (layoutItem != null) {
+                                  controller.removeItem(layoutItem);
                                 }
                               },
                             );

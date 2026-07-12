@@ -1,34 +1,34 @@
 import '../catalog/item.dart';
 import '../catalog/catalog.dart';
 import '../layout/grid_document.dart';
-import '../layout/placed_item.dart';
+import '../layout/item.dart';
 
-/// Pure placement rules — bridges catalog definitions with layout state.
-class PlacementRules {
-  const PlacementRules._();
+/// Rules for [CatalogItem] → [Item].
+class ItemRules {
+  const ItemRules._();
 
   /// Returns null when valid, otherwise an error message.
-  static String? placementError({
+  static String? itemError({
     required Catalog catalog,
     required GridDocument layout,
     required String catalogItemId,
     required int originRow,
     required int originCol,
-    String? ignorePlacementId,
+    String? ignoreItemId,
   }) {
-    final item = catalog.itemById(catalogItemId);
-    if (item == null) return 'Unknown item: $catalogItemId';
+    final catalogItem = catalog.itemById(catalogItemId);
+    if (catalogItem == null) return 'Unknown catalog item: $catalogItemId';
 
-    if (!fitsOnGrid(layout, item, originRow, originCol)) {
+    if (!fitsOnGrid(layout, catalogItem, originRow, originCol)) {
       return 'Item does not fit on the grid';
     }
 
-    for (final placement in layout.placements) {
-      if (placement.id == ignorePlacementId) continue;
-      final other = catalog.itemById(placement.catalogItemId);
+    for (final item in layout.items) {
+      if (item.id == ignoreItemId) continue;
+      final other = catalog.itemById(item.catalogItemId);
       if (other == null) continue;
-      if (overlaps(item, originRow, originCol, other, placement)) {
-        return 'Item overlaps another placement';
+      if (overlaps(catalogItem, originRow, originCol, other, item)) {
+        return 'Item overlaps another item';
       }
     }
 
@@ -41,7 +41,7 @@ class PlacementRules {
     required int row,
     required int col,
   }) {
-    return placementCovering(
+    return itemCovering(
           catalog: catalog,
           layout: layout,
           row: row,
@@ -50,62 +50,62 @@ class PlacementRules {
         null;
   }
 
-  static PlacedItem? placementCovering({
+  static Item? itemCovering({
     required Catalog catalog,
     required GridDocument layout,
     required int row,
     required int col,
   }) {
-    for (final placement in layout.placements) {
-      final item = catalog.itemById(placement.catalogItemId);
-      if (item == null) continue;
-      if (cellInFootprint(item, placement, row, col)) return placement;
+    for (final item in layout.items) {
+      final catalogItem = catalog.itemById(item.catalogItemId);
+      if (catalogItem == null) continue;
+      if (cellInFootprint(catalogItem, item, row, col)) return item;
     }
     return null;
   }
 
   static bool fitsOnGrid(
     GridDocument layout,
-    CatalogItem item,
+    CatalogItem catalogItem,
     int originRow,
     int originCol,
   ) {
     return originRow >= 0 &&
         originCol >= 0 &&
-        originRow + item.height <= layout.rows &&
-        originCol + item.width <= layout.cols;
+        originRow + catalogItem.height <= layout.rows &&
+        originCol + catalogItem.width <= layout.cols;
   }
 
-  /// Placement origin so [anchorRow]/[anchorCol] sits at the item center.
+  /// Item origin so [anchorRow]/[anchorCol] sits at the footprint center.
   static (int originRow, int originCol) originFromCenterAnchor({
     required GridDocument layout,
-    required CatalogItem item,
+    required CatalogItem catalogItem,
     required int anchorRow,
     required int anchorCol,
   }) {
-    var originRow = anchorRow - item.height ~/ 2;
-    var originCol = anchorCol - item.width ~/ 2;
-    originRow = originRow.clamp(0, layout.rows - item.height);
-    originCol = originCol.clamp(0, layout.cols - item.width);
+    var originRow = anchorRow - catalogItem.height ~/ 2;
+    var originCol = anchorCol - catalogItem.width ~/ 2;
+    originRow = originRow.clamp(0, layout.rows - catalogItem.height);
+    originCol = originCol.clamp(0, layout.cols - catalogItem.width);
     return (originRow, originCol);
   }
 
   static bool overlaps(
-    CatalogItem item,
+    CatalogItem catalogItem,
     int originRow,
     int originCol,
-    CatalogItem otherItem,
-    PlacedItem otherPlacement,
+    CatalogItem otherCatalogItem,
+    Item otherItem,
   ) {
     final aLeft = originCol;
-    final aRight = originCol + item.width;
+    final aRight = originCol + catalogItem.width;
     final aTop = originRow;
-    final aBottom = originRow + item.height;
+    final aBottom = originRow + catalogItem.height;
 
-    final bLeft = otherPlacement.originCol;
-    final bRight = otherPlacement.originCol + otherItem.width;
-    final bTop = otherPlacement.originRow;
-    final bBottom = otherPlacement.originRow + otherItem.height;
+    final bLeft = otherItem.originCol;
+    final bRight = otherItem.originCol + otherCatalogItem.width;
+    final bTop = otherItem.originRow;
+    final bBottom = otherItem.originRow + otherCatalogItem.height;
 
     return aLeft < bRight &&
         aRight > bLeft &&
@@ -114,15 +114,15 @@ class PlacementRules {
   }
 
   static bool cellInFootprint(
-    CatalogItem item,
-    PlacedItem placement,
+    CatalogItem catalogItem,
+    Item item,
     int row,
     int col,
   ) {
     return cellInProposedFootprint(
-      item: item,
-      originRow: placement.originRow,
-      originCol: placement.originCol,
+      catalogItem: catalogItem,
+      originRow: item.originRow,
+      originCol: item.originCol,
       row: row,
       col: col,
     );
@@ -130,31 +130,31 @@ class PlacementRules {
 
   /// Whether [row]/[col] lies inside a proposed item footprint.
   static bool cellInProposedFootprint({
-    required CatalogItem item,
+    required CatalogItem catalogItem,
     required int originRow,
     required int originCol,
     required int row,
     required int col,
   }) {
     return row >= originRow &&
-        row < originRow + item.height &&
+        row < originRow + catalogItem.height &&
         col >= originCol &&
-        col < originCol + item.width;
+        col < originCol + catalogItem.width;
   }
 
   /// Whether a single footprint cell can be placed at the proposed origin.
   static bool isFootprintCellValid({
     required Catalog catalog,
     required GridDocument layout,
-    required CatalogItem item,
+    required CatalogItem catalogItem,
     required int originRow,
     required int originCol,
     required int row,
     required int col,
-    String? ignorePlacementId,
+    String? ignoreItemId,
   }) {
     if (!cellInProposedFootprint(
-      item: item,
+      catalogItem: catalogItem,
       originRow: originRow,
       originCol: originCol,
       row: row,
@@ -170,14 +170,14 @@ class PlacementRules {
       return false;
     }
 
-    final covering = placementCovering(
+    final covering = itemCovering(
       catalog: catalog,
       layout: layout,
       row: row,
       col: col,
     );
     if (covering == null) return true;
-    if (covering.id == ignorePlacementId) return true;
+    if (covering.id == ignoreItemId) return true;
     return false;
   }
 }

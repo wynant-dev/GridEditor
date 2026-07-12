@@ -2,9 +2,9 @@ import 'dart:ui';
 
 import '../catalog/catalog.dart';
 import '../layout/grid_document.dart';
-import '../layout/placed_item.dart';
-import '../layout/placed_sticker.dart';
-import '../sticker/sticker_bounds.dart';
+import '../layout/item.dart';
+import '../layout/sticker.dart';
+import '../rules/sticker_rules.dart';
 import 'grid_metrics.dart';
 
 /// Converts pointer positions on the canvas into grid cell coordinates.
@@ -34,39 +34,39 @@ class GridCoordinateMapper {
     return (row, col);
   }
 
-  PlacedItem? hitTestPlacement(
+  Item? hitTestItem(
     Offset worldPosition,
     GridDocument document,
     Catalog catalog,
   ) {
-    for (final placement in document.placements.reversed) {
-      final item = catalog.itemById(placement.catalogItemId);
-      if (item == null) continue;
+    for (final layoutItem in document.items.reversed) {
+      final catalogItem = catalog.itemById(layoutItem.catalogItemId);
+      if (catalogItem == null) continue;
 
       final topLeft = metrics.cellTopLeft(
-        placement.originRow,
-        placement.originCol,
+        layoutItem.originRow,
+        layoutItem.originCol,
       );
       final rect = Rect.fromLTWH(
         topLeft.dx,
         topLeft.dy,
-        item.width * metrics.cellWidth,
-        item.height * metrics.cellHeight,
+        catalogItem.width * metrics.cellWidth,
+        catalogItem.height * metrics.cellHeight,
       );
 
       if (rect.contains(worldPosition)) {
-        return placement;
+        return layoutItem;
       }
     }
 
     return null;
   }
 
-  PlacedSticker? hitTestSticker(
+  Sticker? hitTestSticker(
     Offset worldPosition,
     GridDocument document,
     Catalog catalog, {
-    double size = StickerBounds.kDefaultStickerSize,
+    double size = StickerRules.kDefaultStickerSize,
   }) {
     final half = size / 2;
     for (final sticker in document.stickers.reversed) {

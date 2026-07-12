@@ -12,7 +12,7 @@ Place buildings and objects from a catalog onto a large grid. Pan and zoom to ex
 2. Move the pointer over the grid — a semi-transparent preview shows where the item will land, centered on the cell under your cursor.
 3. Click an empty cell to place it.
 
-If a placement is not allowed (out of bounds or overlapping another piece), a message appears at the bottom of the screen.
+If placing an item is not allowed (out of bounds or overlapping another piece), a message appears at the bottom of the screen.
 
 ### Select, move, and delete
 

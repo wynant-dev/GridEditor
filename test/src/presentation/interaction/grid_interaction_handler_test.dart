@@ -25,8 +25,8 @@ void main() {
       final document = const GridDocument(
         rows: 4,
         cols: 4,
-        placements: [
-          PlacedItem(
+        items: [
+          Item(
             id: 'p1',
             catalogItemId: 'house',
             originRow: 0,
@@ -59,23 +59,23 @@ void main() {
       handler.handlePointerMove(pointer.move(cellCenter(metrics, 0, 1)));
       handler.handlePointerUp(pointer.up());
 
-      expect(editorController.layout.placements.single.originCol, 1);
+      expect(editorController.layout.items.single.originCol, 1);
       expect(interactionState.isDragging, isFalse);
-      expect(editorController.selectedPlacementId, 'p1');
+      expect(editorController.selectedItemId, 'p1');
     });
 
     test('drag to invalid cell reverts without mutating layout', () {
       const blockedDocument = GridDocument(
         rows: 4,
         cols: 4,
-        placements: [
-          PlacedItem(
+        items: [
+          Item(
             id: 'p1',
             catalogItemId: 'house',
             originRow: 0,
             originCol: 0,
           ),
-          PlacedItem(
+          Item(
             id: 'p2',
             catalogItemId: 'house',
             originRow: 0,
@@ -99,18 +99,18 @@ void main() {
       handler.handlePointerMove(pointer.move(cellCenter(metrics, 0, 1)));
       handler.handlePointerUp(pointer.up());
 
-      expect(blocked.layout.placementById('p1')?.originCol, 0);
+      expect(blocked.layout.itemById('p1')?.originCol, 0);
     });
 
-    test('tap without slop selects placement instead of moving', () {
+    test('tap without slop selects item instead of moving', () {
       final pointer = TestPointer(2);
       final down = cellCenter(metrics, 0, 0);
       handler.handlePointerDown(pointer.down(down));
       handler.handlePointerMove(pointer.move(down + const Offset(2, 2)));
       handler.handlePointerUp(pointer.up());
 
-      expect(editorController.layout.placements.single.originCol, 0);
-      expect(editorController.selectedPlacementId, 'p1');
+      expect(editorController.layout.items.single.originCol, 0);
+      expect(editorController.selectedItemId, 'p1');
     });
 
     test('drag preserves grab point when starting from footprint center', () {
@@ -124,8 +124,8 @@ void main() {
       const document = GridDocument(
         rows: 4,
         cols: 4,
-        placements: [
-          PlacedItem(
+        items: [
+          Item(
             id: 'p1',
             catalogItemId: 'house',
             originRow: 0,
@@ -150,8 +150,8 @@ void main() {
       handler.handlePointerMove(pointer.move(footprintCenter + const Offset(30, 30)));
       handler.handlePointerUp(pointer.up());
 
-      expect(largeController.layout.placements.single.originRow, 0);
-      expect(largeController.layout.placements.single.originCol, 0);
+      expect(largeController.layout.items.single.originRow, 0);
+      expect(largeController.layout.items.single.originCol, 0);
     });
   });
 
@@ -179,7 +179,7 @@ void main() {
         rows: 4,
         cols: 4,
         stickers: [
-          PlacedSticker(
+          Sticker(
             id: 's1',
             catalogStickerId: 'tree',
             x: center.dx,
